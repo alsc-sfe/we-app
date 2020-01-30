@@ -1,0 +1,85 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint-config-ali/react",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "semi": [2, "always"],
+    "react/jsx-no-bind": [2, { "allowBind": true }],
+    "react/jsx-filename-extension": 0,
+    "react/jsx-closing-bracket-location": 0,
+    "no-extra-boolean-cast": 0,
+    "no-constant-condition": [1, { "checkLoops": false }],
+    "object-property-newline": 0,
+    "@typescript-eslint/func-call-spacing": ["error", "never"],
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-member-accessibility": 0,
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/indent": [
+      "error",
+      2,
+      {
+          "SwitchCase": 1,
+          "flatTernaryExpressions": true
+      }
+    ],
+    "@typescript-eslint/member-ordering": [
+      "error",
+      {
+          "default": [
+              "public-static-field",
+              "protected-static-field",
+              "private-static-field",
+              "static-field",
+              "public-static-method",
+              "protected-static-method",
+              "private-static-method",
+              "static-method",
+              "public-instance-field",
+              "protected-instance-field",
+              "private-instance-field",
+              "public-field",
+              "protected-field",
+              "private-field",
+              "instance-field",
+              "field",
+              "constructor",
+              "public-instance-method",
+              "protected-instance-method",
+              "private-instance-method",
+              "public-method",
+              "protected-method",
+              "private-method",
+              "instance-method",
+              "method"
+          ]
+      }
+    ],
+    "@typescript-eslint/no-extra-parens": ["error", "functions"],
+    "@typescript-eslint/no-namespace": [
+      "error",
+      {
+          "allowDeclarations": true,
+          "allowDefinitionFiles": true
+      }
+    ],
+    "@typescript-eslint/no-this-alias": [
+      "error",
+      {
+          "allowDestructuring": true
+      }
+    ],
+    "@typescript-eslint/no-useless-constructor": "error",
+    "@typescript-eslint/prefer-function-type": "error",
+    "@typescript-eslint/semi": [
+      "error",
+      "always",
+      {
+          "omitLastInOneLineBlock": true
+      }
+    ],
+    "@typescript-eslint/unified-signatures": "error"
+  }
+}

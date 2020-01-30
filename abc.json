@@ -1,0 +1,12 @@
+{
+  "type": "cook",
+  "assets": {
+      "type": "builder",
+      "builder": {
+        "name": "@ali/builder-cook",
+        "options": {
+           "source_dest": "dist"
+        }
+      }
+  }
+}

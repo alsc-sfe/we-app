@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "jsx": "preserve",
+    "moduleResolution": "node",
+    "declaration": true,
+    "allowSyntheticDefaultImports":true,
+  },
+  "include": [
+    "src/**/*"
+  ],
+}
