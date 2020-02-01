@@ -1,3 +1,5 @@
+import { getHooks } from './hooks';
+
 /**
  * 增强路由
  * 1. 在singleSpa初始化前，拦截事件popstate和hashchange，
@@ -17,15 +19,15 @@ const originalRemoveEventListener = window.removeEventListener;
 const originalPushState = window.history.pushState;
 const originalReplaceState = window.history.replaceState;
 
-const BeforeRoutingHooks = [];
+window.addEventListener('popstate', (ev) => {
+  const hooks = getHooks('beforeRouting');
+  hooks.reduce((p, h) => p.then(h()), Promise.resolve());
+});
 
-export function addHook(hook: any) {
-  BeforeRoutingHooks.push(hook);
-}
-
-window.addEventListener = function (eventName, fn) {
+window.addEventListener = function (eventName: string, fn) {
   if (typeof fn === 'function') {
-    if (routingEventsListeningTo.indexOf(eventName) >= 0 && !capturedEventListeners[eventName].find(listener => listener === fn)) {
+    if (routingEventsListeningTo.indexOf(eventName) >= 0 &&
+      !capturedEventListeners[eventName].find(listener => listener === fn)) {
       capturedEventListeners[eventName].push(fn);
       return;
     }
@@ -34,10 +36,10 @@ window.addEventListener = function (eventName, fn) {
   return originalAddEventListener.apply(this, arguments);
 };
 
-window.removeEventListener = function (eventName, listenerFn) {
-  if (typeof listenerFn === 'function') {
+window.removeEventListener = function (eventName: string, fn) {
+  if (typeof fn === 'function') {
     if (routingEventsListeningTo.indexOf(eventName) >= 0) {
-      capturedEventListeners[eventName] = capturedEventListeners[eventName].filter(fn => fn !== listenerFn);
+      capturedEventListeners[eventName] = capturedEventListeners[eventName].filter(listener => listener !== fn);
       return;
     }
   }
@@ -45,13 +47,15 @@ window.removeEventListener = function (eventName, listenerFn) {
   return originalRemoveEventListener.apply(this, arguments);
 };
 
-window.history.pushState = function (state) {
-  const result = originalPushState.apply(this, arguments);
+export function enhanceRoutingFunction() {
+  window.history.pushState = function (data, title, url) {
+    const result = originalPushState.apply(this, arguments);
 
-  return result;
-};
+    return result;
+  };
 
-window.history.replaceState = function (state) {
-  const result = originalReplaceState.apply(this, arguments);
-  return result;
-};
+  window.history.replaceState = function (data, title, url) {
+    const result = originalReplaceState.apply(this, arguments);
+    return result;
+  };
+}

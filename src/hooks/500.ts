@@ -9,10 +9,10 @@ const hook500: Hook<Hook500Opts> = function ({ element }) {
   return {
     page: {
       activityFunction: () => is500,
-      render({ productName, appName, pageName, render }) {
+      render({ productName, weAppName, pageName, render }) {
         render.mount(
           element,
-          { productName, appName, pageName }
+          { productName, weAppName, pageName }
         );
       },
     },

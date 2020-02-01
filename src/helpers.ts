@@ -1,13 +1,28 @@
-const InnerProductName = '__WeApp';
-const HookWeAppName = 'hook';
+import Product from './weapp/product';
+import WeApp from './weapp/weapp';
+import Page from './weapp/page';
+
+export const InnerProductName = '__WeApp';
+export const HookWeAppName = 'hook';
 const PageNameDivider = '/';
+
+export interface GetPageNameOpts {
+  productName?: string;
+  weAppName?: string;
+  pageName?: string;
+  hookName?: string;
+  product?: Product;
+  weApp?: WeApp;
+  page?: Page;
+  [prop: string]: any;
+}
 
 export function getPageName({
   productName = '',
   weAppName = '',
   pageName = '',
   hookName = '',
-}) {
+}: GetPageNameOpts) {
   let pname = '';
   if (hookName) {
     // hook
@@ -16,7 +31,7 @@ export function getPageName({
     // page
     pname = `${productName}${PageNameDivider}${weAppName}${PageNameDivider}${pageName}`;
   }
-  return pname.replace(/\/+/g, PageNameDivider);
+  return pname.replace(new RegExp(`(${PageNameDivider})+`), PageNameDivider);
 }
 
 export function parsePageName(pageName: string) {

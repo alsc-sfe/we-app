@@ -25,10 +25,10 @@ const hook403: Hook<Hook403Opts> = function ({ element, excludePages = [], check
   return {
     page: {
       activityFunction: () => is403,
-      render({ productName, appName, pageName, render }) {
+      render({ productName, weAppName, pageName, render }) {
         render.mount(
           element,
-          { productName, appName, pageName }
+          { productName, weAppName, pageName }
         );
       },
     },
@@ -47,7 +47,7 @@ const hook403: Hook<Hook403Opts> = function ({ element, excludePages = [], check
 
     async beforeRender() {
       // 阻止渲染
-      return false;
+      return !is403;
     },
   };
 };
