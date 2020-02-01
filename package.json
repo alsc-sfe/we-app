@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "微应用业务框架",
   "homepage": "http://gitlab.alibaba-inc.com/saas-biz-components/we-app",
+  "repository": {
+    "type": "git",
+    "url": "http://gitlab.alibaba-inc.com/saas-biz-components/we-app"
+  },
   "author": "少楚",
   "files": [
     "document",
@@ -26,6 +30,7 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "dependencies": {
+    "single-spa": "^4.4.3",
     "tslib": "1"
   },
   "devDependencies": {
