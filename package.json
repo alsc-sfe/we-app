@@ -30,6 +30,7 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "dependencies": {
+    "lodash-es": "^4.17.15",
     "single-spa": "^4.4.3",
     "tslib": "1"
   },

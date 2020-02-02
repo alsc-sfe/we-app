@@ -1,5 +1,6 @@
-import { getPageName, getPageConfig } from '../helpers';
-import { Hook } from './type';
+import { getPageName } from '../../helpers';
+import { Hook } from '../type';
+import Page from '../../weapp/page';
 
 const ExcludePages = [
   getPageName({
@@ -33,12 +34,13 @@ const hook403: Hook<Hook403Opts> = function ({ element, excludePages = [], check
       },
     },
 
-    async beforeRouting({ activePages }) {
+    async beforeRouting({ activePages, getPage }) {
       // 从当前路由解析出当前激活的页面
       // getPageName 获取需要排除的页面对应的页面名称
       const pageName = activePages.filter((pname: string) => ExcludePages.concat(excludePages).indexOf(pname) === -1);
+      const page = getPage(pageName) as Page;
       // 获取当前页面对应的权限码
-      const pageAuthCode = getPageConfig(pageName, 'pageAuth.pageAuthCode');
+      const pageAuthCode = page.getConfig('pageAuth.pageAuthCode');
 
       is403 = await check403(pageAuthCode);
 

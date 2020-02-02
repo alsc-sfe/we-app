@@ -1,5 +1,5 @@
 import singleSpa from '../single-spa';
-import { getLifecycleHook } from '../hooks';
+import { getLifecycleHook } from '../hooks/hooks';
 import { getPageName } from '../helpers';
 
 singleSpa.addErrorHandler(async (error: any) => {

@@ -1,4 +1,4 @@
-import { Hook } from './type';
+import { Hook } from '../type';
 
 export interface HookLoadingOpts {
   element: any;

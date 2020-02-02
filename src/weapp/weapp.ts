@@ -1,10 +1,12 @@
+import get from 'lodash-es/get';
 import Page, { PageConfig } from './page';
 import Product from './product';
 
 export interface WeAppConfig {
   weAppName: string;
-  product: Product;
+  product?: Product;
   pages?: PageConfig[];
+  disabledHooks?: boolean|string[];
 }
 
 export default class WeApp {
@@ -14,10 +16,17 @@ export default class WeApp {
 
   private pages: Page[];
 
+  private config: WeAppConfig;
+
+  private disabledHooks: boolean|string[];
+
   constructor(config: WeAppConfig) {
     if (config) {
       this.weAppName = config.weAppName;
       this.product = config.product;
+      this.disabledHooks = config.disabledHooks;
+
+      this.config = config;
 
       this.registerPages(config.pages);
     }
@@ -42,5 +51,9 @@ export default class WeApp {
 
   getStatus() {
     return '';
+  }
+
+  getConfig(pathname?: string) {
+    return get(this.config, pathname);
   }
 }

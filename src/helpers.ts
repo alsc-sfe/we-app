@@ -11,10 +11,6 @@ export interface GetPageNameOpts {
   weAppName?: string;
   pageName?: string;
   hookName?: string;
-  product?: Product;
-  weApp?: WeApp;
-  page?: Page;
-  [prop: string]: any;
 }
 
 export function getPageName({
@@ -59,8 +55,4 @@ export function parsePageName(pageName: string) {
   }
 
   return result;
-}
-
-export function getPageConfig(pageName, pathname) {
-  return '';
 }

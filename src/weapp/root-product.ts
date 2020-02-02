@@ -1,22 +1,9 @@
 import Product, { ProductConfig } from './product';
-import { InnerProductName, HookWeAppName, GetPageNameOpts } from '../helpers';
-import { Hook } from '../hooks/type';
-
-export interface RootProductConfig extends ProductConfig {
-  // 生命周期钩子
-  hooks?: Hook<any>[];
-}
+import { InnerProductName, HookWeAppName } from '../helpers';
+import { Hook, HookScope } from '../hooks/type';
 
 class RootProduct extends Product {
   products: Product[] = [];
-
-  constructor(config?: RootProductConfig) {
-    super(config);
-
-    if (config.hooks) {
-      this.registerHooks(config.hooks);
-    }
-  }
 
   registerProducts(cfgs: ProductConfig[] = []) {
     cfgs.forEach(config => {
@@ -37,13 +24,15 @@ class RootProduct extends Product {
     return product;
   }
 
-  setHomePage(opts: GetPageNameOpts) {}
+  setHomePage(opts: HookScope) {}
 
   registerHook(hook: Hook<any>) {}
 
   registerHooks(hooks: Hook<any>[]) {
 
   }
+
+  start() {}
 }
 
 const rootProduct = new RootProduct();
@@ -56,6 +45,7 @@ const hookWeApp = innerProduct.registerWeApp({
 });
 
 export default rootProduct;
+
 export {
   innerProduct,
   hookWeApp,

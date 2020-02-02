@@ -1,5 +1,5 @@
-import { getPageName } from '../helpers';
-import { Hook } from './type';
+import { getPageName } from '../../helpers';
+import { Hook } from '../type';
 
 const ExcludePages = [
   getPageName({ hookName: '404' }),

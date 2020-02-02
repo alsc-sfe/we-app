@@ -1,3 +1,4 @@
+import get from 'lodash-es/get';
 import singleSpa from '../single-spa';
 import WeApp from './weapp';
 import { getPageName } from '../helpers';
@@ -13,6 +14,8 @@ export default class Page {
 
   weApp: WeApp;
 
+  private config: PageConfig;
+
   constructor(config: PageConfig) {
     const { pageName, weApp } = config;
     const { weAppName, product } = weApp;
@@ -25,6 +28,7 @@ export default class Page {
 
     this.pageName = pageName;
     this.weApp = weApp;
+    this.config = config;
 
     singleSpa.registerApplication(
       getPageName(scope),
@@ -49,5 +53,9 @@ export default class Page {
 
   getStatus() {
     return '';
+  }
+
+  getConfig(pathname?: string) {
+    return get(this.config, pathname);
   }
 }

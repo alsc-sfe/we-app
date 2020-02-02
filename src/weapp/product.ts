@@ -6,13 +6,13 @@
  * 4. 生命周期钩子，每个产品可单独定义，各个钩子根据条件(当前激活的产品、微应用、页面)决定是否被调用
  *    hooks被启用的位置，决定了其判断条件
  */
+import get from 'lodash-es/get';
 import WeApp, { WeAppConfig } from './weapp';
-import { Hook } from '../hooks/type';
-import { GetPageNameOpts } from '../helpers';
+import { HookScope } from '../hooks/type';
 
 export interface Render {
-  mount: (element: any, opts?: GetPageNameOpts) => any;
-  unmount: (opts?: GetPageNameOpts) => any;
+  mount: (element: any, opts?: HookScope) => any;
+  unmount: (opts?: HookScope) => any;
 }
 
 export interface ProductConfig {
@@ -26,6 +26,10 @@ export interface ProductConfig {
   weApps?: WeAppConfig[];
   // 页面渲染实现
   render?: Render;
+  // 禁用生命周期钩子声明
+  // true，禁用所有
+  // string[]，指定需要禁用的hook
+  disabledHooks?: boolean|string[];
 }
 
 class Product {
@@ -39,10 +43,17 @@ class Product {
 
   private render: Render;
 
+  private config: ProductConfig;
+
+  private disabledHooks: boolean|string[];
+
   constructor(config?: ProductConfig) {
     if (config) {
       this.productName = config.productName;
       this.skeleton = config.skeleton;
+      this.disabledHooks = config.disabledHooks;
+
+      this.config = config;
     }
   }
 
@@ -64,6 +75,10 @@ class Product {
 
   getStatus() {
     return '';
+  }
+
+  getConfig(pathname?: string) {
+    return get(this.config, pathname);
   }
 }
 
