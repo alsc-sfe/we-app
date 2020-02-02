@@ -6,18 +6,16 @@
  * 4. 生命周期钩子，每个产品可单独定义，各个钩子根据条件(当前激活的产品、微应用、页面)决定是否被调用
  *    hooks被启用的位置，决定了其判断条件
  */
-import get from 'lodash-es/get';
 import WeApp, { WeAppConfig } from './weapp';
 import { HookScope } from '../hooks/type';
+import Base, { BaseConfig, BaseType } from './base';
 
 export interface Render {
   mount: (element: any, opts?: HookScope) => any;
   unmount: (opts?: HookScope) => any;
 }
 
-export interface ProductConfig {
-  // 产品名称
-  productName?: string;
+export interface ProductConfig extends BaseConfig {
   // 基础dom
   skeleton?: string;
   // 需要前置加载的资源
@@ -26,59 +24,37 @@ export interface ProductConfig {
   weApps?: WeAppConfig[];
   // 页面渲染实现
   render?: Render;
-  // 禁用生命周期钩子声明
-  // true，禁用所有
-  // string[]，指定需要禁用的hook
-  disabledHooks?: boolean|string[];
 }
 
-class Product {
-  productName: string;
+class Product extends Base {
+  type: BaseType = BaseType.product;
 
   private skeleton: string;
 
   private baseResources: string[];
 
-  private weApps: WeApp[];
-
   private render: Render;
 
-  private config: ProductConfig;
-
-  private disabledHooks: boolean|string[];
-
   constructor(config?: ProductConfig) {
-    if (config) {
-      this.productName = config.productName;
-      this.skeleton = config.skeleton;
-      this.disabledHooks = config.disabledHooks;
+    super(config);
 
-      this.config = config;
+    if (config) {
+      this.skeleton = config.skeleton;
+
+      this.registerWeApps(config.weApps);
     }
   }
 
+  registerWeApps(cfgs: WeAppConfig[]) {
+    return cfgs.map((cfg) => this.registerWeApp(cfg)) as WeApp[];
+  }
+
   registerWeApp(config: WeAppConfig) {
-    const weApp = new WeApp({
-      ...config,
-      product: this,
-    });
-
-    this.weApps.push(weApp);
-
-    return weApp;
+    return this.registerChild(config, WeApp) as WeApp;
   }
 
   getWeApp(weAppName: string) {
-    const weApp = this.weApps.find(wa => wa.weAppName === weAppName);
-    return weApp;
-  }
-
-  getStatus() {
-    return '';
-  }
-
-  getConfig(pathname?: string) {
-    return get(this.config, pathname);
+    return this.getChild(weAppName) as WeApp;
   }
 }
 

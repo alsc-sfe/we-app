@@ -1,6 +1,4 @@
-import Product from './weapp/product';
-import WeApp from './weapp/weapp';
-import Page from './weapp/page';
+import { HookScope } from './hooks/type';
 
 export const InnerProductName = '__WeApp';
 export const HookWeAppName = 'hook';
@@ -31,7 +29,7 @@ export function getPageName({
 }
 
 export function parsePageName(pageName: string) {
-  const result = {
+  const result: HookScope = {
     productName: '',
     weAppName: '',
     pageName: '',

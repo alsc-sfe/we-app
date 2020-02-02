@@ -1,18 +1,12 @@
 import singleSpa from '../single-spa';
-import { getLifecycleHook } from '../hooks/hooks';
-import { getPageName } from '../helpers';
+import { runLifecycleHook } from '../hooks/hooks';
+import rootProduct from '../weapp/root-product';
 
 singleSpa.addErrorHandler(async (error: any) => {
-  const hooks = getLifecycleHook('onError');
   const pageName = error.appOrParcelName || error.appName || error.name;
+  const activeScope = rootProduct.getScope(pageName);
 
-  hooks
-    .filter(({ scope, fn }) => {
-      return getPageName(scope) === pageName;
-    })
-    .reduce((p, { fn }) => {
-      return p.then(fn);
-    }, Promise.resolve())
+  await runLifecycleHook('onError', [activeScope])
     .then(() => {
       if (singleSpa.getAppStatus(pageName)) {
         singleSpa.unloadApplication(pageName);

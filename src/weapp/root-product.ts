@@ -1,27 +1,27 @@
 import Product, { ProductConfig } from './product';
-import { InnerProductName, HookWeAppName } from '../helpers';
+import { InnerProductName, HookWeAppName, parsePageName } from '../helpers';
 import { Hook, HookScope } from '../hooks/type';
+import WeApp from './weapp';
+import { BaseType } from './base';
+import { useHooks } from '../hooks/hooks';
 
 class RootProduct extends Product {
-  products: Product[] = [];
+  type: BaseType = BaseType.root;
+
+  hookWeApp: WeApp;
 
   registerProducts(cfgs: ProductConfig[] = []) {
-    cfgs.forEach(config => {
-      this.registerProduct(config);
-    });
+    return cfgs.map(config => {
+      return this.registerProduct(config);
+    }) as Product[];
   }
 
   registerProduct(config: ProductConfig) {
-    const product = new Product(config);
-    this.products.push(product);
-    return product;
+    return this.registerChild(config, Product) as Product;
   }
 
   getProduct(productName: string) {
-    const product = this.products.find((p) => {
-      return p.productName === productName;
-    });
-    return product;
+    return this.getChild(productName) as Product;
   }
 
   setHomePage(opts: HookScope) {}
@@ -32,17 +32,38 @@ class RootProduct extends Product {
 
   }
 
-  start() {}
+  getScope(pageName: string) {
+    const scope = parsePageName(pageName);
+    if (scope.hookName) {
+      scope.page = this.hookWeApp.getPage(scope.hookName);
+    } else if (scope.pageName) {
+      if (!scope.productName) {
+        scope.weApp = this.getWeApp(scope.weAppName);
+        scope.page = scope.weApp.getPage(scope.pageName);
+      } else {
+        scope.product = this.getProduct(scope.productName);
+        scope.weApp = scope.product.getWeApp(scope.weAppName);
+        scope.page = scope.weApp.getPage(scope.pageName);
+      }
+    }
+    return scope;
+  }
+
+  start() {
+    useHooks();
+  }
 }
 
 const rootProduct = new RootProduct();
 // 注册内置子产品
 const innerProduct = rootProduct.registerProduct({
-  productName: InnerProductName,
+  name: InnerProductName,
 });
 const hookWeApp = innerProduct.registerWeApp({
-  weAppName: HookWeAppName,
+  name: HookWeAppName,
 });
+
+rootProduct.hookWeApp = hookWeApp;
 
 export default rootProduct;
 

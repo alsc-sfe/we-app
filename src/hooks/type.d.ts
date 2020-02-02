@@ -3,8 +3,9 @@ import WeApp from '../weapp/weapp';
 import Page from '../weapp/page';
 
 export interface HookDesc {
+  hookName?: string;
   page?: {
-    activityFunction: () => boolean;
+    activityFunction: (location: Location) => boolean;
     render: (args: any) => void;
   };
   // 路由切换前

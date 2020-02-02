@@ -1,4 +1,7 @@
-import { getHooks } from './hooks';
+import { runLifecycleHook } from '../hooks/hooks';
+import singleSpa from '../single-spa';
+import rootProduct from '../weapp/root-product';
+import { parseUri } from './helper';
 
 /**
  * 增强路由
@@ -19,10 +22,40 @@ const originalRemoveEventListener = window.removeEventListener;
 const originalPushState = window.history.pushState;
 const originalReplaceState = window.history.replaceState;
 
-window.addEventListener('popstate', (ev) => {
-  const hooks = getHooks('beforeRouting');
-  hooks.reduce((p, h) => p.then(h()), Promise.resolve());
-});
+function callCapturedEventListeners(eventArguments) {
+  if (eventArguments) {
+    const eventType = eventArguments[0].type;
+    if (routingEventsListeningTo.indexOf(eventType) >= 0) {
+      capturedEventListeners[eventType].forEach(listener => {
+        listener.apply(this, eventArguments);
+      });
+    }
+  }
+}
+
+function routingWithHook(location: Location) {
+  const activePages = singleSpa.checkActivityFunctions(location);
+  const activeScopes = activePages.map((pageName) => {
+    return rootProduct.getScope(pageName);
+  });
+
+  const opts = {
+    activePages,
+    getScope: rootProduct.getScope,
+  };
+  return runLifecycleHook('beforeRouting', activeScopes, opts);
+}
+
+function routingEventHandler(event: Event) {
+  routingWithHook(location).then((isContinue: boolean|undefined) => {
+    if (isContinue !== false) {
+      callCapturedEventListeners(event);
+    }
+  });
+}
+
+window.addEventListener('popstate', routingEventHandler);
+window.addEventListener('hashchange', routingEventHandler);
 
 window.addEventListener = function (eventName: string, fn) {
   if (typeof fn === 'function') {
@@ -47,15 +80,52 @@ window.removeEventListener = function (eventName: string, fn) {
   return originalRemoveEventListener.apply(this, arguments);
 };
 
+function routingFunctionWithHook(url: string) {
+  const destination = parseUri(`${location.protocol}//${location.hostname}${location.port ? `:${location.port}` : ''}${url}`);
+  return routingWithHook(destination);
+}
+
 export function enhanceRoutingFunction() {
-  window.history.pushState = function (data, title, url) {
-    const result = originalPushState.apply(this, arguments);
+  const currentPushState = window.history.pushState;
+  const currentPopState = window.history.replaceState;
 
-    return result;
+  window.history.pushState = function (_data, _title, url) {
+    routingFunctionWithHook(url).then((isContinue: boolean|undefined) => {
+      if (isContinue !== false) {
+        currentPushState.apply(this, arguments);
+      }
+    });
   };
 
-  window.history.replaceState = function (data, title, url) {
-    const result = originalReplaceState.apply(this, arguments);
-    return result;
+  window.history.replaceState = function (_data, _title, url) {
+    routingFunctionWithHook(url).then((isContinue: boolean|undefined) => {
+      if (isContinue !== false) {
+        currentPopState.apply(this, arguments);
+      }
+    });
   };
+}
+
+function createPopStateEvent(state: any) {
+  // https://github.com/CanopyTax/single-spa/issues/224 and https://github.com/CanopyTax/single-spa-angular/issues/49
+  // We need a popstate event even though the browser doesn't do one by default when you call replaceState, so that
+  // all the applications can reroute.
+  try {
+    return new PopStateEvent('popstate', { state });
+  } catch (err) {
+    // IE 11 compatibility https://github.com/CanopyTax/single-spa/issues/299
+    // https://docs.microsoft.com/en-us/openspecs/ie_standards/ms-html5e/bd560f47-b349-4d2c-baa8-f1560fb489dd
+    const evt = document.createEvent('PopStateEvent');
+    // @ts-ignore
+    evt.initPopStateEvent('popstate', false, false, state);
+    return evt;
+  }
+}
+
+export function startRouting() {
+  routingWithHook(location).then((isContinue: boolean|undefined) => {
+    if (isContinue !== false) {
+      callCapturedEventListeners(createPopStateEvent(null));
+    }
+  });
 }

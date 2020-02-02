@@ -1,34 +1,27 @@
-import get from 'lodash-es/get';
 import singleSpa from '../single-spa';
-import WeApp from './weapp';
 import { getPageName } from '../helpers';
+import Base, { BaseConfig, BaseType } from './base';
 
-export interface PageConfig {
-  pageName: string;
-  weApp: WeApp;
+export interface PageConfig extends BaseConfig {
+  activityFunctions?: Function[];
+  render?: Function;
   [prop: string]: any;
 }
 
-export default class Page {
-  pageName: string;
-
-  weApp: WeApp;
-
-  private config: PageConfig;
+export default class Page extends Base {
+  type: BaseType = BaseType.page;
 
   constructor(config: PageConfig) {
-    const { pageName, weApp } = config;
-    const { weAppName, product } = weApp;
-    const { productName } = product;
+    super(config);
+
+    const { name: pageName, parent: weApp } = config;
+    const { name: weAppName, parent: product } = weApp;
+    const { name: productName } = product;
     const scope = {
       productName,
       weAppName,
       pageName,
     };
-
-    this.pageName = pageName;
-    this.weApp = weApp;
-    this.config = config;
 
     singleSpa.registerApplication(
       getPageName(scope),
@@ -49,13 +42,5 @@ export default class Page {
         ...scope,
       },
     );
-  }
-
-  getStatus() {
-    return '';
-  }
-
-  getConfig(pathname?: string) {
-    return get(this.config, pathname);
   }
 }
