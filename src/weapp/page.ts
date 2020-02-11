@@ -1,10 +1,11 @@
 import singleSpa from '../single-spa';
 import { getPageName } from '../helpers';
 import Base, { BaseConfig, BaseType } from './base';
+import { Render } from './product';
 
 export interface PageConfig extends BaseConfig {
-  activityFunctions?: Function[];
-  render?: Function;
+  activityFunction?: Function;
+  render?: Render;
   [prop: string]: any;
 }
 

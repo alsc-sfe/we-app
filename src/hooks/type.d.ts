@@ -2,11 +2,19 @@ import Product from '../weapp/product';
 import WeApp from '../weapp/weapp';
 import Page from '../weapp/page';
 
+export interface PageRender {
+  mount: (args: any) => void;
+  unmount: (args: any) => void;
+}
+
 export interface HookDesc {
   hookName?: string;
+  // hook的配置
+  opts?: any;
+  // 定义页面
   page?: {
     activityFunction: (location: Location) => boolean;
-    render: (args: any) => void;
+    render: PageRender;
   };
   // 路由切换前
   beforeRouting?: (args: any) => Promise<boolean|undefined>;
@@ -33,5 +41,6 @@ export interface HookScope {
   product?: Product;
   weApp?: WeApp;
   page?: Page;
+  opts?: any;
   [prop: string]: any;
 }

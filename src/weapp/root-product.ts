@@ -50,7 +50,9 @@ class RootProduct extends Product {
   }
 
   start() {
-    useHooks();
+    useHooks([''], {
+      product: this,
+    });
   }
 }
 

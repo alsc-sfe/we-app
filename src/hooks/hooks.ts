@@ -3,21 +3,22 @@
  * 1. 常规的钩子只在产品级别，而基础库加载、基础dom渲染则需要到微应用级别，
  *    例如，在crm中嵌入商家中心的签约页面，在切换到签约页面路由时，需要加载基础库antd1
  * 2. 实际上是hook在不同级别工作时的配置不同，所以需要在每个级别可以指定对应hook的配置
- * 3. hook默认全站启用，各个产品、微应用上可以禁用hook
+ * 3. hook需要经过注册和启用两步，各个产品、微应用上可以启用、禁用hook
  */
 import { Hook, HookDesc, HookScope } from './type';
 import { getPageName } from '../helpers';
 import { PageConfig } from '../weapp/page';
 import singleSpa from '../single-spa';
 import rootProduct from '../weapp/root-product';
+import { BaseType } from '../weapp/base';
 
 // 登记hook
-let Hooks: HookDesc[] = [];
+const Hooks: HookDesc[] = [];
+const IncludeHooks: { hookName: string; scopes: HookScope[] }[] = [];
 const ExcludeHooks: { hookName: string; scopes: HookScope[] }[] = [];
 // hook拆解到生命周期
 export interface LifecycleHook {
   hookName: string;
-  excludeScopes: HookScope[];
   exec: (opts?: any) => void;
 }
 const LifecycleCache: {
@@ -31,154 +32,272 @@ const LifecycleCache: {
   onError: [],
 };
 
+function registerHook(hook: Hook<any>|{hookName: string}, opts?: any) {
+  let h = Hooks.find(({ hookName }) => hookName === hook.hookName);
+
+  if (h) {
+    return h;
+  }
+
+  h = {
+    ...(hook as Hook<any>)(opts),
+    hookName: hook.hookName,
+    opts,
+  };
+
+  Hooks.push(h);
+
+  return h;
+}
+
 export function registerHooks(hook: Hook<any>, opts?: any) {
   const hooks: [Hook<any>, any][] = Array.isArray(hook) ? hook : [[hook, opts]];
 
-  const rhooks = hooks.map(([h, o]) => {
-    return {
-      ...h(o),
-      hookName: h.hookName,
-    };
-  });
-
-  Hooks = Hooks.concat(rhooks);
+  hooks.forEach(([h, o]) => registerHook(h, o));
 }
 
-export type DisabledHooks = boolean | string[];
+function matchScope(matchScopes: HookScope[], activeScopes: HookScope[]) {
+  let matchedScope: HookScope;
 
-export function disableHooks(disabledHooks: DisabledHooks, scope: HookScope) {
-  let excludeHooks: string[] = disabledHooks as string[];
-  if (typeof disabledHooks === 'boolean') {
-    excludeHooks = Hooks.map(({ hookName }) => {
-      return hookName;
-    });
-  }
+  for (let i = 0, len = matchScopes.length; i < len; i++) {
+    const scope = matchScopes[i];
 
-  excludeHooks.forEach((hname) => {
-    const excludeHook = ExcludeHooks.find(({ hookName }) => {
-      return hookName === hname;
-    });
-    if (excludeHook) {
-      excludeHook.scopes.push(scope);
-    } else {
-      ExcludeHooks.push({
-        hookName: hname,
-        scopes: [scope],
-      });
+    for (let j = 0, l = activeScopes.length; j < len; j++) {
+      const activeScope = activeScopes[j];
+      // 从页面到微应用到产品，范围逐步扩大
+      if (scope.pageName) {
+        if (
+          scope.productName === activeScope.productName &&
+          scope.weAppName === activeScope.weAppName &&
+          scope.page === activeScope.page
+        ) {
+          matchedScope = scope;
+          break;
+        }
+      } else if (scope.weAppName) {
+        if (
+          scope.productName === activeScope.productName &&
+          scope.weAppName === activeScope.weAppName
+        ) {
+          matchedScope = scope;
+          break;
+        }
+      } else if (scope.productName &&
+        scope.productName === activeScope.productName
+      ) {
+        matchedScope = scope;
+        break;
+      }
     }
-  });
+  }
+
+  return matchedScope;
 }
 
-function matchScope(excludeScope: HookScope, activeScope: HookScope) {
-  if (excludeScope.pageName &&
-    excludeScope.productName === activeScope.productName &&
-    excludeScope.weAppName === activeScope.weAppName &&
-    excludeScope.page === activeScope.page) {
-    return true;
-  } else if (excludeScope.weAppName &&
-    excludeScope.productName === activeScope.productName &&
-    excludeScope.weAppName === activeScope.weAppName
+function matchHookScope(hookName: string, activeScopes: HookScope[]) {
+  const includeHook = IncludeHooks.find(({ hookName: hname }) => hookName === hname);
+  const enabledScopes = includeHook.scopes;
+
+  const excludeHook = ExcludeHooks.find(({ hookName: hname }) => hookName === hname);
+  const disabledScopes = excludeHook.scopes;
+
+  // 没有级别启用当前插件
+  if (!enabledScopes) {
+    return false;
+  }
+
+  const matchEnabledScope: HookScope = matchScope(enabledScopes, activeScopes);
+  // 没有匹配的启用scope
+  if (!matchEnabledScope) {
+    return false;
+  }
+
+  const matchDisabledScope: HookScope = matchScope(disabledScopes, activeScopes);
+  // 比对启用scope和禁用scope，哪个范围小则使用哪个
+  // 启用scope和禁用scope相同则报错
+  if (
+    (matchEnabledScope.pageName && matchDisabledScope.pageName) ||
+    (
+      !matchEnabledScope.pageName && !matchDisabledScope.pageName &&
+      matchEnabledScope.weAppName && matchEnabledScope.weAppName
+    ) ||
+    (
+      !matchEnabledScope.weAppName && !matchDisabledScope.weAppName &&
+      matchEnabledScope.productName && matchDisabledScope.productName
+    )
   ) {
-    return true;
-  } else if (excludeScope.productName &&
-    excludeScope.productName === activeScope.productName
-  ) {
+    throw new Error('同一级别不可同时启用或禁用同一插件');
+  }
+  // 从页面到微应用到产品逐渐扩大范围
+  if (matchEnabledScope.pageName) {
     return true;
   }
+  if (matchDisabledScope.pageName) {
+    return false;
+  }
+  if (matchEnabledScope.weAppName) {
+    return true;
+  }
+  if (matchDisabledScope.weAppName) {
+    return false;
+  }
+  if (matchEnabledScope.productName) {
+    return true;
+  }
+  if (matchDisabledScope.productName) {
+    return false;
+  }
+  // 根产品放行
+  if (matchEnabledScope.product && matchEnabledScope.product.type === BaseType.root) {
+    return true;
+  }
+
+  return false;
 }
 
-function cachePage(hookDescPage: HookDesc['page'], excludeScopes: HookScope[], hookDesc: HookDesc) {
+function cachePage(hookDescPage: HookDesc['page'], hookDesc: HookDesc) {
   const { activityFunction, render } = hookDescPage;
   // 根据scope合成activityFunction，在框架整体运行时，再注册页面
   const hookPageName = getPageName({ hookName: hookDesc.hookName });
 
   const scopeActivityFunction = (location: Location) => {
     // 获取当前路由对应的页面对应的scope
-    // 将需排除的scope与当前匹配的scope进行比对
-    // 当存在于被排除的scope中时，则返回false
     const activePages = singleSpa.checkActivityFunctions(location);
     const activeScopes = activePages.map((pageName) => {
       return rootProduct.getScope(pageName);
     });
+    // 匹配启用scope和禁用scope
+    const isScopeMatched = matchHookScope(hookDesc.hookName, activeScopes);
 
-    for (let i = 0, len = excludeScopes.length; i < len; i++) {
-      const excludeScope = excludeScopes[i];
-      for (let j = 0, l = activeScopes.length; j < len; j++) {
-        const activeScope = activeScopes[j];
-        const isScopeMatched = matchScope(excludeScope, activeScope);
-        if (isScopeMatched) {
-          return false;
-        }
-      }
+    if (!isScopeMatched) {
+      return false;
     }
 
     return activityFunction(location);
   };
 
   let pageConfig: PageConfig = LifecycleCache.page.find((c) => c.hookName === hookDesc.hookName);
-  if (pageConfig) {
-    pageConfig.activityFunctions.push(scopeActivityFunction);
-  } else {
+  if (!pageConfig) {
     pageConfig = {
       hookName: hookDesc.hookName,
       name: hookPageName,
-      activityFunctions: [scopeActivityFunction],
+      activityFunction: scopeActivityFunction,
       render,
     };
     LifecycleCache.page.push(pageConfig);
   }
 }
 
-// useHooks 记录下来每个钩子对应的内容及配置
-export function useHooks() {
-  Hooks.forEach((hookDesc) => {
-    let excludeScopes = [];
-    const excludeHook = ExcludeHooks.find(({ hookName }) => hookName === hookDesc.hookName);
-    if (excludeHook) {
-      excludeScopes = excludeHook.scopes;
-    }
+// useHooks 拆解每个钩子的内容并缓存到生命周期
+export interface DisabledHook {
+  hookName: string;
+  disabled: true;
+}
+export type UseHookParams = string | [string] | [string, any] | DisabledHook |
+Hook<any> | [Hook<any>] | [Hook<any>, any] |
+(string|Hook<any>) | [(string|Hook<any>)] | [(string|Hook<any>), any];
 
-    if (hookDesc.page) {
-      cachePage(hookDesc.page, excludeScopes, hookDesc);
-    }
+export type UseHooksParams = UseHookParams[];
 
-    // beforeRouting 通过路由找到激活的页面，匹配页面和scope，确定当前生命周期是否执行
-    // 其他的是在页面的生命周期内的，可以先根据scope筛选出fn列表，再执行
-    ['beforeRouting', 'beforeLoad', 'beforeRender', 'onError'].forEach((name) => {
-      if (hookDesc[name]) {
-        const lifecycleCache = LifecycleCache[name].find(({ hookName }) => hookName === hookDesc.hookName);
-        if (lifecycleCache) {
-          lifecycleCache.excludeScopes = lifecycleCache.excludeScopes.concat(excludeScopes);
-        } else {
-          LifecycleCache[name].push({
-            excludeScopes,
-            exec: hookDesc[name],
-            hookName: hookDesc.hookName,
-          });
-        }
-      }
+function enableHook(hookDesc: HookDesc, scope: HookScope) {
+  const { hookName } = hookDesc;
+  const includeHook = IncludeHooks.find(({ hookName: hname }) => {
+    return hookName === hname;
+  });
+  // 记录scope
+  if (includeHook) {
+    includeHook.scopes.push(scope);
+  } else {
+    IncludeHooks.push({
+      hookName,
+      scopes: [scope],
     });
+  }
+
+  // 将启用的插件拆解到生命周期缓存
+  if (hookDesc.page) {
+    cachePage(hookDesc.page, hookDesc);
+  }
+
+  ['beforeRouting', 'beforeLoad', 'beforeRender', 'onError'].forEach((name) => {
+    if (hookDesc[name]) {
+      const lifecycleCache = LifecycleCache[name].find(({ hookName: hname }) => hname === hookDesc.hookName);
+      if (!lifecycleCache) {
+        LifecycleCache[name].push({
+          exec: hookDesc[name],
+          hookName: hookDesc.hookName,
+        });
+      }
+    }
   });
 }
 
-export function getLifecycleHook(lifecycleType: string) {
+function disableHook(hookName: string, scope: HookScope) {
+  const excludeHook = ExcludeHooks.find(({ hookName: hname }) => {
+    return hookName === hname;
+  });
+  if (excludeHook) {
+    excludeHook.scopes.push(scope);
+  } else {
+    ExcludeHooks.push({
+      hookName,
+      scopes: [scope],
+    });
+  }
+}
+
+function specifyHook(useHookParams: UseHookParams, scope: HookScope) {
+  let params: UseHookParams|UseHookParams[] = useHookParams;
+  if (!Array.isArray(params)) {
+    params = [params];
+  }
+
+  const [hookName, opts] = params;
+  // 在hook scope上记录当前需要的opts
+  // 避免引用问题，重新创建scope对象
+  const hookScope = {
+    ...scope,
+    opts,
+  };
+  // 记录禁用的hook
+  // 判断hook是否禁用，禁用则记录在 ExcludeHooks
+  const disabledHook = hookName as DisabledHook;
+  if (disabledHook.disabled) {
+    disableHook(disabledHook.hookName, hookScope);
+  } else {
+    // 记录启用的hook、scope、opts
+    let hook: Hook<any>|{hookName: string} = hookName as Hook<any>;
+    if (typeof hookName === 'string') {
+      hook = {
+        hookName,
+      };
+    }
+    // 先注册钩子
+    const hookDesc = registerHook(hook, opts);
+    // 拆解到生命周期钩子缓存
+    enableHook(hookDesc, hookScope);
+  }
+}
+
+// hooks: [ [ hookName, opts ], [ hook, opts ], { hookName, disabled: true } ]
+export function specifyHooks(useHooksParams: UseHooksParams, scope: HookScope) {
+  useHooksParams.forEach((useHookParams) => {
+    specifyHook(useHookParams, scope);
+  });
+}
+
+function getLifecycleHook(lifecycleType: string) {
   return LifecycleCache[lifecycleType];
 }
 
-export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope[], opts?: any) {
+export function runHook(lifecycleType: string, activeScopes: HookScope[], opts?: any) {
   const hooks: LifecycleHook[] = getLifecycleHook(lifecycleType) as LifecycleHook[];
   // 先过滤出需要执行的hook
   // 再执行相应的hook处理函数
   return hooks
-    .filter(({ excludeScopes }) => {
-      const matchedExcludeScope = excludeScopes.find((excludeScope) => {
-        const matchedActiveScope = activeScopes.find((activeScope) => {
-          const isScopeMatched = matchScope(excludeScope, activeScope);
-          return isScopeMatched;
-        });
-        return matchedActiveScope;
-      });
-      return !matchedExcludeScope;
+    .filter(({ hookName }) => {
+      const isScopeMatched = matchHookScope(hookName, activeScopes);
+      return isScopeMatched;
     })
     .reduce(async (p, { exec }) => {
       await p;
