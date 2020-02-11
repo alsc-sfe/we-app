@@ -94,7 +94,8 @@ function matchScope(matchScopes: HookScope[], activeScopes: HookScope[]) {
   return matchedScope;
 }
 
-function matchHookScope(hookName: string, activeScopes: HookScope[]) {
+function matchHookScope(hookName: string, activeScopes: HookScope[],
+  matchedScopes: { [hookName: string]: HookScope } = {}) {
   const includeHook = IncludeHooks.find(({ hookName: hname }) => hookName === hname);
   const enabledScopes = includeHook.scopes;
 
@@ -130,18 +131,21 @@ function matchHookScope(hookName: string, activeScopes: HookScope[]) {
   }
   // 从页面到微应用到产品逐渐扩大范围
   if (matchEnabledScope.pageName) {
+    matchedScopes[hookName] = matchEnabledScope;
     return true;
   }
   if (matchDisabledScope.pageName) {
     return false;
   }
   if (matchEnabledScope.weAppName) {
+    matchedScopes[hookName] = matchEnabledScope;
     return true;
   }
   if (matchDisabledScope.weAppName) {
     return false;
   }
   if (matchEnabledScope.productName) {
+    matchedScopes[hookName] = matchEnabledScope;
     return true;
   }
   if (matchDisabledScope.productName) {
@@ -149,6 +153,7 @@ function matchHookScope(hookName: string, activeScopes: HookScope[]) {
   }
   // 根产品放行
   if (matchEnabledScope.product && matchEnabledScope.product.type === BaseType.root) {
+    matchedScopes[hookName] = matchEnabledScope;
     return true;
   }
 
@@ -290,17 +295,22 @@ function getLifecycleHook(lifecycleType: string) {
   return LifecycleCache[lifecycleType];
 }
 
-export function runHook(lifecycleType: string, activeScopes: HookScope[], opts?: any) {
+export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope[], opts?: any) {
   const hooks: LifecycleHook[] = getLifecycleHook(lifecycleType) as LifecycleHook[];
+  const matchedScopes: {[hookName: string]: HookScope} = {};
   // 先过滤出需要执行的hook
   // 再执行相应的hook处理函数
   return hooks
     .filter(({ hookName }) => {
-      const isScopeMatched = matchHookScope(hookName, activeScopes);
+      const isScopeMatched = matchHookScope(hookName, activeScopes, matchedScopes);
       return isScopeMatched;
     })
-    .reduce(async (p, { exec }) => {
+    .reduce(async (p, { hookName, exec }) => {
+      const hookScope = matchedScopes[hookName];
       await p;
-      return exec(opts);
+      return exec({
+        ...hookScope,
+        ...opts,
+      });
     }, Promise.resolve(undefined));
 }

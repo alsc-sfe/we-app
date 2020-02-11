@@ -1,4 +1,4 @@
-import { runHook } from '../hooks/hooks';
+import { runLifecycleHook } from '../hooks/hooks';
 import singleSpa from '../single-spa';
 import rootProduct from '../weapp/root-product';
 import { parseUri } from './helper';
@@ -43,7 +43,7 @@ function routingWithHook(location: Location) {
     activePages,
     getScope: rootProduct.getScope,
   };
-  return runHook('beforeRouting', activeScopes, opts);
+  return runLifecycleHook('beforeRouting', activeScopes, opts);
 }
 
 function routingEventHandler(event: Event) {
