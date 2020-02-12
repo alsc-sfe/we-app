@@ -4,13 +4,13 @@ export interface Hook500Opts {
   element: any;
 }
 
-const hook500: Hook<Hook500Opts> = function ({ element }) {
+const hook500: Hook<Hook500Opts> = function () {
   let is500 = false;
   return {
     page: {
       activityFunction: () => is500,
       render: {
-        mount({ productName, weAppName, pageName, render }) {
+        mount({ productName, weAppName, pageName, render, opts: { element } }) {
           render.mount(
             element,
             { productName, weAppName, pageName }

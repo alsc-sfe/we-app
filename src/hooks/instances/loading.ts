@@ -4,9 +4,9 @@ export interface HookLoadingOpts {
   element: any;
 }
 
-const hookLoading: Hook<HookLoadingOpts> = function ({ element }) {
+const hookLoading: Hook<HookLoadingOpts> = function () {
   return {
-    async beforeLoad({ render }) {
+    async beforeLoad({ render, opts: { element } }) {
       render.mount(
         element,
         /* 默认渲染到当前页面对应的容器内 */

@@ -21,13 +21,13 @@ export interface Hook403Opts {
   [prop: string]: any;
 }
 
-const hook403: Hook<Hook403Opts> = function ({ element, excludePages = [], check403 }) {
+const hook403: Hook<Hook403Opts> = function () {
   let is403 = false;
   return {
     page: {
       activityFunction: () => is403,
       render: {
-        mount({ productName, weAppName, pageName, render }) {
+        mount({ productName, weAppName, pageName, render, opts: { element } }) {
           render.mount(
             element,
             { productName, weAppName, pageName }
@@ -37,7 +37,7 @@ const hook403: Hook<Hook403Opts> = function ({ element, excludePages = [], check
       },
     },
 
-    async beforeRouting({ activePages, getScope }) {
+    async beforeRouting({ activePages, getScope, opts: { excludePages = [], check403 } }) {
       // 从当前路由解析出当前激活的页面
       const pageName = activePages.find((pname: string) => ExcludePages.concat(excludePages).indexOf(pname) === -1);
       if (pageName) {
