@@ -26,11 +26,14 @@ const hook403: Hook<Hook403Opts> = function ({ element, excludePages = [], check
   return {
     page: {
       activityFunction: () => is403,
-      render({ productName, weAppName, pageName, render }) {
-        render.mount(
-          element,
-          { productName, weAppName, pageName }
-        );
+      render: {
+        mount({ productName, weAppName, pageName, render }) {
+          render.mount(
+            element,
+            { productName, weAppName, pageName }
+          );
+        },
+        unmount() {},
       },
     },
 

@@ -296,21 +296,27 @@ function getLifecycleHook(lifecycleType: string) {
 }
 
 export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope[], opts?: any) {
-  const hooks: LifecycleHook[] = getLifecycleHook(lifecycleType) as LifecycleHook[];
+  const lifecycleHooks: LifecycleHook[] = getLifecycleHook(lifecycleType) as LifecycleHook[];
   const matchedScopes: {[hookName: string]: HookScope} = {};
   // 先过滤出需要执行的hook
   // 再执行相应的hook处理函数
-  return hooks
+  return lifecycleHooks
     .filter(({ hookName }) => {
       const isScopeMatched = matchHookScope(hookName, activeScopes, matchedScopes);
       return isScopeMatched;
     })
     .reduce(async (p, { hookName, exec }) => {
+      const hook = Hooks.find(({ hookName: hname }) => hname === hookName);
       const hookScope = matchedScopes[hookName];
+
       await p;
       return exec({
         ...hookScope,
         ...opts,
+        opts: {
+          ...hook.opts,
+          ...hookScope.opts,
+        },
       });
     }, Promise.resolve(undefined));
 }

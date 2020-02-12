@@ -17,11 +17,14 @@ const hook404: Hook<Hook404Opts> = function ({ element, excludePages = [] }) {
   return {
     page: {
       activityFunction: () => is404,
-      render({ productName, weAppName, pageName, render }) {
-        render.mount(
-          element,
-          { productName, weAppName, pageName }
-        );
+      render: {
+        mount({ productName, weAppName, pageName, render }) {
+          render.mount(
+            element,
+            { productName, weAppName, pageName }
+          );
+        },
+        unmount() {},
       },
     },
 

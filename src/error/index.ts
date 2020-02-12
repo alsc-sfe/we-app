@@ -1,5 +1,5 @@
 import singleSpa from '../single-spa';
-import { runLifecycleHook } from '../hooks/hooks';
+import { runLifecycleHook } from '../hooks';
 import rootProduct from '../weapp/root-product';
 
 singleSpa.addErrorHandler(async (error: any) => {

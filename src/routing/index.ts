@@ -1,4 +1,4 @@
-import { runLifecycleHook } from '../hooks/hooks';
+import { runLifecycleHook } from '../hooks';
 import singleSpa from '../single-spa';
 import rootProduct from '../weapp/root-product';
 import { parseUri } from './helper';
