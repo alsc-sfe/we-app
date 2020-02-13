@@ -44,6 +44,8 @@ export default class Base {
 
   private config: BaseConfig;
 
+  private skeletonContainer: HTMLElement|Element;
+
   constructor(config?: BaseConfig) {
     if (config) {
       this.name = config.name;
@@ -75,5 +77,24 @@ export default class Base {
 
   getConfig(pathname?: string) {
     return get(this.config, pathname);
+  }
+
+  getSkeletonContainer(traced = false) {
+    // eslint-disable-next-line
+    let base: Base = this;
+
+    while (traced && !base.skeletonContainer) {
+      base = this.parent;
+
+      if (base.type === BaseType.root) {
+        break;
+      }
+    }
+
+    return base.skeletonContainer;
+  }
+
+  setSkeletonContainer(skeletonContainer: HTMLElement|Element) {
+    this.skeletonContainer = skeletonContainer;
   }
 }

@@ -4,13 +4,15 @@ import Base, { BaseConfig, BaseType } from './base';
 import { Render } from './product';
 
 export interface PageConfig extends BaseConfig {
-  activityFunction?: Function;
+  activityFunction?: (location: Location) => boolean;
   render?: Render;
   [prop: string]: any;
 }
 
 export default class Page extends Base {
   type: BaseType = BaseType.page;
+
+  private pageContainer: HTMLElement;
 
   constructor(config: PageConfig) {
     super(config);
@@ -43,5 +45,13 @@ export default class Page extends Base {
         ...scope,
       },
     );
+  }
+
+  getPageContainer() {
+    return this.pageContainer;
+  }
+
+  setPageContainer(pageContainer: HTMLElement) {
+    this.pageContainer = pageContainer;
   }
 }

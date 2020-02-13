@@ -71,19 +71,34 @@ function matchScopes(resScopes: HookScope[], destScopes: HookScope[]) {
           resScope.weAppName === destScope.weAppName &&
           resScope.page === destScope.page
         ) {
-          matchedScopes.push(resScope);
+          matchedScopes.push({
+            ...resScope,
+            matchedScope: {
+              ...destScope,
+            },
+          });
         }
       } else if (resScope.weAppName) {
         if (
           resScope.productName === destScope.productName &&
           resScope.weAppName === destScope.weAppName
         ) {
-          matchedScopes.push(resScope);
+          matchedScopes.push({
+            ...resScope,
+            matchedScope: {
+              ...destScope,
+            },
+          });
         }
       } else if (resScope.productName &&
         resScope.productName === destScope.productName
       ) {
-        matchedScopes.push(resScope);
+        matchedScopes.push({
+          ...resScope,
+          matchedScope: {
+            ...destScope,
+          },
+        });
       }
     }
   }
@@ -130,7 +145,10 @@ function matchActiveScopes(hookName: string, activeScopes: HookScope[],
     return false;
   }
 
-  matchedActiveScopes[hookName] = matchedEnabledActiveScopes;
+  matchedActiveScopes[hookName] = matchedEnabledActiveScopes.map(({ matchedScope, ...rest }) => ({
+    ...rest,
+    enabledScope: matchedScope,
+  }));
   return true;
 }
 
@@ -294,20 +312,21 @@ export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope[
       return isScopeMatched;
     })
     .reduce(async (p, { hookName, exec }) => {
-      const hook = Hooks.find(({ hookName: hname }) => hname === hookName);
+      const hookDesc = Hooks.find(({ hookName: hname }) => hname === hookName);
       // 像路由切换前，根据url是可以匹配到多个页面的
       // 所以每个页面在剔除禁用的之后，都需要执行一次钩子函数
-      const hookScopes = matchedActiveScopes[hookName];
+      const hookMatchedActiveScopes = matchedActiveScopes[hookName];
 
       await p;
 
       if (typeof exec === 'function') {
-        return hookScopes.map((hookScope) => {
+        return hookMatchedActiveScopes.map((hookMatchedActiveScope) => {
+          const { enabledScope: hookScope } = hookMatchedActiveScope;
           return exec({
-            ...hookScope,
+            ...hookMatchedActiveScope,
             ...opts,
             opts: {
-              ...hook.opts,
+              ...hookDesc.opts,
               ...hookScope.opts,
             },
           });
