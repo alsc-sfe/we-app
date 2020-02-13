@@ -17,7 +17,7 @@ const hookLoading: Hook<HookLoadingOpts> = function () {
       render.unmount();
     },
 
-    async beforeRender({ render }) {
+    async beforeMountRender({ render }) {
       render.unmount();
       return undefined;
     },

@@ -29,7 +29,7 @@ const hook500: Hook<Hook500Opts> = function () {
       is500 = true;
     },
 
-    async beforeRender() {
+    async beforeMountRender() {
       // 阻止渲染
       return false;
     },

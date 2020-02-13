@@ -21,8 +21,9 @@ export interface Hook403Opts {
   [prop: string]: any;
 }
 
-const hook403: Hook<Hook403Opts> = function () {
+const hook403: Hook<Hook403Opts> = () => {
   let is403 = false;
+
   return {
     page: {
       activityFunction: () => is403,
@@ -52,7 +53,7 @@ const hook403: Hook<Hook403Opts> = function () {
       return undefined;
     },
 
-    async beforeRender() {
+    async beforeMountRender() {
       // 阻止渲染
       return !is403;
     },

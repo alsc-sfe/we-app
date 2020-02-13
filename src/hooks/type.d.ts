@@ -21,7 +21,8 @@ export interface HookDesc {
   // 页面资源加载前
   beforeLoad?: (args: any) => Promise<any>;
   // 页面渲染前
-  beforeRender?: (args: any) => Promise<boolean|undefined>;
+  beforeMountRender?: (args: any) => Promise<boolean|undefined>;
+  beforeUnmountRender?: (args: any) => Promise<boolean|undefined>;
   // 页面卸载后
   afterUmount?: (args: any) => Promise<any>;
   // 页面执行错误
@@ -30,7 +31,7 @@ export interface HookDesc {
 
 export interface Hook<T> {
   hookName: string;
-  (opts: T): HookDesc;
+  (opts?: T): HookDesc;
 }
 
 export interface HookScope {
