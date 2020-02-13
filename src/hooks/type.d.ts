@@ -17,16 +17,16 @@ export interface HookDesc {
     render: PageRender;
   };
   // 路由切换前
-  beforeRouting?: (args: any) => Promise<boolean|undefined>;
+  beforeRouting?: (args: HookScope) => Promise<boolean|undefined>;
   // 页面资源加载前
-  beforeLoad?: (args: any) => Promise<any>;
+  beforeLoad?: (args: HookScope) => Promise<any>;
   // 页面渲染前
-  beforeMountRender?: (args: any) => Promise<boolean|undefined>;
-  beforeUnmountRender?: (args: any) => Promise<boolean|undefined>;
+  beforeMountRender?: (args: HookScope) => Promise<boolean|undefined>;
+  beforeUnmountRender?: (args: HookScope) => Promise<boolean|undefined>;
   // 页面卸载后
-  afterUmount?: (args: any) => Promise<any>;
+  afterUmount?: (args: HookScope) => Promise<any>;
   // 页面执行错误
-  onError?: (args: any) => Promise<any>;
+  onError?: (args: HookScope) => Promise<any>;
 }
 
 export interface Hook<T> {

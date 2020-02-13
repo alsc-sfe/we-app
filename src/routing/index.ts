@@ -39,11 +39,13 @@ function routingWithHook(location: Location) {
     return rootProduct.getScope(pageName);
   });
 
-  const opts = {
-    activePages,
-    getScope: rootProduct.getScope,
-  };
-  return runLifecycleHook('beforeRouting', activeScopes, opts);
+  return runLifecycleHook('beforeRouting', activeScopes).then((continues: (boolean|undefined)[]) => {
+    const index = continues.findIndex((c) => c === false);
+    if (index > -1) {
+      return false;
+    }
+    return true;
+  });
 }
 
 function routingEventHandler(event: Event) {

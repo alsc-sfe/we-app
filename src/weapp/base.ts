@@ -1,12 +1,12 @@
 import get from 'lodash-es/get';
 import { HookScope } from '../hooks/type';
-import { DisabledHooks, disableHooks } from '../hooks/hooks';
+import { specifyHooks } from '../hooks';
+import { UseHooksParams } from '../hooks/hooks';
 
 export interface BaseConfig {
   name?: string;
   children?: any[];
-  disabledHooks?: DisabledHooks;
-  hooksConfig?: { [prop: string]: any };
+  hooks?: boolean | UseHooksParams;
   parent?: Base;
   [prop: string]: any;
 }
@@ -49,7 +49,9 @@ export default class Base {
       this.name = config.name;
       this.parent = config.parent;
 
-      disableHooks(config.disabledHooks, getScope(this));
+      if (config.hooks) {
+        specifyHooks(config.hooks, getScope(this));
+      }
 
       this.config = config;
     }

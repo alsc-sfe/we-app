@@ -1,5 +1,5 @@
 import { getPageName } from '../../helpers';
-import { Hook } from '../type';
+import { Hook, HookScope } from '../type';
 
 const ExcludePages = [
   getPageName({ hookName: '404' }),
@@ -28,10 +28,11 @@ const hook404: Hook<Hook404Opts> = function () {
       },
     },
 
-    async beforeRouting({ activePages, opts: { excludePages = [] } }) {
+    async beforeRouting(scope: HookScope) {
+      const { opts: { excludePages = [] } } = scope;
+      const pageName = getPageName(scope);
       // 需要排除的页面
-      const currentPageNames = activePages.filter((pageName) => ExcludePages.concat(excludePages).indexOf(pageName) === -1);
-      is404 = currentPageNames.length === 0;
+      is404 = ExcludePages.concat(excludePages).indexOf(pageName) === -1;
       // 返回false将阻止routing
       return undefined;
     },

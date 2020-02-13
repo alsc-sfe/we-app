@@ -3,7 +3,7 @@ import { InnerProductName, HookWeAppName, parsePageName } from '../helpers';
 import { Hook, HookScope } from '../hooks/type';
 import WeApp from './weapp';
 import { BaseType } from './base';
-import { useHooks } from '../hooks/hooks';
+import { specifyHooks } from '../hooks';
 
 class RootProduct extends Product {
   type: BaseType = BaseType.root;
@@ -50,7 +50,7 @@ class RootProduct extends Product {
   }
 
   start() {
-    useHooks([''], {
+    specifyHooks([''], {
       product: this,
     });
   }

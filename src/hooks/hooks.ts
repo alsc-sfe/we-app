@@ -10,7 +10,6 @@ import { getPageName } from '../helpers';
 import { PageConfig } from '../weapp/page';
 import singleSpa from '../single-spa';
 import rootProduct from '../weapp/root-product';
-import { BaseType } from '../weapp/base';
 
 // 登记hook
 const Hooks: HookDesc[] = [];
@@ -19,7 +18,7 @@ const ExcludeHooks: { hookName: string; scopes: HookScope[] }[] = [];
 // hook拆解到生命周期
 export interface LifecycleHook {
   hookName: string;
-  exec: (opts?: any) => void;
+  exec: (opts?: HookScope) => Promise<any>;
 }
 const LifecycleCache: {
   [prop: string]: (PageConfig|LifecycleHook)[];
@@ -56,46 +55,44 @@ export function registerHooks(hook: Hook<any>, opts?: any) {
   hooks.forEach(([h, o]) => registerHook(h, o));
 }
 
-function matchScope(matchScopes: HookScope[], activeScopes: HookScope[]) {
-  let matchedScope: HookScope;
+// 计算 resScopes 中与 destScopes 匹配的 scopes
+function matchScopes(resScopes: HookScope[], destScopes: HookScope[]) {
+  const matchedScopes: HookScope[] = [];
 
-  for (let i = 0, len = matchScopes.length; i < len; i++) {
-    const scope = matchScopes[i];
+  for (let i = 0, len = resScopes.length; i < len; i++) {
+    const resScope = resScopes[i];
 
-    for (let j = 0, l = activeScopes.length; j < len; j++) {
-      const activeScope = activeScopes[j];
+    for (let j = 0, l = destScopes.length; j < len; j++) {
+      const destScope = destScopes[j];
       // 从页面到微应用到产品，范围逐步扩大
-      if (scope.pageName) {
+      if (resScope.pageName) {
         if (
-          scope.productName === activeScope.productName &&
-          scope.weAppName === activeScope.weAppName &&
-          scope.page === activeScope.page
+          resScope.productName === destScope.productName &&
+          resScope.weAppName === destScope.weAppName &&
+          resScope.page === destScope.page
         ) {
-          matchedScope = scope;
-          break;
+          matchedScopes.push(resScope);
         }
-      } else if (scope.weAppName) {
+      } else if (resScope.weAppName) {
         if (
-          scope.productName === activeScope.productName &&
-          scope.weAppName === activeScope.weAppName
+          resScope.productName === destScope.productName &&
+          resScope.weAppName === destScope.weAppName
         ) {
-          matchedScope = scope;
-          break;
+          matchedScopes.push(resScope);
         }
-      } else if (scope.productName &&
-        scope.productName === activeScope.productName
+      } else if (resScope.productName &&
+        resScope.productName === destScope.productName
       ) {
-        matchedScope = scope;
-        break;
+        matchedScopes.push(resScope);
       }
     }
   }
 
-  return matchedScope;
+  return matchedScopes;
 }
 
-function matchHookScope(hookName: string, activeScopes: HookScope[],
-  matchedScopes: { [hookName: string]: HookScope } = {}) {
+function matchActiveScopes(hookName: string, activeScopes: HookScope[],
+  matchedActiveScopes: { [hookName: string]: HookScope[] } = {}) {
   const includeHook = IncludeHooks.find(({ hookName: hname }) => hookName === hname);
   const enabledScopes = includeHook.scopes;
 
@@ -107,57 +104,34 @@ function matchHookScope(hookName: string, activeScopes: HookScope[],
     return false;
   }
 
-  const matchEnabledScope: HookScope = matchScope(enabledScopes, activeScopes);
+  const matchedEnabledActiveScopes: HookScope[] = matchScopes(activeScopes, enabledScopes);
   // 没有匹配的启用scope
-  if (!matchEnabledScope) {
+  if (!matchedEnabledActiveScopes.length) {
     return false;
   }
 
-  const matchDisabledScope: HookScope = matchScope(disabledScopes, activeScopes);
-  // 比对启用scope和禁用scope，哪个范围小则使用哪个
-  // 启用scope和禁用scope相同则报错
-  if (
-    (matchEnabledScope.pageName && matchDisabledScope.pageName) ||
-    (
-      !matchEnabledScope.pageName && !matchDisabledScope.pageName &&
-      matchEnabledScope.weAppName && matchEnabledScope.weAppName
-    ) ||
-    (
-      !matchEnabledScope.weAppName && !matchDisabledScope.weAppName &&
-      matchEnabledScope.productName && matchDisabledScope.productName
-    )
-  ) {
-    throw new Error('同一级别不可同时启用或禁用同一插件');
-  }
-  // 从页面到微应用到产品逐渐扩大范围
-  if (matchEnabledScope.pageName) {
-    matchedScopes[hookName] = matchEnabledScope;
-    return true;
-  }
-  if (matchDisabledScope.pageName) {
-    return false;
-  }
-  if (matchEnabledScope.weAppName) {
-    matchedScopes[hookName] = matchEnabledScope;
-    return true;
-  }
-  if (matchDisabledScope.weAppName) {
-    return false;
-  }
-  if (matchEnabledScope.productName) {
-    matchedScopes[hookName] = matchEnabledScope;
-    return true;
-  }
-  if (matchDisabledScope.productName) {
-    return false;
-  }
-  // 根产品放行
-  if (matchEnabledScope.product && matchEnabledScope.product.type === BaseType.root) {
-    matchedScopes[hookName] = matchEnabledScope;
+  const matchedDisabledActiveScopes: HookScope[] = matchScopes(activeScopes, disabledScopes);
+  if (!matchedDisabledActiveScopes.length) {
+    matchedActiveScopes[hookName] = matchedEnabledActiveScopes;
     return true;
   }
 
-  return false;
+  const matchedExcludeActiveScopes = matchScopes(matchedEnabledActiveScopes, matchedDisabledActiveScopes);
+
+  matchedExcludeActiveScopes.forEach((scope) => {
+    const pageName = getPageName(scope);
+    const index = matchedEnabledActiveScopes.findIndex((s) => getPageName(s) === pageName);
+    if (index > -1) {
+      matchedEnabledActiveScopes.splice(index, 1);
+    }
+  });
+
+  if (!matchedExcludeActiveScopes.length) {
+    return false;
+  }
+
+  matchedActiveScopes[hookName] = matchedEnabledActiveScopes;
+  return true;
 }
 
 function cachePage(hookDescPage: HookDesc['page'], hookDesc: HookDesc) {
@@ -172,7 +146,7 @@ function cachePage(hookDescPage: HookDesc['page'], hookDesc: HookDesc) {
       return rootProduct.getScope(pageName);
     });
     // 匹配启用scope和禁用scope
-    const isScopeMatched = matchHookScope(hookDesc.hookName, activeScopes);
+    const isScopeMatched = matchActiveScopes(hookDesc.hookName, activeScopes);
 
     if (!isScopeMatched) {
       return false;
@@ -285,7 +259,21 @@ function specifyHook(useHookParams: UseHookParams, scope: HookScope) {
 }
 
 // hooks: [ [ hookName, opts ], [ hook, opts ], { hookName, disabled: true } ]
-export function specifyHooks(useHooksParams: UseHooksParams, scope: HookScope) {
+export function specifyHooks(params: boolean | UseHooksParams, scope: HookScope) {
+  let useHooksParams = params as UseHooksParams;
+  if (typeof params === 'boolean') {
+    if (params) {
+      // 在当前级别启用所有插件
+      useHooksParams = Hooks.map(({ hookName }) => hookName);
+    } else {
+      // 在当前级别禁用所有插件
+      useHooksParams = Hooks.map(({ hookName }) => ({
+        hookName,
+        disabled: true,
+      }));
+    }
+  }
+
   useHooksParams.forEach((useHookParams) => {
     specifyHook(useHookParams, scope);
   });
@@ -297,26 +285,33 @@ function getLifecycleHook(lifecycleType: string) {
 
 export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope[], opts?: any) {
   const lifecycleHooks: LifecycleHook[] = getLifecycleHook(lifecycleType) as LifecycleHook[];
-  const matchedScopes: {[hookName: string]: HookScope} = {};
+  const matchedActiveScopes: {[hookName: string]: HookScope[]} = {};
   // 先过滤出需要执行的hook
   // 再执行相应的hook处理函数
   return lifecycleHooks
     .filter(({ hookName }) => {
-      const isScopeMatched = matchHookScope(hookName, activeScopes, matchedScopes);
+      const isScopeMatched = matchActiveScopes(hookName, activeScopes, matchedActiveScopes);
       return isScopeMatched;
     })
     .reduce(async (p, { hookName, exec }) => {
       const hook = Hooks.find(({ hookName: hname }) => hname === hookName);
-      const hookScope = matchedScopes[hookName];
+      // 像路由切换前，根据url是可以匹配到多个页面的
+      // 所以每个页面在剔除禁用的之后，都需要执行一次钩子函数
+      const hookScopes = matchedActiveScopes[hookName];
 
       await p;
-      return exec({
-        ...hookScope,
-        ...opts,
-        opts: {
-          ...hook.opts,
-          ...hookScope.opts,
-        },
-      });
-    }, Promise.resolve(undefined));
+
+      if (typeof exec === 'function') {
+        return hookScopes.map((hookScope) => {
+          return exec({
+            ...hookScope,
+            ...opts,
+            opts: {
+              ...hook.opts,
+              ...hookScope.opts,
+            },
+          });
+        });
+      }
+    }, Promise.resolve([undefined]));
 }
