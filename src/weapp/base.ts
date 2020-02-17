@@ -3,11 +3,18 @@ import { HookScope } from '../hooks/type';
 import { specifyHooks } from '../hooks';
 import { UseHooksParams } from '../hooks/hooks';
 
+export interface Render {
+  mount: (element: any, opts?: HookScope) => any;
+  unmount: (opts?: HookScope) => any;
+}
+
 export interface BaseConfig {
   name?: string;
   children?: any[];
   hooks?: boolean | UseHooksParams;
   parent?: Base;
+  render?: Render;
+  resourceLoader?: (url: string) => void;
   [prop: string]: any;
 }
 
@@ -45,6 +52,8 @@ export default class Base {
   private config: BaseConfig;
 
   private skeletonContainer: HTMLElement|Element;
+
+  private render: Render;
 
   constructor(config?: BaseConfig) {
     if (config) {

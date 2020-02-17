@@ -12,13 +12,13 @@ import singleSpa from '../single-spa';
 import rootProduct from '../weapp/root-product';
 
 // 登记hook
-const Hooks: HookDesc[] = [];
-const IncludeHooks: { hookName: string; scopes: HookScope[] }[] = [];
-const ExcludeHooks: { hookName: string; scopes: HookScope[] }[] = [];
+const Hooks: HookDesc<any>[] = [];
+const IncludeHooks: { hookName: string; scopes: HookScope<any>[] }[] = [];
+const ExcludeHooks: { hookName: string; scopes: HookScope<any>[] }[] = [];
 // hook拆解到生命周期
 export interface LifecycleHook {
   hookName: string;
-  exec: (opts?: HookScope) => Promise<any>;
+  exec: (opts?: HookScope<any>) => Promise<any>;
 }
 const LifecycleCache: {
   [prop: string]: (PageConfig|LifecycleHook)[];
@@ -56,8 +56,8 @@ export function registerHooks(hook: Hook<any>, opts?: any) {
 }
 
 // 计算 resScopes 中与 destScopes 匹配的 scopes
-function matchScopes(resScopes: HookScope[], destScopes: HookScope[]) {
-  const matchedScopes: HookScope[] = [];
+function matchScopes(resScopes: HookScope<any>[], destScopes: HookScope<any>[]) {
+  const matchedScopes: HookScope<any>[] = [];
 
   for (let i = 0, len = resScopes.length; i < len; i++) {
     const resScope = resScopes[i];
@@ -106,8 +106,8 @@ function matchScopes(resScopes: HookScope[], destScopes: HookScope[]) {
   return matchedScopes;
 }
 
-function matchActiveScopes(hookName: string, activeScopes: HookScope[],
-  matchedActiveScopes: { [hookName: string]: HookScope[] } = {}) {
+function matchActiveScopes(hookName: string, activeScopes: HookScope<any>[],
+  matchedActiveScopes: { [hookName: string]: HookScope<any>[] } = {}) {
   const includeHook = IncludeHooks.find(({ hookName: hname }) => hookName === hname);
   const enabledScopes = includeHook.scopes;
 
@@ -119,13 +119,13 @@ function matchActiveScopes(hookName: string, activeScopes: HookScope[],
     return false;
   }
 
-  const matchedEnabledActiveScopes: HookScope[] = matchScopes(activeScopes, enabledScopes);
+  const matchedEnabledActiveScopes: HookScope<any>[] = matchScopes(activeScopes, enabledScopes);
   // 没有匹配的启用scope
   if (!matchedEnabledActiveScopes.length) {
     return false;
   }
 
-  const matchedDisabledActiveScopes: HookScope[] = matchScopes(activeScopes, disabledScopes);
+  const matchedDisabledActiveScopes: HookScope<any>[] = matchScopes(activeScopes, disabledScopes);
   if (!matchedDisabledActiveScopes.length) {
     matchedActiveScopes[hookName] = matchedEnabledActiveScopes;
     return true;
@@ -152,7 +152,7 @@ function matchActiveScopes(hookName: string, activeScopes: HookScope[],
   return true;
 }
 
-function cachePage(hookDescPage: HookDesc['page'], hookDesc: HookDesc) {
+function cachePage(hookDescPage: HookDesc<any>['page'], hookDesc: HookDesc<any>) {
   const { activityFunction, render } = hookDescPage;
   // 根据scope合成activityFunction，在框架整体运行时，再注册页面
   const hookPageName = getPageName({ hookName: hookDesc.hookName });
@@ -196,7 +196,7 @@ Hook<any> | [Hook<any>] | [Hook<any>, any] |
 
 export type UseHooksParams = UseHookParams[];
 
-function enableHook(hookDesc: HookDesc, scope: HookScope) {
+function enableHook(hookDesc: HookDesc<any>, scope: HookScope<any>) {
   const { hookName } = hookDesc;
   const includeHook = IncludeHooks.find(({ hookName: hname }) => {
     return hookName === hname;
@@ -229,7 +229,7 @@ function enableHook(hookDesc: HookDesc, scope: HookScope) {
   });
 }
 
-function disableHook(hookName: string, scope: HookScope) {
+function disableHook(hookName: string, scope: HookScope<any>) {
   const excludeHook = ExcludeHooks.find(({ hookName: hname }) => {
     return hookName === hname;
   });
@@ -243,7 +243,7 @@ function disableHook(hookName: string, scope: HookScope) {
   }
 }
 
-function specifyHook(useHookParams: UseHookParams, scope: HookScope) {
+function specifyHook(useHookParams: UseHookParams, scope: HookScope<any>) {
   let params: UseHookParams|UseHookParams[] = useHookParams;
   if (!Array.isArray(params)) {
     params = [params];
@@ -277,7 +277,7 @@ function specifyHook(useHookParams: UseHookParams, scope: HookScope) {
 }
 
 // hooks: [ [ hookName, opts ], [ hook, opts ], { hookName, disabled: true } ]
-export function specifyHooks(params: boolean | UseHooksParams, scope: HookScope) {
+export function specifyHooks(params: boolean | UseHooksParams, scope: HookScope<any>) {
   let useHooksParams = params as UseHooksParams;
   if (typeof params === 'boolean') {
     if (params) {
@@ -301,9 +301,9 @@ function getLifecycleHook(lifecycleType: string) {
   return LifecycleCache[lifecycleType];
 }
 
-export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope[], opts?: any) {
+export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<any>[], opts?: any) {
   const lifecycleHooks: LifecycleHook[] = getLifecycleHook(lifecycleType) as LifecycleHook[];
-  const matchedActiveScopes: {[hookName: string]: HookScope[]} = {};
+  const matchedActiveScopes: {[hookName: string]: HookScope<any>[]} = {};
   // 先过滤出需要执行的hook
   // 再执行相应的hook处理函数
   return lifecycleHooks

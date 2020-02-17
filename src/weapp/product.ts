@@ -7,13 +7,7 @@
  *    hooks被启用的位置，决定了其判断条件
  */
 import WeApp, { WeAppConfig } from './weapp';
-import { HookScope } from '../hooks/type';
-import Base, { BaseConfig, BaseType } from './base';
-
-export interface Render {
-  mount: (element: any, opts?: HookScope) => any;
-  unmount: (opts?: HookScope) => any;
-}
+import Base, { BaseConfig, BaseType, Render } from './base';
 
 export interface ProductConfig extends BaseConfig {
   // 基础dom
@@ -32,8 +26,6 @@ class Product extends Base {
   private skeleton: string;
 
   private baseResources: string[];
-
-  private render: Render;
 
   constructor(config?: ProductConfig) {
     super(config);

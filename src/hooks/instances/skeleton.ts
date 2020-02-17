@@ -7,7 +7,7 @@ export interface HookSkeletonOpts {
   [prop: string]: any;
 }
 
-function DefaultGetPageContainer(elSkeleton: Element, scope: HookScope) {
+function DefaultGetPageContainer(elSkeleton: Element, scope: HookScope<HookSkeletonOpts>) {
   if (elSkeleton) {
     const { productName = '', weAppName = '', pageName = '',
       opts: { contentSelector = '.__weapp__content' } } = scope;
@@ -30,10 +30,10 @@ function DefaultGetPageContainer(elSkeleton: Element, scope: HookScope) {
 }
 
 const hookSkeleton: Hook<HookSkeletonOpts> = () => {
-  let lastScope: HookScope;
+  let lastScope: HookScope<HookSkeletonOpts>;
 
   return {
-    async beforeRouting(scope: HookScope) {
+    async beforeRouting(scope: HookScope<HookSkeletonOpts>) {
       const { enabledScope } = scope;
       // 使用启用scope的级别获取骨架容器
       const { getSkeletonContainer } = enabledScope.page;
@@ -54,6 +54,9 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
       }
 
       // 跨产品时，是否需要隐藏当前skeleton
+      // 此处有2个问题，
+      // 1. 当是父子关系时，父级不可清除
+      // 2. 多个skeleton，lastScope会被覆盖，导致清除不彻底
       if (lastScope) {
         let { opts: { container: lastContainer } } = lastScope;
         const { opts: { contentSelector: lastContentSelector },
@@ -61,12 +64,21 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
         const { getSkeletonContainer: getLastSkeletonContainer } = lastEnabledScope.page;
 
         const lastSkeleton = getLastSkeletonContainer();
-        // 需要处理取父骨架的情况，取父骨架的内容区
-        if (lastContainer) {
-          // 回溯到父骨架
-          lastContainer = getLastSkeletonContainer(true).querySelector(lastContentSelector);
+        // 为父子关系不清除
+        if (getSkeletonContainer(true) !== lastSkeleton) {
+          // 需要处理取父骨架的情况，取父骨架的内容区
+          if (!lastContainer) {
+            // 回溯到父骨架
+            lastContainer = getLastSkeletonContainer(true).querySelector(lastContentSelector);
+          }
+          lastContainer.removeChild(lastSkeleton);
         }
-        lastContainer.removeChild(lastSkeleton);
+        // lastScope链式回溯
+        if (lastScope.lastScope) {
+          lastScope = lastScope.lastScope;
+        } else {
+          lastScope = null;
+        }
       }
 
       // 渲染骨架
@@ -80,7 +92,7 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
       const df = document.createDocumentFragment();
       df.appendChild(div.children[0]);
 
-      if (container) {
+      if (!container) {
         // 回溯到父骨架
         container = getSkeletonContainer(true).querySelector(contentSelector);
       }
@@ -89,6 +101,10 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
 
       setSkeletonContainer(div.children[0]);
 
+      // lastScope 形成链式
+      if (lastScope) {
+        scope.lastScope = lastScope;
+      }
       lastScope = scope;
 
       return undefined;

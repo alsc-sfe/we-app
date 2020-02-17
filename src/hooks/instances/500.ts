@@ -1,4 +1,4 @@
-import { Hook } from '../type';
+import { Hook, HookScope } from '../type';
 
 export interface Hook500Opts {
   element: any;
@@ -10,7 +10,7 @@ const hook500: Hook<Hook500Opts> = function () {
     page: {
       activityFunction: () => is500,
       render: {
-        mount({ productName, weAppName, pageName, render, opts: { element } }) {
+        mount({ productName, weAppName, pageName, render, opts: { element } }: HookScope<Hook500Opts>) {
           render.mount(
             element,
             { productName, weAppName, pageName }
@@ -29,7 +29,7 @@ const hook500: Hook<Hook500Opts> = function () {
       is500 = true;
     },
 
-    async beforeMountRender() {
+    async beforeMount() {
       // 阻止渲染
       return false;
     },

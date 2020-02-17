@@ -28,7 +28,7 @@ const hook404: Hook<Hook404Opts> = function () {
       },
     },
 
-    async beforeRouting(scope: HookScope) {
+    async beforeRouting(scope: HookScope<Hook404Opts>) {
       const { opts: { excludePages = [] } } = scope;
       const pageName = getPageName(scope);
       // 需要排除的页面

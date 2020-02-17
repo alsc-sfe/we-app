@@ -7,34 +7,34 @@ export interface PageRender {
   unmount: (args: any) => void;
 }
 
-export interface HookDesc {
+export interface HookDesc<HookOpts> {
   hookName?: string;
   // hook的配置
-  opts?: any;
+  opts?: HookOpts;
   // 定义页面
   page?: {
     activityFunction: (location: Location) => boolean;
     render: PageRender;
   };
   // 路由切换前
-  beforeRouting?: (args: HookScope) => Promise<boolean|undefined>;
+  beforeRouting?: (args: HookScope<HookOpts>) => Promise<boolean|undefined>;
   // 页面资源加载前
-  beforeLoad?: (args: HookScope) => Promise<any>;
+  beforeLoad?: (args: HookScope<HookOpts>) => Promise<any>;
   // 页面渲染前
-  beforeMountRender?: (args: HookScope) => Promise<boolean|undefined>;
-  beforeUnmountRender?: (args: HookScope) => Promise<boolean|undefined>;
+  beforeMount?: (args: HookScope<HookOpts>) => Promise<boolean|undefined>;
+  afterMount?: (args: HookScope<HookOpts>) => Promise<any>;
+  beforeUnmount?: (args: HookScope<HookOpts>) => Promise<boolean|undefined>;
   // 页面卸载后
-  afterUmount?: (args: HookScope) => Promise<any>;
+  afterUmount?: (args: HookScope<HookOpts>) => Promise<any>;
   // 页面执行错误
-  onError?: (args: HookScope) => Promise<any>;
+  onError?: (args: HookScope<HookOpts>) => Promise<any>;
 }
 
-export interface Hook<T> {
-  hookName: string;
-  (opts?: T): HookDesc;
+export interface Hook<HookOpts> extends HookDesc<HookOpts> {
+  (opts?: HookOpts): HookDesc<HookOpts>;
 }
 
-export interface HookScope {
+export interface HookScope<HookOpts> {
   productName?: string;
   weAppName?: string;
   pageName?: string;
@@ -42,6 +42,6 @@ export interface HookScope {
   product?: Product;
   weApp?: WeApp;
   page?: Page;
-  opts?: any;
+  opts?: HookOpts;
   [prop: string]: any;
 }

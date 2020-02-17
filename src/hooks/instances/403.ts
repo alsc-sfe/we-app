@@ -37,7 +37,7 @@ const hook403: Hook<Hook403Opts> = () => {
       },
     },
 
-    async beforeRouting(scope: HookScope) {
+    async beforeRouting(scope: HookScope<Hook403Opts>) {
       const { opts: { excludePages = [] } } = scope;
       const pageName = getPageName(scope);
       // 从当前路由解析出当前激活的页面
@@ -54,7 +54,7 @@ const hook403: Hook<Hook403Opts> = () => {
       return undefined;
     },
 
-    async beforeMountRender() {
+    async beforeMount() {
       // 阻止渲染
       return !is403;
     },

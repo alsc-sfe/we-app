@@ -1,4 +1,4 @@
-import { Hook } from '../type';
+import { Hook, HookScope } from '../type';
 
 export interface HookLoadingOpts {
   element: any;
@@ -6,18 +6,18 @@ export interface HookLoadingOpts {
 
 const hookLoading: Hook<HookLoadingOpts> = function () {
   return {
-    async beforeLoad({ render, opts: { element } }) {
+    async beforeLoad({ render, opts: { element } }: HookScope<HookLoadingOpts>) {
       render.mount(
         element,
         /* 默认渲染到当前页面对应的容器内 */
       );
     },
 
-    async onError({ render }) {
+    async onError({ render }: HookScope<HookLoadingOpts>) {
       render.unmount();
     },
 
-    async beforeMountRender({ render }) {
+    async beforeMount({ render }: HookScope<HookLoadingOpts>) {
       render.unmount();
       return undefined;
     },
