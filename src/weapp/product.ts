@@ -10,6 +10,7 @@ import WeApp, { WeAppConfig } from './weapp';
 import Base, { BaseConfig, BaseType, Render } from './base';
 
 export interface ProductConfig extends BaseConfig {
+  parent?: Product;
   // 基础dom
   skeleton?: string;
   // 需要前置加载的资源
@@ -23,16 +24,12 @@ export interface ProductConfig extends BaseConfig {
 class Product extends Base {
   type: BaseType = BaseType.product;
 
-  private skeleton: string;
-
-  private baseResources: string[];
+  parent: Product;
 
   constructor(config?: ProductConfig) {
     super(config);
 
     if (config) {
-      this.skeleton = config.skeleton;
-
       this.registerWeApps(config.weApps);
     }
   }

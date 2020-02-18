@@ -10,9 +10,11 @@ import { getPageName } from '../helpers';
 import { PageConfig } from '../weapp/page';
 import singleSpa from '../single-spa';
 import rootProduct from '../weapp/root-product';
+import { errorHandler } from '../error';
+import { LifeCycles } from 'single-spa';
 
 // 登记hook
-const Hooks: HookDesc<any>[] = [];
+const HookDescs: HookDesc<any>[] = [];
 const IncludeHooks: { hookName: string; scopes: HookScope<any>[] }[] = [];
 const ExcludeHooks: { hookName: string; scopes: HookScope<any>[] }[] = [];
 // hook拆解到生命周期
@@ -20,19 +22,26 @@ export interface LifecycleHook {
   hookName: string;
   exec: (opts?: HookScope<any>) => Promise<any>;
 }
+export const Lifecycles: string[] = [
+  'beforeRouting', 'beforeLoad',
+  'beforeMount', 'afterMount',
+  'beforeUnmount', 'afterUnmount',
+  'onError'
+];
 const LifecycleCache: {
   [prop: string]: (PageConfig|LifecycleHook)[];
-} = {
-  page: [],
-  beforeRouting: [],
-  beforeLoad: [],
-  beforeRender: [],
-  afterUmount: [],
-  onError: [],
-};
+} = (() => {
+  const lifecycleCache = {
+    page: [],
+  };
+  Lifecycles.forEach((l) => {
+    lifecycleCache[l] = [];
+  });
+  return lifecycleCache;
+})();
 
 function registerHook(hook: Hook<any>|{hookName: string}, opts?: any) {
-  let h = Hooks.find(({ hookName }) => hookName === hook.hookName);
+  let h = HookDescs.find(({ hookName }) => hookName === hook.hookName);
 
   if (h) {
     return h;
@@ -44,7 +53,7 @@ function registerHook(hook: Hook<any>|{hookName: string}, opts?: any) {
     opts,
   };
 
-  Hooks.push(h);
+  HookDescs.push(h);
 
   return h;
 }
@@ -216,7 +225,7 @@ function enableHook(hookDesc: HookDesc<any>, scope: HookScope<any>) {
     cachePage(hookDesc.page, hookDesc);
   }
 
-  ['beforeRouting', 'beforeLoad', 'beforeRender', 'onError'].forEach((name) => {
+  Lifecycles.forEach((name) => {
     if (hookDesc[name]) {
       const lifecycleCache = LifecycleCache[name].find(({ hookName: hname }) => hname === hookDesc.hookName);
       if (!lifecycleCache) {
@@ -282,10 +291,10 @@ export function specifyHooks(params: boolean | UseHooksParams, scope: HookScope<
   if (typeof params === 'boolean') {
     if (params) {
       // 在当前级别启用所有插件
-      useHooksParams = Hooks.map(({ hookName }) => hookName);
+      useHooksParams = HookDescs.map(({ hookName }) => hookName);
     } else {
       // 在当前级别禁用所有插件
-      useHooksParams = Hooks.map(({ hookName }) => ({
+      useHooksParams = HookDescs.map(({ hookName }) => ({
         hookName,
         disabled: true,
       }));
@@ -301,7 +310,7 @@ function getLifecycleHook(lifecycleType: string) {
   return LifecycleCache[lifecycleType];
 }
 
-export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<any>[], opts?: any) {
+export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<any>[], props?: any) {
   const lifecycleHooks: LifecycleHook[] = getLifecycleHook(lifecycleType) as LifecycleHook[];
   const matchedActiveScopes: {[hookName: string]: HookScope<any>[]} = {};
   // 先过滤出需要执行的hook
@@ -312,7 +321,7 @@ export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<
       return isScopeMatched;
     })
     .reduce(async (p, { hookName, exec }) => {
-      const hookDesc = Hooks.find(({ hookName: hname }) => hname === hookName);
+      const hookDesc = HookDescs.find(({ hookName: hname }) => hname === hookName);
       // 像路由切换前，根据url是可以匹配到多个页面的
       // 所以每个页面在剔除禁用的之后，都需要执行一次钩子函数
       const hookMatchedActiveScopes = matchedActiveScopes[hookName];
@@ -324,7 +333,10 @@ export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<
           const { enabledScope: hookScope } = hookMatchedActiveScope;
           return exec({
             ...hookMatchedActiveScope,
-            ...opts,
+            ...props,
+            errorHandler: (error: Event) => {
+              return errorHandler(error, [hookMatchedActiveScope]);
+            },
             opts: {
               ...hookDesc.opts,
               ...hookScope.opts,

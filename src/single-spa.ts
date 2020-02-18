@@ -4,8 +4,11 @@
  */
 // 覆盖路由事件
 import { enhanceRoutingFunction } from './routing';
-import singleSpa from 'single-spa';
+import singleSpa, { navigateToUrl } from 'single-spa';
 // 覆盖路由方法
 enhanceRoutingFunction();
 
 export default singleSpa;
+export {
+  navigateToUrl,
+};

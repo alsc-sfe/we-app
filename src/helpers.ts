@@ -1,4 +1,5 @@
 import { HookScope } from './hooks/type';
+import { BaseType } from './weapp/base';
 
 export const InnerProductName = '__WeApp';
 export const HookWeAppName = 'hook';
@@ -29,7 +30,7 @@ export function getPageName({
 }
 
 export function parsePageName(pageName: string) {
-  const result: HookScope = {
+  const result: HookScope<any> = {
     productName: '',
     weAppName: '',
     pageName: '',
@@ -53,4 +54,28 @@ export function parsePageName(pageName: string) {
   }
 
   return result;
+}
+
+export function isAncestorScope(ancestor: HookScope<any>, descendant: HookScope<any>) {
+  if (ancestor.product.type === BaseType.root) {
+    return true;
+  }
+
+  if (
+    ancestor.productName && !ancestor.weAppName &&
+    ancestor.productName === descendant.productName
+  ) {
+    return true;
+  }
+
+  if (
+    ancestor.productName && ancestor.weAppName && !ancestor.pageName &&
+    ancestor.productName === descendant.productName &&
+    ancestor.weAppName === descendant.weAppName &&
+    descendant.pageName
+  ) {
+    return true;
+  }
+
+  return false;
 }

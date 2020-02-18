@@ -24,7 +24,7 @@ class RootProduct extends Product {
     return this.getChild(productName) as Product;
   }
 
-  setHomePage(opts: HookScope) {}
+  setHomePage(opts: HookScope<any>) {}
 
   registerHook(hook: Hook<any>) {}
 

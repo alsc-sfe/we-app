@@ -25,7 +25,7 @@ export interface HookDesc<HookOpts> {
   afterMount?: (args: HookScope<HookOpts>) => Promise<any>;
   beforeUnmount?: (args: HookScope<HookOpts>) => Promise<boolean|undefined>;
   // 页面卸载后
-  afterUmount?: (args: HookScope<HookOpts>) => Promise<any>;
+  afterUnmount?: (args: HookScope<HookOpts>) => Promise<any>;
   // 页面执行错误
   onError?: (args: HookScope<HookOpts>) => Promise<any>;
 }
@@ -38,10 +38,22 @@ export interface HookScope<HookOpts> {
   productName?: string;
   weAppName?: string;
   pageName?: string;
+
   hookName?: string;
+
   product?: Product;
   weApp?: WeApp;
   page?: Page;
+
   opts?: HookOpts;
+
+  enabledScope?: HookScope<HookOpts>;
+
+  errorHandler?: (error: Event) => Promise<any[]>;
+
+  context?: Window;
+
+  lastScope?: HookScope<HookOpts>;
+
   [prop: string]: any;
 }

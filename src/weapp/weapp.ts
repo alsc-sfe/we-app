@@ -5,11 +5,15 @@ import { DisabledHooks } from '../hooks/hooks';
 import Base, { BaseConfig, BaseType } from './base';
 
 export interface WeAppConfig extends BaseConfig {
+  parent?: Product;
+
   pages?: PageConfig[];
 }
 
 export default class WeApp extends Base {
   type: BaseType = BaseType.weApp;
+
+  parent: Product;
 
   constructor(config: WeAppConfig) {
     super(config);

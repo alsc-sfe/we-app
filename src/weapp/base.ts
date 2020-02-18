@@ -2,19 +2,26 @@ import get from 'lodash-es/get';
 import { HookScope } from '../hooks/type';
 import { specifyHooks } from '../hooks';
 import { UseHooksParams } from '../hooks/hooks';
+import { ResourceLoader } from '../resource-loader';
+import Product from './product';
 
 export interface Render {
-  mount: (element: any, opts?: HookScope) => any;
-  unmount: (opts?: HookScope) => any;
+  mount: (element: any, opts?: HookScope<any>) => any;
+  unmount: (opts?: HookScope<any>) => any;
 }
 
 export interface BaseConfig {
   name?: string;
-  children?: any[];
-  hooks?: boolean | UseHooksParams;
   parent?: Base;
+
+  hooks?: boolean | UseHooksParams;
+
   render?: Render;
-  resourceLoader?: (url: string) => void;
+
+  resourceLoader?: ResourceLoader;
+  basicLibs?: string[];
+  useSystem?: string[];
+
   [prop: string]: any;
 }
 
@@ -25,19 +32,18 @@ export enum BaseType {
   page = 'page'
 }
 
-function getScope(base: Base, scope: HookScope = {}) {
+function getScope(base: Base, scope: HookScope<any> = {}) {
   if (base.type === BaseType.root) {
+    if (!scope.product) {
+      scope.product = base as Product;
+    }
     return scope;
   }
 
   scope[`${base.type}Name`] = base.name;
   scope[base.type as string] = base;
 
-  if (base.parent !== base) {
-    return getScope(base, scope);
-  }
-
-  return scope;
+  getScope(base.parent, scope);
 }
 
 export default class Base {
@@ -53,7 +59,9 @@ export default class Base {
 
   private skeletonContainer: HTMLElement|Element;
 
-  private render: Render;
+  private sandbox?: Window;
+
+  private data: object = {};
 
   constructor(config?: BaseConfig) {
     if (config) {
@@ -105,5 +113,25 @@ export default class Base {
 
   setSkeletonContainer(skeletonContainer: HTMLElement|Element) {
     this.skeletonContainer = skeletonContainer;
+  }
+
+  getRender() {
+    return this.getConfig('render');
+  }
+
+  getData(pathname?: string) {
+    return get(this.data, pathname);
+  }
+
+  setData(pathname: string|symbol|object, data?: any) {
+    if (typeof pathname === 'object') {
+      this.data = {
+        ...this.data,
+        ...pathname,
+      };
+      return;
+    }
+
+    this.data[pathname] = data;
   }
 }

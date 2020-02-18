@@ -1,3 +1,7 @@
+/**
+ * 骨架必须在路由切换前确定是显示还是隐藏
+ * 页面容器在路由切换前显示，在卸载后隐藏
+ */
 import { Hook, HookScope } from '../type';
 
 export interface HookSkeletonOpts {
@@ -57,6 +61,7 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
       // 此处有2个问题，
       // 1. 当是父子关系时，父级不可清除
       // 2. 多个skeleton，lastScope会被覆盖，导致清除不彻底
+      //    所以，lastScope使用链式
       if (lastScope) {
         let { opts: { container: lastContainer } } = lastScope;
         const { opts: { contentSelector: lastContentSelector },
@@ -72,12 +77,12 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
             lastContainer = getLastSkeletonContainer(true).querySelector(lastContentSelector);
           }
           lastContainer.removeChild(lastSkeleton);
-        }
-        // lastScope链式回溯
-        if (lastScope.lastScope) {
-          lastScope = lastScope.lastScope;
-        } else {
-          lastScope = null;
+          // lastScope链式回溯
+          if (lastScope.lastScope) {
+            lastScope = lastScope.lastScope;
+          } else {
+            lastScope = null;
+          }
         }
       }
 
@@ -108,6 +113,9 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
       lastScope = scope;
 
       return undefined;
+    },
+    afterUmount() {
+      // 隐藏页面容器
     },
   };
 };
