@@ -11,7 +11,6 @@ import { PageConfig } from '../weapp/page';
 import singleSpa from '../single-spa';
 import rootProduct from '../weapp/root-product';
 import { errorHandler } from '../error';
-import { LifeCycles } from 'single-spa';
 
 // 登记hook
 const HookDescs: HookDesc<any>[] = [];
@@ -26,7 +25,7 @@ export const Lifecycles: string[] = [
   'beforeRouting', 'beforeLoad',
   'beforeMount', 'afterMount',
   'beforeUnmount', 'afterUnmount',
-  'onError'
+  'onError',
 ];
 const LifecycleCache: {
   [prop: string]: (PageConfig|LifecycleHook)[];

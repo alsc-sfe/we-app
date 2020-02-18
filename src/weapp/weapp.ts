@@ -1,7 +1,5 @@
-import get from 'lodash-es/get';
 import Page, { PageConfig } from './page';
 import Product from './product';
-import { DisabledHooks } from '../hooks/hooks';
 import Base, { BaseConfig, BaseType } from './base';
 
 export interface WeAppConfig extends BaseConfig {

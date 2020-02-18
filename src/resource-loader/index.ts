@@ -1,4 +1,4 @@
-import { HookScope } from "../hooks/type";
+import { HookScope } from '../hooks/type';
 
 declare global {
   interface Window {
@@ -73,7 +73,7 @@ export const DefaultResourceLoader: ResourceLoader = {
     const { useSystem } = opts;
 
     if (typeof resource === 'string') {
-      const head = document.querySelector('head')
+      const head = document.querySelector('head');
 
       if (resource.indexOf('.js') > -1) {
         if (useSystem) {
