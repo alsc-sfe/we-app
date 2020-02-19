@@ -26,9 +26,12 @@ const hook403: Hook<Hook403Opts> = () => {
   return {
     page: {
       activityFunction: () => is403,
+      hooks: false,
       render: {
-        mount({ productName, weAppName, pageName, render, opts: { element } }) {
-          render.mount(
+        // 已经进入页面渲染环节，需要拿到需要渲染的对象
+        mount({ productName, weAppName, pageName, page, opts: { element } }) {
+          const render = page?.getRender();
+          render?.mount(
             element,
             { productName, weAppName, pageName }
           );

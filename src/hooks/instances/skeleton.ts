@@ -11,7 +11,14 @@ export interface HookSkeletonOpts {
   [prop: string]: any;
 }
 
-function DefaultGetPageContainer(elSkeleton: Element, scope: HookScope<HookSkeletonOpts>) {
+function DefaultGetPageContainer(scope: HookScope<HookSkeletonOpts>) {
+  if (!scope.page) {
+    return;
+  }
+
+  const { product, weApp, page } = scope.enabledScope;
+  const base = page || weApp || product;
+  const elSkeleton: Element = base.getSkeletonContainer();
   if (elSkeleton) {
     const { productName = '', weAppName = '', pageName = '',
       opts: { contentSelector = '.__weapp__content' } } = scope;
@@ -23,8 +30,6 @@ function DefaultGetPageContainer(elSkeleton: Element, scope: HookScope<HookSkele
       const elContent = elSkeleton.querySelector(contentSelector);
 
       elPageContainer = document.createElement('div');
-      // @ts-ignore
-      elPageContainer.style.display = 'none';
 
       elContent.appendChild(elPageContainer);
     }
@@ -40,22 +45,7 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
     async beforeRouting(scope: HookScope<HookSkeletonOpts>) {
       const { enabledScope } = scope;
       // 使用启用scope的级别获取骨架容器
-      const { getSkeletonContainer } = enabledScope.page;
-
-      const elSkeleton: Element = getSkeletonContainer();
-
-      if (elSkeleton) {
-        // 生成页面容器，容器存储到scope中
-        const { opts: { getPageContainer = DefaultGetPageContainer } } = scope;
-        const { setPageContainer } = scope.page;
-
-        const elPageContainer = getPageContainer(elSkeleton, scope);
-        if (elPageContainer) {
-          setPageContainer(elPageContainer);
-        }
-
-        return undefined;
-      }
+      const base = enabledScope.page || enabledScope.weApp || enabledScope.product;
 
       // 跨产品时，是否需要隐藏当前skeleton
       // 此处有2个问题，
@@ -66,15 +56,16 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
         let { opts: { container: lastContainer } } = lastScope;
         const { opts: { contentSelector: lastContentSelector },
           enabledScope: lastEnabledScope } = lastScope;
-        const { getSkeletonContainer: getLastSkeletonContainer } = lastEnabledScope.page;
+        const lastBase =
+          lastEnabledScope.page || lastEnabledScope.weApp || lastEnabledScope.product;
 
-        const lastSkeleton = getLastSkeletonContainer();
+        const lastSkeleton = lastBase.getSkeletonContainer();
         // 为父子关系不清除
-        if (getSkeletonContainer(true) !== lastSkeleton) {
+        if (base.getSkeletonContainer(true) !== lastSkeleton) {
           // 需要处理取父骨架的情况，取父骨架的内容区
           if (!lastContainer) {
             // 回溯到父骨架
-            lastContainer = getLastSkeletonContainer(true).querySelector(lastContentSelector);
+            lastContainer = lastBase.getSkeletonContainer(true).querySelector(lastContentSelector);
           }
           lastContainer.removeChild(lastSkeleton);
           // lastScope链式回溯
@@ -87,24 +78,24 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
       }
 
       // 渲染骨架
-      const { setSkeletonContainer } = enabledScope.page;
       let { opts: { container } } = scope;
       const { opts: { skeleton, contentSelector } } = scope;
 
       const div = document.createElement('div');
       div.innerHTML = skeleton;
+      const skeletonContainer = div.children[0];
 
       const df = document.createDocumentFragment();
-      df.appendChild(div.children[0]);
+      df.appendChild(skeletonContainer);
 
       if (!container) {
         // 回溯到父骨架
-        container = getSkeletonContainer(true).querySelector(contentSelector);
+        container = base.getSkeletonContainer(true).querySelector(contentSelector);
       }
 
       container.appendChild(df);
 
-      setSkeletonContainer(div.children[0]);
+      base.setSkeletonContainer(skeletonContainer);
 
       // lastScope 形成链式
       if (lastScope) {
@@ -114,8 +105,24 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
 
       return undefined;
     },
-    afterUmount() {
+    async beforeLoad(scope: HookScope<HookSkeletonOpts>) {
+      // 生成页面容器，容器存储到scope中
+      const { opts: { getPageContainer = DefaultGetPageContainer } } = scope;
+
+      const elPageContainer = getPageContainer(scope);
+      if (elPageContainer) {
+        scope.page?.setPageContainer(elPageContainer);
+      }
+
+      return undefined;
+    },
+    async afterUmount(scope: HookScope<HookSkeletonOpts>) {
       // 隐藏页面容器
+      const { getPageContainer } = scope.page;
+
+      const elPageContainer = getPageContainer();
+
+      elPageContainer.style.display = 'none';
     },
   };
 };

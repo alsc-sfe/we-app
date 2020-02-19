@@ -26,20 +26,8 @@ class Product extends Base {
 
   parent: Product;
 
-  constructor(config?: ProductConfig) {
-    super(config);
-
-    if (config) {
-      this.registerWeApps(config.weApps);
-    }
-  }
-
-  registerWeApps(cfgs: WeAppConfig[]) {
-    return cfgs.map((cfg) => this.registerWeApp(cfg)) as WeApp[];
-  }
-
-  registerWeApp(config: WeAppConfig) {
-    return this.registerChild(config, WeApp) as WeApp;
+  appendWeApp(config: WeAppConfig) {
+    return this.appendChild(config, WeApp) as WeApp;
   }
 
   getWeApp(weAppName: string) {

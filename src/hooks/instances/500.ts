@@ -10,8 +10,9 @@ const hook500: Hook<Hook500Opts> = function () {
     page: {
       activityFunction: () => is500,
       render: {
-        mount({ productName, weAppName, pageName, render, opts: { element } }: HookScope<Hook500Opts>) {
-          render.mount(
+        mount({ productName, weAppName, pageName, page, opts: { element } }: HookScope<Hook500Opts>) {
+          const render = page?.getRender();
+          render?.mount(
             element,
             { productName, weAppName, pageName }
           );

@@ -12,6 +12,7 @@ export interface Render {
 
 export interface BaseConfig {
   name?: string;
+  type?: BaseType;
   parent?: Base;
 
   hooks?: boolean | UseHooksParams;
@@ -32,7 +33,7 @@ export enum BaseType {
   page = 'page'
 }
 
-function getScope(base: Base, scope: HookScope<any> = {}) {
+function compoundScope(base: Base, scope: HookScope<any> = {}): HookScope<any> {
   if (base.type === BaseType.root) {
     if (!scope.product) {
       scope.product = base as Product;
@@ -43,7 +44,7 @@ function getScope(base: Base, scope: HookScope<any> = {}) {
   scope[`${base.type}Name`] = base.name;
   scope[base.type as string] = base;
 
-  getScope(base.parent, scope);
+  return compoundScope(base.parent, scope);
 }
 
 export default class Base {
@@ -53,7 +54,9 @@ export default class Base {
 
   parent: Base;
 
-  private children: Base[];
+  compoundScope = compoundScope;
+
+  private children: Base[] = [];
 
   private config: BaseConfig;
 
@@ -69,14 +72,18 @@ export default class Base {
       this.parent = config.parent;
 
       if (config.hooks) {
-        specifyHooks(config.hooks, getScope(this));
+        specifyHooks(config.hooks, compoundScope(this));
       }
 
       this.config = config;
     }
   }
 
-  registerChild(config: BaseConfig, Child: typeof Base) {
+  appendChild(config: BaseConfig, Child: typeof Base) {
+    if (this.getChild(config.name)) {
+      return;
+    }
+
     const child = new Child({
       ...config,
       parent: this,
@@ -93,22 +100,27 @@ export default class Base {
   }
 
   getConfig(pathname?: string) {
-    return get(this.config, pathname);
+    let config = pathname ? get(this.config, pathname) : this.config;
+    if (!config && this.type !== BaseType.root) {
+      config = this.parent.getConfig(pathname);
+    }
+    return config;
+  }
+
+  setConfig(config: BaseConfig) {
+    this.config = {
+      ...this.config,
+      ...config,
+    };
   }
 
   getSkeletonContainer(traced = false) {
-    // eslint-disable-next-line
-    let base: Base = this;
-
-    while (traced && !base.skeletonContainer) {
-      base = this.parent;
-
-      if (base.type === BaseType.root) {
-        break;
-      }
+    let { skeletonContainer } = this;
+    if (!skeletonContainer && this.parent.type !== BaseType.root) {
+      skeletonContainer = this.parent.getSkeletonContainer(traced);
     }
 
-    return base.skeletonContainer;
+    return skeletonContainer;
   }
 
   setSkeletonContainer(skeletonContainer: HTMLElement|Element) {
@@ -116,7 +128,11 @@ export default class Base {
   }
 
   getRender() {
-    return this.getConfig('render');
+    let render = this.getConfig('render');
+    if (!render && this.type !== BaseType.root) {
+      render = this.parent.getRender();
+    }
+    return render;
   }
 
   getData(pathname?: string) {
@@ -133,5 +149,9 @@ export default class Base {
     }
 
     this.data[pathname] = data;
+  }
+
+  specifyHooks(params: boolean|UseHooksParams) {
+    specifyHooks(params, compoundScope(this));
   }
 }

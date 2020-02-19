@@ -18,8 +18,9 @@ const hook404: Hook<Hook404Opts> = function () {
     page: {
       activityFunction: () => is404,
       render: {
-        mount({ productName, weAppName, pageName, render, opts: { element } }) {
-          render.mount(
+        mount({ productName, weAppName, pageName, page, opts: { element } }) {
+          const render = page?.getRender();
+          render?.mount(
             element,
             { productName, weAppName, pageName }
           );

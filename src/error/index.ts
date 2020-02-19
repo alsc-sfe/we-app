@@ -1,6 +1,6 @@
-import singleSpa from '../single-spa';
+import { addErrorHandler, getAppStatus, unloadApplication } from '../single-spa';
 import { runLifecycleHook } from '../hooks';
-import rootProduct from '../weapp/root-product';
+import { getScope } from '../weapp';
 import { HookScope } from '../hooks/type';
 
 export const errorHandler = (error: Event, activeScopes: HookScope<any>[]) => {
@@ -10,14 +10,14 @@ export const errorHandler = (error: Event, activeScopes: HookScope<any>[]) => {
   return runLifecycleHook('onError', activeScopes, { error });
 };
 
-singleSpa.addErrorHandler((error: any) => {
+addErrorHandler((error: any) => {
   const pageName = error.appOrParcelName || error.appName || error.name;
-  const activeScope = rootProduct.getScope(pageName);
+  const activeScope = getScope(pageName);
 
   errorHandler(error, [activeScope])
     .then(() => {
-      if (singleSpa.getAppStatus(pageName)) {
-        singleSpa.unloadApplication(pageName);
+      if (getAppStatus(pageName)) {
+        unloadApplication(pageName);
       }
     });
 });

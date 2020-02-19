@@ -20,9 +20,9 @@ module.exports = {
     // 开启UMD、System模块构建，将编译发布到CDN
     cdn: false,
     // 模块打包成UMD后的文件名前缀（需要自定义！！！）
-    filename: 'layout',
+    filename: 'weapp',
     // 模块打包成UMD后的, 导出的模块名称（需要自定义！！！）
-    library: "Layout",
+    library: "WeApp",
     // 自定义UMD构建配置
     config: (compileConfig) => {
       return compileConfig;

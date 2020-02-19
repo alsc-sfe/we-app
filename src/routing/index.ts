@@ -1,2 +1,2 @@
-export { enhanceRoutingFunction, startRouting } from './routing';
-export { navigateToUrl } from '../single-spa';
+export { startRouting } from './routing';
+export * from './route';

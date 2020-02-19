@@ -8,9 +8,11 @@
 import { Hook, HookDesc, HookScope } from './type';
 import { getPageName } from '../helpers';
 import { PageConfig } from '../weapp/page';
-import singleSpa from '../single-spa';
-import rootProduct from '../weapp/root-product';
+import { checkActivityFunctions, getAppNames } from '../single-spa';
+import { getScope, compoundScope } from '../weapp';
 import { errorHandler } from '../error';
+import { RoutingWithHook, setRoutingWithHook } from '../routing/event-intercept';
+import { BaseType } from '../weapp/base';
 
 // 登记hook
 const HookDescs: HookDesc<any>[] = [];
@@ -57,10 +59,16 @@ function registerHook(hook: Hook<any>|{hookName: string}, opts?: any) {
   return h;
 }
 
-export function registerHooks(hook: Hook<any>, opts?: any) {
-  const hooks: [Hook<any>, any][] = Array.isArray(hook) ? hook : [[hook, opts]];
+export function registerHooks(hook: Hook<any>|Hook<any>[]|[Hook<any>, any][], opts?: any) {
+  const hooks: Hook<any>[]|[Hook<any>, any][] = Array.isArray(hook) ? hook : [[hook, opts]];
 
-  hooks.forEach(([h, o]) => registerHook(h, o));
+  hooks.forEach((h) => {
+    if (Array.isArray(h)) {
+      registerHook(h[0], h[1]);
+    } else {
+      registerHook(h);
+    }
+  });
 }
 
 // 计算 resScopes 中与 destScopes 匹配的 scopes
@@ -85,8 +93,11 @@ function matchScopes(resScopes: HookScope<any>[], destScopes: HookScope<any>[]) 
               ...destScope,
             },
           });
+          break;
         }
-      } else if (resScope.weAppName) {
+      }
+
+      if (resScope.weAppName) {
         if (
           resScope.productName === destScope.productName &&
           resScope.weAppName === destScope.weAppName
@@ -97,8 +108,11 @@ function matchScopes(resScopes: HookScope<any>[], destScopes: HookScope<any>[]) 
               ...destScope,
             },
           });
+          break;
         }
-      } else if (resScope.productName &&
+      }
+
+      if (resScope.productName &&
         resScope.productName === destScope.productName
       ) {
         matchedScopes.push({
@@ -107,6 +121,20 @@ function matchScopes(resScopes: HookScope<any>[], destScopes: HookScope<any>[]) 
             ...destScope,
           },
         });
+        break;
+      }
+
+      if (
+        destScope.product.type === BaseType.root &&
+        !destScope.weAppName
+      ) {
+        matchedScopes.push({
+          ...resScope,
+          matchedScope: {
+            ...destScope,
+          },
+        });
+        break;
       }
     }
   }
@@ -117,10 +145,10 @@ function matchScopes(resScopes: HookScope<any>[], destScopes: HookScope<any>[]) 
 function matchActiveScopes(hookName: string, activeScopes: HookScope<any>[],
   matchedActiveScopes: { [hookName: string]: HookScope<any>[] } = {}) {
   const includeHook = IncludeHooks.find(({ hookName: hname }) => hookName === hname);
-  const enabledScopes = includeHook.scopes;
+  const enabledScopes = includeHook?.scopes;
 
   const excludeHook = ExcludeHooks.find(({ hookName: hname }) => hookName === hname);
-  const disabledScopes = excludeHook.scopes;
+  const disabledScopes = excludeHook?.scopes;
 
   // 没有级别启用当前插件
   if (!enabledScopes) {
@@ -133,9 +161,12 @@ function matchActiveScopes(hookName: string, activeScopes: HookScope<any>[],
     return false;
   }
 
-  const matchedDisabledActiveScopes: HookScope<any>[] = matchScopes(activeScopes, disabledScopes);
+  const matchedDisabledActiveScopes: HookScope<any>[] = disabledScopes ? matchScopes(activeScopes, disabledScopes) : [];
   if (!matchedDisabledActiveScopes.length) {
-    matchedActiveScopes[hookName] = matchedEnabledActiveScopes;
+    matchedActiveScopes[hookName] = matchedEnabledActiveScopes.map(({ matchedScope, ...rest }) => ({
+      ...rest,
+      enabledScope: matchedScope,
+    }));
     return true;
   }
 
@@ -167,9 +198,9 @@ function cachePage(hookDescPage: HookDesc<any>['page'], hookDesc: HookDesc<any>)
 
   const scopeActivityFunction = (location: Location) => {
     // 获取当前路由对应的页面对应的scope
-    const activePages = singleSpa.checkActivityFunctions(location);
+    const activePages = checkActivityFunctions(location);
     const activeScopes = activePages.map((pageName) => {
-      return rootProduct.getScope(pageName);
+      return getScope(pageName);
     });
     // 匹配启用scope和禁用scope
     const isScopeMatched = matchActiveScopes(hookDesc.hookName, activeScopes);
@@ -309,7 +340,7 @@ function getLifecycleHook(lifecycleType: string) {
   return LifecycleCache[lifecycleType];
 }
 
-export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<any>[], props?: any) {
+export async function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<any>[], props?: any) {
   const lifecycleHooks: LifecycleHook[] = getLifecycleHook(lifecycleType) as LifecycleHook[];
   const matchedActiveScopes: {[hookName: string]: HookScope<any>[]} = {};
   // 先过滤出需要执行的hook
@@ -328,7 +359,7 @@ export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<
       await p;
 
       if (typeof exec === 'function') {
-        return hookMatchedActiveScopes.map((hookMatchedActiveScope) => {
+        let res = hookMatchedActiveScopes.map((hookMatchedActiveScope) => {
           const { enabledScope: hookScope } = hookMatchedActiveScope;
           return exec({
             ...hookMatchedActiveScope,
@@ -342,6 +373,37 @@ export function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<
             },
           });
         });
+        res = await Promise.all(res);
+        return res;
       }
+      return [];
     }, Promise.resolve([undefined]));
 }
+
+// 设置路由生命周期钩子
+// 放在这里是避免出现循环依赖
+const routingWithHook: RoutingWithHook = async (location: Location) => {
+  let activeScopes: HookScope<any>[];
+  // 检测是否已注册页面
+  const appNames = getAppNames();
+  // 未注册页面，则使用根产品作为scope
+  if (appNames.length === 0) {
+    activeScopes = [
+      compoundScope(),
+    ];
+  } else {
+    const activePages = checkActivityFunctions(location);
+    activeScopes = activePages.map((pageName) => {
+      return getScope(pageName);
+    });
+  }
+
+  const continues: (boolean|undefined)[] = await runLifecycleHook('beforeRouting', activeScopes);
+  const index = continues.findIndex((c) => c === false);
+  if (index > -1) {
+    return false;
+  }
+  return true;
+};
+
+setRoutingWithHook(routingWithHook);
