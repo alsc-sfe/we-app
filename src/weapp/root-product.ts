@@ -42,6 +42,7 @@ class RootProduct extends Product {
       scope.page = this.hookWeApp.getPage(scope.hookName);
     } else if (scope.pageName) {
       if (!scope.productName) {
+        scope.product = this;
         scope.weApp = this.getWeApp(scope.weAppName);
         scope.page = scope.weApp.getPage(scope.pageName);
       } else {

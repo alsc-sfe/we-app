@@ -1,6 +1,6 @@
 import { startRouting } from './routing';
 import { ProductConfig } from './weapp/product';
-import { registerProducts, registerWeApps, setConfig, startRootProduct, specifyHooks } from './weapp';
+import { registerProducts, registerWeApps, setConfig, startRootProduct, specifyHooks, setHomepage } from './weapp';
 import { registerHooks } from './hooks';
 import { start as singleSpaStart } from './single-spa';
 
@@ -22,4 +22,5 @@ export {
   registerWeApps,
   setConfig,
   specifyHooks,
+  setHomepage,
 };

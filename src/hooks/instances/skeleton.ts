@@ -28,10 +28,10 @@ function DefaultGetPageContainer(scope: HookScope<HookSkeletonOpts>) {
 
     if (!elPageContainer) {
       const elContent = elSkeleton.querySelector(contentSelector);
-
-      elPageContainer = document.createElement('div');
-
-      elContent.appendChild(elPageContainer);
+      if (elContent) {
+        elPageContainer = document.createElement('div');
+        elContent.appendChild(elPageContainer);
+      }
     }
 
     return elPageContainer;

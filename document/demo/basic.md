@@ -7,7 +7,7 @@ PC模板
 
 ````jsx
 import './style.less';
-import { registerWeApps, start, specifyHooks } from "@alife/we-app";
+import { registerWeApps, start, specifyHooks, setHomepage } from "@alife/we-app";
 import render from './render';
 
 specifyHooks([
@@ -21,7 +21,7 @@ specifyHooks([
             <div class="microfe-menu" id="__bcommon__menu"></div>
             <div class="microfe-wrapper">
               <div class="microfe-root-body">
-                <div class="microfe-root-content" class=".__weapp__content"></div>
+                <div class="microfe-root-content __weapp__content"></div>
               </div>
             </div>
           </div>
@@ -40,6 +40,11 @@ registerWeApps([
     url: 'https://g.alicdn.com/alsc-saas/web-boh-common/1.3.3/app-config.js',
   },
 ]);
+
+setHomepage({
+  weAppName: 'bcommon',
+  pageName: 'account-settings',
+});
 
 start({
   basicLibs: [
