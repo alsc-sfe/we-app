@@ -71,6 +71,13 @@ registerWeApps([
   },
 ]);
 
+setHomepage({
+  weAppName: 'bcommon',
+  pageName: 'account-settings',
+});
+
+start();
+
 registerProducts([
   {
     name: 'boh',
@@ -82,11 +89,6 @@ registerProducts([
     ],
   },
 ]);
-
-setHomepage({
-  weAppName: 'bcommon',
-  pageName: 'account-settings',
-});
 
 start();
 ````

@@ -345,23 +345,31 @@ function getLifecycleHook(lifecycleType: string) {
 export async function runLifecycleHook(lifecycleType: string, activeScopes: HookScope<any>[], props?: any) {
   const lifecycleHooks: LifecycleHook[] = getLifecycleHook(lifecycleType) as LifecycleHook[];
   const matchedActiveScopes: {[hookName: string]: HookScope<any>[]} = {};
-  // 先过滤出需要执行的hook
-  // 再执行相应的hook处理函数
-  return lifecycleHooks
+  /**
+   * 先过滤出需要执行的hook，再执行相应的hook处理函数
+   * 1. 一个路由对应多个页面，多个页面对应多个scope，也就是activeScopes
+   * 2. 一个生命周期对应多个hook，每个hook有多个启用/禁用scope
+   * 3. 一个hook的启用activeScope计算方式为，将activeScopes和hook的启用/禁用scope匹配，
+   *    返回匹配的activeScopes列表，匹配的启用scope放在activeScope.enabledScope，
+   *    依据activeScopes的有无，则可以获取在当前页面要启用的hook
+   * 4. 按照hook来执行，由于会有多个activeScopes，所以需要执行多次，
+   *    结果以数组存储，多个hook的结果需要concat
+   */
+  const pHookExecs = lifecycleHooks
     .filter(({ hookName }) => {
       const isScopeMatched = matchActiveScopes(hookName, activeScopes, matchedActiveScopes);
       return isScopeMatched;
     })
-    .reduce(async (p, { hookName, exec }) => {
+    .reduce(async (pHook, { hookName, exec }) => {
       const hookDesc = HookDescs.find(({ hookName: hname }) => hname === hookName);
       // 像路由切换前，根据url是可以匹配到多个页面的
       // 所以每个页面在剔除禁用的之后，都需要执行一次钩子函数
       const hookMatchedActiveScopes = matchedActiveScopes[hookName];
 
-      await p;
+      const resHookExec = await pHook;
 
       if (typeof exec === 'function') {
-        let res = hookMatchedActiveScopes.map((hookMatchedActiveScope) => {
+        const pLifecycleHooks: Promise<any>[] = hookMatchedActiveScopes.map((hookMatchedActiveScope) => {
           const { enabledScope: hookScope } = hookMatchedActiveScope;
           return exec({
             ...hookMatchedActiveScope,
@@ -375,11 +383,17 @@ export async function runLifecycleHook(lifecycleType: string, activeScopes: Hook
             },
           });
         });
-        res = await Promise.all(res);
-        return res;
+
+        const resLifecycleHooks = await Promise.all(pLifecycleHooks);
+        return resHookExec.concat(resLifecycleHooks);
       }
+
       return [];
-    }, Promise.resolve([undefined]));
+    }, Promise.resolve([]));
+
+  const hookExecs = await pHookExecs;
+
+  return hookExecs;
 }
 
 // 设置路由生命周期钩子

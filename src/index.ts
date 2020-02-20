@@ -11,8 +11,11 @@ import { registerProducts, registerWeApps, setConfig, getChildrenInitStatus,
   startRootProduct, specifyHooks, setHomepage } from './weapp';
 import { registerHooks } from './hooks';
 
-export async function start(config: ProductConfig) {
+let startPromise: Promise<any>;
+
+async function _start(config?: ProductConfig) {
   setConfig(config);
+  // 所有的级别都已经注册完成
   await getChildrenInitStatus();
   // 首次进入，触发路由拦截
   await startRouting();
@@ -20,6 +23,16 @@ export async function start(config: ProductConfig) {
   startRootProduct();
   // singleSpa要求必须调用
   startSingleSpa();
+}
+
+export function start(config?: ProductConfig) {
+  if (!startPromise) {
+    startPromise = _start(config);
+  } else {
+    startPromise.then(() => {
+      startPromise = _start(config);
+    });
+  }
 }
 
 export {
