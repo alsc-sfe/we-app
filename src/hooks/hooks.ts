@@ -80,8 +80,9 @@ function matchScopes(resScopes: HookScope<any>[], destScopes: HookScope<any>[]) 
 
     for (let j = 0, l = destScopes.length; j < len; j++) {
       const destScope = destScopes[j];
-      // 从页面到微应用到产品，范围逐步扩大
-      if (resScope.pageName) {
+
+      // 以destScope为基准，从页面到微应用到产品，范围逐步扩大
+      if (destScope.pageName) {
         if (
           resScope.productName === destScope.productName &&
           resScope.weAppName === destScope.weAppName &&
@@ -97,7 +98,7 @@ function matchScopes(resScopes: HookScope<any>[], destScopes: HookScope<any>[]) 
         }
       }
 
-      if (resScope.weAppName) {
+      if (destScope.weAppName) {
         if (
           resScope.productName === destScope.productName &&
           resScope.weAppName === destScope.weAppName
@@ -112,21 +113,22 @@ function matchScopes(resScopes: HookScope<any>[], destScopes: HookScope<any>[]) 
         }
       }
 
-      if (resScope.productName &&
-        resScope.productName === destScope.productName
-      ) {
-        matchedScopes.push({
-          ...resScope,
-          matchedScope: {
-            ...destScope,
-          },
-        });
-        break;
+      if (destScope.productName) {
+        if (
+          resScope.productName === destScope.productName
+        ) {
+          matchedScopes.push({
+            ...resScope,
+            matchedScope: {
+              ...destScope,
+            },
+          });
+          break;
+        }
       }
 
       if (
-        destScope.product.type === BaseType.root &&
-        !destScope.weAppName
+        destScope.product?.type === BaseType.root
       ) {
         matchedScopes.push({
           ...resScope,

@@ -1,3 +1,9 @@
+/**
+ * 这里依赖的System从window底下取，原因有两个：
+ * 1. CRM的基础库需要提前systemjs，如react、antd等
+ * 2. import systemjs仍然会注册到window底下，
+ *    可能造成全局污染
+ */
 import { HookScope } from '../hooks/type';
 
 declare global {
