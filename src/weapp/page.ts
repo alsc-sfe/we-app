@@ -1,3 +1,10 @@
+/**
+ * 首次访问时，需要执行beforeRouting，
+ * 而此时一旦向singleSpa中注册了页面，则会触发singleSpa的reroute，
+ * 导致页面直接进入渲染，跳过了生命周期routing
+ * 所以，需要先缓存配置，再统一执行singleSpa注册，
+ * 在首次访问时，通过调用page的makeActivityFunction，手动获取activeScopes
+ */
 import { registerApplication } from 'single-spa';
 import { getPageName, checkUseSystem } from '../helpers';
 import Base, { BaseConfig, BaseType } from './base';
@@ -22,6 +29,8 @@ export interface PageConfig extends BaseConfig {
   [prop: string]: any;
 }
 
+export type ActivityFunction = (location?: Location) => boolean;
+
 export default class Page extends Base {
   type: BaseType = BaseType.page;
 
@@ -32,6 +41,10 @@ export default class Page extends Base {
   constructor(config: PageConfig) {
     super(config);
 
+    this.setInited();
+  }
+
+  start() {
     const resourceLoader = this.getConfig('resourceLoader');
     const url = this.getConfig('url') || [];
     const useSystem = this.getConfig('useSystem') || [];
@@ -114,7 +127,7 @@ export default class Page extends Base {
     const config = this.getConfig();
     const { route, routeIgnore, afterRouteDiscover } = config;
 
-    let activityFunction: (location: Location) => boolean;
+    let activityFunction: ActivityFunction;
 
     if (route === true && !routeIgnore) {
       activityFunction = () => {

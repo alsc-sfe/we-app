@@ -1,5 +1,6 @@
 import { callCapturedEventListeners, getRoutingWithHook } from './event-intercept';
 import { parseUri } from './helper';
+import { HookScope } from '../hooks/type';
 
 async function routingFunctionWithHook(url: string) {
   const destination = parseUri(`${location.protocol}//${location.hostname}${location.port ? `:${location.port}` : ''}${url}`);
@@ -41,8 +42,8 @@ function createPopStateEvent(state: any) {
 }
 
 // 首次进入执行路由拦截
-export async function startRouting() {
-  await getRoutingWithHook()(location).then((isContinue: boolean|undefined) => {
+export async function startRouting(activeScopes: HookScope<any>[]) {
+  await getRoutingWithHook()(location, activeScopes).then((isContinue: boolean|undefined) => {
     if (isContinue !== false) {
       callCapturedEventListeners([createPopStateEvent(null)]);
     }

@@ -2,8 +2,9 @@ import Page, { PageConfig } from './page';
 import Product from './product';
 import Base, { BaseConfig, BaseType } from './base';
 import { checkUseSystem } from '../helpers';
-import { ResourceLoader } from '../resource-loader';
+import { ResourceLoader, ResourceFunction } from '../resource-loader';
 import { Route as TRoute } from '../routing';
+import { HookScope } from '../hooks/type';
 
 export interface WeAppConfig extends BaseConfig {
   parent?: Product;
@@ -11,6 +12,8 @@ export interface WeAppConfig extends BaseConfig {
   url?: string;
 
   pages?: PageConfig[];
+
+  filterPages?: (cfgs: PageConfig|PageConfig[]) => PageConfig|PageConfig[]|undefined;
 }
 
 interface Route {
@@ -23,7 +26,7 @@ interface Module {
   moduleName: string;
   route: string|string[]|boolean|Route|Route[];
   routeIgnore: Route[];
-  getComponent: () => Promise<any>;
+  getComponent: ResourceFunction;
   [prop: string]: any;
 }
 interface AppConfig {
@@ -56,7 +59,7 @@ function transformAppConfig(appConfig: AppConfig): WeAppConfig {
       return {
         ...module,
         name: module.moduleName,
-        url: [module.getComponent()],
+        url: [module.getComponent],
         route: transformRoute(module.route),
         routeIgnore: transformRoute(module.routeIgnore),
       };
@@ -64,6 +67,10 @@ function transformAppConfig(appConfig: AppConfig): WeAppConfig {
     ...appConfig,
   };
 }
+
+// 已注册页面都记录在这里
+// 主要用于首次访问时获取activeScopes
+let registedPages: Page[] = [];
 
 export default class WeApp extends Base {
   type: BaseType = BaseType.weApp;
@@ -75,9 +82,12 @@ export default class WeApp extends Base {
 
     if (config) {
       if (config.url) {
-        this.loadConfig(config);
+        this.setInitDeferred();
+        this.loadConfig(config).then(() => {
+          this.setInited();
+        });
       } else {
-        this.appendPages(config.pages);
+        this.registerPages(config.pages);
       }
     }
   }
@@ -102,21 +112,52 @@ export default class WeApp extends Base {
 
     this.setConfig(weAppConfig);
 
-    // crm中从三方渠道过来需要去掉navbar，如何实现？
-    this.appendPages(weAppConfig.pages);
+    this.registerPages(weAppConfig.pages);
   }
 
-  appendPages(cfgs: PageConfig[] = []) {
-    return cfgs.map((config) => {
-      return this.appendPage(config);
-    }) as Page[];
+  registerPages(configs: PageConfig[] = []) {
+    const cfgs = this.filterPages(configs) as PageConfig[];
+    if (cfgs) {
+      const pages = this.registerChildren(cfgs, Page) as Page[];
+      registedPages = registedPages.concat(pages);
+      return pages;
+    }
   }
 
-  appendPage(config: PageConfig) {
-    return this.appendChild(config, Page) as Page;
+  registerPage(cfg: PageConfig) {
+    const config = this.filterPages(cfg) as PageConfig;
+    if (config) {
+      const page = this.registerChild(config, Page) as Page;
+      registedPages.push(page);
+      return page;
+    }
+  }
+
+  filterPages(cfgs: PageConfig|PageConfig[]) {
+    const filter = this.getConfig('filterPages') as WeAppConfig['filterPages'];
+    if (filter && typeof filter === 'function') {
+      return filter(cfgs);
+    }
+    return cfgs;
   }
 
   getPage(pageName: string) {
     return this.getChild(pageName) as Page;
   }
+}
+
+export function getActiveScopes(location: Location) {
+  const activeScopes: HookScope<any>[] = [];
+  const activeFns = registedPages.map((page) => {
+    return {
+      page,
+      activeFn: page.makeActivityFunction(),
+    };
+  });
+  activeFns.forEach(({ page, activeFn }) => {
+    if (activeFn(location)) {
+      activeScopes.push(page.compoundScope(page));
+    }
+  });
+  return activeScopes;
 }

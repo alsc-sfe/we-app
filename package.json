@@ -33,6 +33,7 @@
     "lodash-es": "^4.17.15",
     "path-to-regexp": "^3.2.0",
     "single-spa": "^4.4.3",
+    "systemjs": "^6.2.3",
     "tslib": "1"
   },
   "devDependencies": {

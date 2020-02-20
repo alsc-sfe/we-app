@@ -1,7 +1,7 @@
 import Product, { ProductConfig } from './product';
 import { InnerProductName, HookWeAppName, parsePageName } from '../helpers';
-import WeApp, { WeAppConfig } from './weapp';
-import Base, { BaseType, BaseConfig } from './base';
+import WeApp, { getActiveScopes } from './weapp';
+import Base, { BaseType } from './base';
 import { DefaultResourceLoader } from '../resource-loader';
 import { RouterType } from '../routing/enum';
 
@@ -12,24 +12,12 @@ class RootProduct extends Product {
 
   hookWeApp: WeApp;
 
-  private baseConfigs: BaseConfig[] = [];
-
   registerProducts(cfgs: ProductConfig[] = []) {
-    this.baseConfigs = this.baseConfigs.concat(cfgs.map((cfg) => ({
-      ...cfg,
-      type: BaseType.product,
-    })));
+    return this.registerChildren(cfgs, Product) as Product[];
   }
 
-  registerWeApps(cfgs: WeAppConfig[] = []) {
-    this.baseConfigs = this.baseConfigs.concat(cfgs.map((cfg) => ({
-      ...cfg,
-      type: BaseType.weApp,
-    })));
-  }
-
-  appendProduct(config: ProductConfig) {
-    return this.appendChild(config, Product) as Product;
+  registerProduct(cfg: ProductConfig) {
+    return this.registerChild(cfg, Product) as Product;
   }
 
   getProduct(productName: string) {
@@ -53,29 +41,17 @@ class RootProduct extends Product {
     }
     return scope;
   }
-
-  startRootProduct() {
-    this.baseConfigs.forEach((cfg) => {
-      switch (cfg.type) {
-        case BaseType.product:
-          this.appendProduct(cfg as ProductConfig);
-          break;
-        case BaseType.weApp:
-          this.appendWeApp(cfg as WeAppConfig);
-          break;
-        default:
-          break;
-      }
-    });
-  }
 }
 
-const rootProduct = new RootProduct();
+const rootProduct = new RootProduct({
+  resourceLoader: DefaultResourceLoader,
+  routerType: RouterType.browser,
+});
 // 注册内置子产品，用于挂载hook等微应用
-const innerProduct = rootProduct.appendProduct({
+const innerProduct = rootProduct.registerProduct({
   name: InnerProductName,
 });
-const hookWeApp = innerProduct.appendWeApp({
+const hookWeApp = innerProduct.registerWeApp({
   name: HookWeAppName,
 });
 
@@ -84,20 +60,16 @@ rootProduct.hookWeApp = hookWeApp;
 export const registerProducts = rootProduct.registerProducts.bind(rootProduct) as RootProduct['registerProducts'];
 export const registerWeApps = rootProduct.registerWeApps.bind(rootProduct) as RootProduct['registerWeApps'];
 export const specifyHooks = rootProduct.specifyHooks.bind(rootProduct) as RootProduct['specifyHooks'];
-export const startRootProduct = rootProduct.startRootProduct.bind(rootProduct) as RootProduct['startRootProduct'];
+export const startRootProduct = rootProduct.start.bind(rootProduct) as RootProduct['start'];
 export const getScope = rootProduct.getScope.bind(rootProduct) as RootProduct['getScope'];
-export const setConfig = (config: ProductConfig) => {
-  rootProduct.setConfig({
-    resourceLoader: DefaultResourceLoader,
-    routerType: RouterType.browser,
-    ...config,
-  });
-};
+export const setConfig = rootProduct.setConfig.bind(rootProduct) as RootProduct['setConfig'];
 export const compoundScope = (base?: Base) => {
   return rootProduct.compoundScope(base || rootProduct);
 };
+export const getChildrenInitStatus = rootProduct.getChildrenInitStatus.bind(rootProduct) as RootProduct['getChildrenInitStatus'];
 
 export {
   innerProduct,
   hookWeApp,
+  getActiveScopes,
 };

@@ -1,3 +1,5 @@
+import { HookScope } from '../hooks/type';
+
 /**
  * 增强路由
  * 1. 在singleSpa初始化前，拦截事件popstate和hashchange，
@@ -28,7 +30,7 @@ export function callCapturedEventListeners(eventArguments) {
   }
 }
 
-export type RoutingWithHook = (location: Location) => Promise<boolean>;
+export type RoutingWithHook = (location: Location, activeScopes?: HookScope<any>) => Promise<boolean>;
 let routingWithHook: RoutingWithHook = async () => true;
 
 export function getRoutingWithHook() {

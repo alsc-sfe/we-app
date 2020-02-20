@@ -384,16 +384,10 @@ export async function runLifecycleHook(lifecycleType: string, activeScopes: Hook
 
 // 设置路由生命周期钩子
 // 放在这里是避免出现循环依赖
-const routingWithHook: RoutingWithHook = async (location: Location) => {
-  let activeScopes: HookScope<any>[];
-  // 检测是否已注册页面
-  const appNames = getAppNames();
+const routingWithHook: RoutingWithHook = async (location: Location, scopes: HookScope<any>[] = []) => {
+  let activeScopes: HookScope<any>[] = scopes;
   // 未注册页面，则使用根产品作为scope
-  if (appNames.length === 0) {
-    activeScopes = [
-      compoundScope(),
-    ];
-  } else {
+  if (activeScopes.length === 0) {
     const activePages = checkActivityFunctions(location);
     activeScopes = activePages.map((pageName) => {
       return getScope(pageName);

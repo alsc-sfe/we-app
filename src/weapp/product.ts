@@ -8,17 +8,16 @@
  */
 import WeApp, { WeAppConfig } from './weapp';
 import Base, { BaseConfig, BaseType, Render } from './base';
+import { ResourceLoader } from '../resource-loader';
 
 export interface ProductConfig extends BaseConfig {
   parent?: Product;
-  // 基础dom
-  skeleton?: string;
-  // 需要前置加载的资源
-  baseResources?: string[];
   // 微应用列表
   weApps?: WeAppConfig[];
   // 页面渲染实现
   render?: Render;
+  // 资源加载器
+  resourceLoader?: ResourceLoader;
 }
 
 class Product extends Base {
@@ -26,8 +25,20 @@ class Product extends Base {
 
   parent: Product;
 
-  appendWeApp(config: WeAppConfig) {
-    return this.appendChild(config, WeApp) as WeApp;
+  constructor(config: ProductConfig) {
+    super(config);
+
+    if (config.weApps) {
+      this.registerWeApps(config.weApps);
+    }
+  }
+
+  registerWeApps(cfgs: WeAppConfig[]) {
+    return this.registerChildren(cfgs, WeApp) as WeApp[];
+  }
+
+  registerWeApp(cfg: WeAppConfig) {
+    return this.registerChild(cfg, WeApp) as WeApp;
   }
 
   getWeApp(weAppName: string) {

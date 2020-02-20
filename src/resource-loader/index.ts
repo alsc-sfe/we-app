@@ -1,10 +1,14 @@
 /**
  * 这里依赖的System从window底下取，原因有两个：
- * 1. CRM的基础库需要提前systemjs，如react、antd等
- * 2. import systemjs仍然会注册到window底下，
- *    可能造成全局污染
+ * 1. CRM的基础库依赖systemjs，如react、antd等的system module
+ * 2. import systemjs仍然会注册到window底下，可能造成全局污染
+ *
+ * 解决办法：
+ * 1. 全局手动引入，部署多一步
+ * 2. 默认resourceLoader内置systemjs依赖，可能造成全局污染
  */
 import { HookScope } from '../hooks/type';
+import 'systemjs/dist/system';
 
 declare global {
   interface Window {
@@ -15,7 +19,10 @@ declare global {
   }
 }
 
-export type Resource = string | Promise<any>;
+const { System } = window;
+
+export type ResourceFunction = () => Promise<any>;
+export type Resource = string | Promise<any> | ResourceFunction;
 
 export interface ResourceLoader {
   mount: (
@@ -43,7 +50,7 @@ export const DefaultResourceLoader: ResourceLoader = {
     if (typeof resource === 'string') {
       if (resource.indexOf('.js') > -1) {
         if (useSystem) {
-          return context.System ? context.System.import(resource) : {};
+          return context.System ? context.System.import(resource) : System.import(resource);
         }
 
         return new Promise((resolve, reject) => {
@@ -65,6 +72,10 @@ export const DefaultResourceLoader: ResourceLoader = {
 
         return;
       }
+    }
+
+    if (typeof resource === 'function') {
+      return resource();
     }
 
     return resource;

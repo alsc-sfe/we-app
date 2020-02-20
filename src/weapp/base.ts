@@ -4,6 +4,7 @@ import { specifyHooks } from '../hooks';
 import { UseHooksParams } from '../hooks/hooks';
 import { ResourceLoader } from '../resource-loader';
 import Product from './product';
+import Deferred from '../utils/deferred';
 
 export interface Render {
   mount: (element: any, opts?: HookScope<any>) => any;
@@ -60,11 +61,13 @@ export default class Base {
 
   private config: BaseConfig;
 
-  private skeletonContainer: HTMLElement|Element;
-
   private sandbox?: Window;
 
   private data: object = {};
+
+  private isStarted: boolean = false;
+
+  private initDeferred: Deferred<Base>;
 
   constructor(config?: BaseConfig) {
     if (config) {
@@ -79,24 +82,35 @@ export default class Base {
     }
   }
 
-  appendChild(config: BaseConfig, Child: typeof Base) {
-    if (this.getChild(config.name)) {
+  // 执行
+  start() {
+    if (this.isStarted) {
       return;
     }
+    this.isStarted = true;
 
-    const child = new Child({
-      ...config,
-      parent: this,
+    this.children.forEach((child) => {
+      child.start();
     });
-
-    this.children.push(child);
-
-    return child;
   }
 
-  getChild(name: string) {
-    const child = this.children.find(c => c.name === name);
-    return child;
+  getInited() {
+    return this.initDeferred?.promise;
+  }
+
+  async getChildrenInitStatus() {
+    let initStatus: Base[] = [];
+    const initedPs = this.children.map(async (child) => {
+      const inited = await child.getInited();
+      if (inited) {
+        initStatus.push(inited);
+      } else {
+        const inits = await child.getChildrenInitStatus();
+        initStatus = initStatus.concat(inits);
+      }
+    });
+    await Promise.all(initedPs);
+    return initStatus;
   }
 
   getConfig(pathname?: string) {
@@ -115,28 +129,27 @@ export default class Base {
   }
 
   getSkeletonContainer(traced = false) {
-    let { skeletonContainer } = this;
-    if (!skeletonContainer && this.parent.type !== BaseType.root) {
-      skeletonContainer = this.parent.getSkeletonContainer(traced);
-    }
-
-    return skeletonContainer;
+    return this.getData('skeletonContainer', traced);
   }
 
   setSkeletonContainer(skeletonContainer: HTMLElement|Element) {
-    this.skeletonContainer = skeletonContainer;
+    this.setData('skeletonContainer', skeletonContainer);
   }
 
   getRender() {
-    let render = this.getConfig('render');
-    if (!render && this.type !== BaseType.root) {
-      render = this.parent.getRender();
-    }
-    return render;
+    return this.getConfig('render');
   }
 
-  getData(pathname?: string) {
-    return get(this.data, pathname);
+  getData(pathname: string, traced = false) {
+    if (!pathname) {
+      return;
+    }
+
+    let data = get(this.data, pathname);
+    if (traced && !data && this.type !== BaseType.root) {
+      data = this.parent.getData(pathname);
+    }
+    return data;
   }
 
   setData(pathname: string|symbol|object, data?: any) {
@@ -153,5 +166,40 @@ export default class Base {
 
   specifyHooks(params: boolean|UseHooksParams) {
     specifyHooks(params, compoundScope(this));
+  }
+
+  protected registerChildren(cfgs: BaseConfig[], Child: typeof Base) {
+    return cfgs.map((config) => this.registerChild(config, Child));
+  }
+
+  protected registerChild(config: BaseConfig, Child: typeof Base) {
+    if (this.getChild(config.name)) {
+      return;
+    }
+
+    const child = new Child({
+      ...config,
+      parent: this,
+    });
+
+    this.children.push(child);
+
+    return child;
+  }
+
+  protected setInitDeferred() {
+    if (!this.initDeferred) {
+      this.initDeferred = new Deferred();
+    }
+  }
+
+  protected setInited() {
+    this.setInitDeferred();
+    this.initDeferred.resolve(this);
+  }
+
+  protected getChild(name: string) {
+    const child = this.children.find(c => c.name === name);
+    return child;
   }
 }

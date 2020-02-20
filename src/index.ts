@@ -2,23 +2,25 @@
 // 路由事件拦截
 import './routing/event-intercept';
 // singleSpa初始化
-import { start as singleSpaStart } from 'single-spa';
+import { start as startSingleSpa } from 'single-spa';
 // 路由方法拦截
 import { startRouting } from './routing/routing';
 
 import { ProductConfig } from './weapp/product';
-import { registerProducts, registerWeApps, setConfig, startRootProduct, specifyHooks, setHomepage } from './weapp';
+import { registerProducts, registerWeApps, setConfig, getChildrenInitStatus,
+  startRootProduct, specifyHooks, setHomepage, getActiveScopes } from './weapp';
 import { registerHooks } from './hooks';
 
 export async function start(config: ProductConfig) {
   setConfig(config);
+  await getChildrenInitStatus();
   // 首次进入，触发路由拦截
-  // 默认执行根scope，而当页面不是在根scope时，怎么办
-  await startRouting();
+  const activeScopes = getActiveScopes(location);
+  await startRouting(activeScopes);
   // 初始化页面
   startRootProduct();
   // singleSpa要求必须调用
-  singleSpaStart();
+  startSingleSpa();
 }
 
 export {
