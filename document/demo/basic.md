@@ -6,6 +6,7 @@ title: demo1
 PC模板
 
 ````jsx
+import './global';
 import './style.less';
 import { setConfig, registerWeApps, registerProducts, start, specifyHooks, setHomepage } from "@alife/we-app";
 import render from './render';
