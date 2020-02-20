@@ -1,8 +1,14 @@
-import { startRouting } from './routing';
+/* 路由拦截与singleSpa初始化的顺序必须是事件拦截、初始化singleSpa、方法拦截 */
+// 路由事件拦截
+import './routing/event-intercept';
+// singleSpa初始化
+import { start as singleSpaStart } from 'single-spa';
+// 路由方法拦截
+import { startRouting } from './routing/routing';
+
 import { ProductConfig } from './weapp/product';
 import { registerProducts, registerWeApps, setConfig, startRootProduct, specifyHooks, setHomepage } from './weapp';
 import { registerHooks } from './hooks';
-import { start as singleSpaStart } from './single-spa';
 
 export async function start(config: ProductConfig) {
   setConfig(config);

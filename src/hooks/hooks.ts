@@ -8,7 +8,7 @@
 import { Hook, HookDesc, HookScope } from './type';
 import { getPageName } from '../helpers';
 import { PageConfig } from '../weapp/page';
-import { checkActivityFunctions, getAppNames } from '../single-spa';
+import { checkActivityFunctions, getAppNames } from 'single-spa';
 import { getScope, compoundScope } from '../weapp';
 import { errorHandler } from '../error';
 import { RoutingWithHook, setRoutingWithHook } from '../routing/event-intercept';

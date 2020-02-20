@@ -1,4 +1,4 @@
-import { registerApplication } from '../single-spa';
+import { registerApplication } from 'single-spa';
 import { getPageName, checkUseSystem } from '../helpers';
 import Base, { BaseConfig, BaseType } from './base';
 import { HookScope } from '../hooks/type';

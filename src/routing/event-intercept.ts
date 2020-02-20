@@ -39,12 +39,11 @@ export function setRoutingWithHook(fn: RoutingWithHook) {
   routingWithHook = fn;
 }
 
-function routingEventHandler(event: Event) {
-  routingWithHook(location).then((isContinue: boolean|undefined) => {
-    if (isContinue !== false) {
-      callCapturedEventListeners([event]);
-    }
-  });
+async function routingEventHandler(event: Event) {
+  const isContinue: boolean|undefined = await routingWithHook(location);
+  if (isContinue !== false) {
+    callCapturedEventListeners([event]);
+  }
 }
 
 window.addEventListener('popstate', routingEventHandler);

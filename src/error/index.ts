@@ -1,4 +1,4 @@
-import { addErrorHandler, getAppStatus, unloadApplication } from '../single-spa';
+import { addErrorHandler, getAppStatus, unloadApplication } from 'single-spa';
 import { runLifecycleHook } from '../hooks';
 import { getScope } from '../weapp';
 import { HookScope } from '../hooks/type';

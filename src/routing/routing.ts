@@ -1,28 +1,27 @@
 import { callCapturedEventListeners, getRoutingWithHook } from './event-intercept';
 import { parseUri } from './helper';
 
-function routingFunctionWithHook(url: string) {
+async function routingFunctionWithHook(url: string) {
   const destination = parseUri(`${location.protocol}//${location.hostname}${location.port ? `:${location.port}` : ''}${url}`);
-  return getRoutingWithHook()(destination);
+  const isContinue: boolean|undefined = await getRoutingWithHook()(destination);
+  return isContinue;
 }
 
 const currentPushState = window.history.pushState;
 const currentPopState = window.history.replaceState;
 
-window.history.pushState = function (_data, _title, url) {
-  routingFunctionWithHook(url).then((isContinue: boolean|undefined) => {
-    if (isContinue !== false) {
-      currentPushState.apply(this, arguments);
-    }
-  });
+window.history.pushState = async function (_data, _title, url) {
+  const isContinue: boolean|undefined = await routingFunctionWithHook(url);
+  if (isContinue !== false) {
+    currentPushState.apply(this, arguments);
+  }
 };
 
-window.history.replaceState = function (_data, _title, url) {
-  routingFunctionWithHook(url).then((isContinue: boolean|undefined) => {
-    if (isContinue !== false) {
-      currentPopState.apply(this, arguments);
-    }
-  });
+window.history.replaceState = async function (_data, _title, url) {
+  const isContinue: boolean|undefined = await routingFunctionWithHook(url);
+  if (isContinue !== false) {
+    currentPopState.apply(this, arguments);
+  }
 };
 
 function createPopStateEvent(state: any) {
