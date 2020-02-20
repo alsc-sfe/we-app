@@ -81,27 +81,29 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
       let { opts: { container } } = scope;
       const { opts: { skeleton, contentSelector } } = scope;
 
-      const div = document.createElement('div');
-      div.innerHTML = skeleton;
-      const skeletonContainer = div.children[0];
+      if (!base.getSkeletonContainer()) {
+        const div = document.createElement('div');
+        div.innerHTML = skeleton;
+        const skeletonContainer = div.children[0];
 
-      const df = document.createDocumentFragment();
-      df.appendChild(skeletonContainer);
+        const df = document.createDocumentFragment();
+        df.appendChild(skeletonContainer);
 
-      if (!container) {
-        // 回溯到父骨架
-        container = base.getSkeletonContainer(true).querySelector(contentSelector);
+        if (!container) {
+          // 回溯到父骨架
+          container = base.getSkeletonContainer(true).querySelector(contentSelector);
+        }
+
+        container.appendChild(df);
+
+        base.setSkeletonContainer(skeletonContainer);
+
+        // lastScope 形成链式
+        if (lastScope) {
+          scope.lastScope = lastScope;
+        }
+        lastScope = scope;
       }
-
-      container.appendChild(df);
-
-      base.setSkeletonContainer(skeletonContainer);
-
-      // lastScope 形成链式
-      if (lastScope) {
-        scope.lastScope = lastScope;
-      }
-      lastScope = scope;
 
       return undefined;
     },
