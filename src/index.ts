@@ -8,15 +8,14 @@ import { startRouting } from './routing/routing';
 
 import { ProductConfig } from './weapp/product';
 import { registerProducts, registerWeApps, setConfig, getChildrenInitStatus,
-  startRootProduct, specifyHooks, setHomepage, getActiveScopes } from './weapp';
+  startRootProduct, specifyHooks, setHomepage } from './weapp';
 import { registerHooks } from './hooks';
 
 export async function start(config: ProductConfig) {
   setConfig(config);
   await getChildrenInitStatus();
   // 首次进入，触发路由拦截
-  const activeScopes = getActiveScopes(location);
-  await startRouting(activeScopes);
+  await startRouting();
   // 初始化页面
   startRootProduct();
   // singleSpa要求必须调用
