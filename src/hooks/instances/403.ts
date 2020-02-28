@@ -29,14 +29,23 @@ const hook403: Hook<Hook403Opts> = () => {
       hooks: false,
       render: {
         // 已经进入页面渲染环节，需要拿到需要渲染的对象
-        mount({ productName, weAppName, pageName, page, opts: { element } }) {
-          const render = page?.getRender();
-          render?.mount(
-            element,
-            { productName, weAppName, pageName }
-          );
+        mount(_component, container, { weApp, page }) {
+          // 获得原始的渲染函数
+          // 从weApp取，而不是page，因为
+          // 当前页面对应render就是hook.page.render
+          const render = weApp?.getRender();
+          const Component = page?.getConfig('403');
+          if (Component) {
+            render?.mount(
+              Component,
+              container,
+            );
+          }
         },
-        unmount() {},
+        unmount(container, { weApp }) {
+          const render = weApp?.getRender();
+          render?.unmount(container);
+        },
       },
     },
 

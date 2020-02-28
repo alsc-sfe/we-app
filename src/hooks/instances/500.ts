@@ -9,15 +9,25 @@ const hook500: Hook<Hook500Opts> = function () {
   return {
     page: {
       activityFunction: () => is500,
+      hooks: false,
       render: {
-        mount({ productName, weAppName, pageName, page, opts: { element } }: HookScope<Hook500Opts>) {
-          const render = page?.getRender();
-          render?.mount(
-            element,
-            { productName, weAppName, pageName }
-          );
+        mount(_component, container, { weApp, page }) {
+          // 获得原始的渲染函数
+          // 从weApp取，而不是page，因为
+          // 当前页面对应render就是hook.page.render
+          const render = weApp?.getRender();
+          const Component = page?.getConfig('500');
+          if (Component) {
+            render?.mount(
+              Component,
+              container,
+            );
+          }
         },
-        unmount() {},
+        unmount(container, { weApp }) {
+          const render = weApp?.getRender();
+          render?.unmount(container);
+        },
       },
     },
 

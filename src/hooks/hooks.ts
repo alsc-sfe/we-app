@@ -9,7 +9,7 @@ import { Hook, HookDesc, HookScope } from './type';
 import { getPageName } from '../helpers';
 import { PageConfig } from '../weapp/page';
 import { checkActivityFunctions, getAppNames } from 'single-spa';
-import { getScope, compoundScope } from '../weapp';
+import { getScope, compoundScope, getActiveScopes } from '../weapp';
 import { errorHandler } from '../error';
 import { RoutingWithHook, setRoutingWithHook } from '../routing/event-intercept';
 import { BaseType } from '../weapp/base';
@@ -24,7 +24,8 @@ export interface LifecycleHook {
   exec: (opts?: HookScope<any>) => Promise<any>;
 }
 export const Lifecycles: string[] = [
-  'beforeRouting', 'beforeLoad',
+  'beforeRouting',
+  'beforeLoad', 'afterLoad',
   'beforeMount', 'afterMount',
   'beforeUnmount', 'afterUnmount',
   'onError',
@@ -200,10 +201,7 @@ function cachePage(hookDescPage: HookDesc<any>['page'], hookDesc: HookDesc<any>)
 
   const scopeActivityFunction = (location: Location) => {
     // 获取当前路由对应的页面对应的scope
-    const activePages = checkActivityFunctions(location);
-    const activeScopes = activePages.map((pageName) => {
-      return getScope(pageName);
-    });
+    const activeScopes = getActiveScopes(location, [hookPageName]);
     // 匹配启用scope和禁用scope
     const isScopeMatched = matchActiveScopes(hookDesc.hookName, activeScopes);
 
@@ -218,7 +216,7 @@ function cachePage(hookDescPage: HookDesc<any>['page'], hookDesc: HookDesc<any>)
   if (!pageConfig) {
     pageConfig = {
       hookName: hookDesc.hookName,
-      name: hookPageName,
+      name: hookDesc.hookName,
       activityFunction: scopeActivityFunction,
       render,
     };
@@ -338,7 +336,7 @@ export function specifyHooks(params: boolean | UseHooksParams, scope: HookScope<
   });
 }
 
-function getLifecycleHook(lifecycleType: string) {
+export function getLifecycleHook(lifecycleType: string) {
   return LifecycleCache[lifecycleType];
 }
 

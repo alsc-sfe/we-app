@@ -66,7 +66,9 @@ export const setConfig = rootProduct.setConfig.bind(rootProduct) as RootProduct[
 export const compoundScope = (base?: Base) => {
   return rootProduct.compoundScope(base || rootProduct);
 };
-export const getChildrenInitStatus = rootProduct.getChildrenInitStatus.bind(rootProduct) as RootProduct['getChildrenInitStatus'];
+export const requireChildrenInited = rootProduct.requireChildrenInited.bind(rootProduct) as RootProduct['requireChildrenInited'];
+export const setData = rootProduct.setData.bind(rootProduct) as RootProduct['setData'];
+export const getData = rootProduct.getData.bind(rootProduct) as RootProduct['getData'];
 
 export {
   innerProduct,

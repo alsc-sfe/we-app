@@ -6,8 +6,7 @@ export interface HookLoadingOpts {
 
 const hookLoading: Hook<HookLoadingOpts> = function () {
   return {
-    async beforeLoad({ page, opts: { element } }: HookScope<HookLoadingOpts>) {
-      const render = page?.getRender();
+    async beforeLoad({ render, opts: { element } }: HookScope<HookLoadingOpts>) {
       render?.mount(
         element,
         /* 默认渲染到当前页面对应的容器内 */
@@ -19,8 +18,7 @@ const hookLoading: Hook<HookLoadingOpts> = function () {
       render?.unmount();
     },
 
-    async beforeMount({ page }: HookScope<HookLoadingOpts>) {
-      const render = page?.getRender();
+    async beforeMount({ render }: HookScope<HookLoadingOpts>) {
       render?.unmount();
       return undefined;
     },

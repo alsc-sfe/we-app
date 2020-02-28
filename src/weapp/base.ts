@@ -7,8 +7,8 @@ import Product from './product';
 import Deferred from '../utils/deferred';
 
 export interface Render {
-  mount: (element: any, opts?: HookScope<any>) => any;
-  unmount: (opts?: HookScope<any>) => any;
+  mount: (element: any, container?: HTMLElement, opts?: HookScope<any>) => any;
+  unmount: (container?: HTMLElement, opts?: HookScope<any>) => any;
 }
 
 export interface BaseConfig {
@@ -98,14 +98,14 @@ export default class Base {
     return this.initDeferred?.promise;
   }
 
-  async getChildrenInitStatus() {
+  async requireChildrenInited() {
     let initStatus: Base[] = [];
     const initedPs = this.children.map(async (child) => {
       const inited = await child.getInited();
       if (inited) {
         initStatus.push(inited);
       } else {
-        const inits = await child.getChildrenInitStatus();
+        const inits = await child.requireChildrenInited();
         initStatus = initStatus.concat(inits);
       }
     });
@@ -137,7 +137,21 @@ export default class Base {
   }
 
   getRender() {
-    return this.getConfig('render');
+    let render = this.getConfig('render') as Render;
+    if (render) {
+      if (this.type === BaseType.page) {
+        const container = this.getPageContainer();
+        render = {
+          mount: (element, node, opts) => {
+            render.mount(element, node || container, opts);
+          },
+          unmount: (node, opts) => {
+            render.unmount(node || container, opts);
+          },
+        };
+      }
+      return render;
+    }
   }
 
   getData(pathname: string, traced = false) {
@@ -169,7 +183,7 @@ export default class Base {
   }
 
   protected registerChildren(cfgs: BaseConfig[], Child: typeof Base) {
-    return cfgs.map((config) => this.registerChild(config, Child));
+    return cfgs.map((config) => this.registerChild(config, Child)).filter((child) => child);
   }
 
   protected registerChild(config: BaseConfig, Child: typeof Base) {

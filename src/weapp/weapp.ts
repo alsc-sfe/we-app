@@ -1,7 +1,7 @@
 import Page, { PageConfig } from './page';
 import Product from './product';
 import Base, { BaseConfig, BaseType } from './base';
-import { checkUseSystem } from '../helpers';
+import { checkUseSystem, getPageName } from '../helpers';
 import { ResourceLoader, ResourceFunction } from '../resource-loader';
 import { Route as TRoute } from '../routing';
 import { HookScope } from '../hooks/type';
@@ -128,7 +128,7 @@ export default class WeApp extends Base {
     const config = this.filterPages(cfg) as PageConfig;
     if (config) {
       const page = this.registerChild(config, Page) as Page;
-      registedPages.push(page);
+      page && registedPages.push(page);
       return page;
     }
   }
@@ -146,9 +146,13 @@ export default class WeApp extends Base {
   }
 }
 
-export function getActiveScopes(location: Location) {
+export function getActiveScopes(location: Location, excludePageNames: string[] = []) {
   const activeScopes: HookScope<any>[] = [];
-  const activeFns = registedPages.map((page) => {
+  const activeFns = registedPages.filter((page) => {
+    const scope = page.compoundScope(page);
+    const pageName = getPageName(scope);
+    return excludePageNames.indexOf(pageName) === -1;
+  }).map((page) => {
     return {
       page,
       activeFn: page.makeActivityFunction(),

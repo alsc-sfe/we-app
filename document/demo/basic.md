@@ -39,6 +39,9 @@ setConfig({
   // 所有的微应用、页面的资源都用system加载
   useSystem: ['url'],
   render,
+  404: function Page404() {
+    return <div>404</div>
+  },
 });
 
 specifyHooks([
@@ -62,7 +65,8 @@ specifyHooks([
       contentSelector: '.__weapp__content',
     },
   ],
-  'basicLibs'
+  'basicLibs',
+  '404',
 ]);
 
 registerWeApps([

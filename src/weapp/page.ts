@@ -7,7 +7,7 @@
  */
 import { registerApplication } from 'single-spa';
 import { getPageName, checkUseSystem } from '../helpers';
-import Base, { BaseConfig, BaseType } from './base';
+import Base, { BaseConfig, BaseType, Render } from './base';
 import { HookScope } from '../hooks/type';
 import WeApp from './weapp';
 import { Resource } from '../resource-loader';
@@ -18,6 +18,8 @@ import { matchHomepage } from './homepage';
 
 export interface PageConfig extends BaseConfig {
   parent?: WeApp;
+
+  activityFunction?: ActivityFunction;
 
   // 路由的定义，始终显示 true, 微应用内相对路径 /page, 绝对路径 ~/product/weapp/page
   route?: Route;
@@ -57,7 +59,10 @@ export default class Page extends Base {
       getPageName(scope),
       async (appProps: object) => {
         // beforeLoad
-        await runLifecycleHook('beforeLoad', [scope]);
+        const render = this.getRender() as Render;
+        await runLifecycleHook('beforeLoad', [scope], {
+          render,
+        });
 
         const mountedUrl = url.map((r) => {
           return resourceLoader.mount(r, scope, { useSystem: urlUseSystem });
@@ -68,6 +73,8 @@ export default class Page extends Base {
           return resource;
         }).then((resource: any) => resource?.default || resource);
 
+        await runLifecycleHook('afterLoad', [scope]);
+
         return {
           bootstrap: [async () => component],
           mount: [
@@ -75,34 +82,32 @@ export default class Page extends Base {
             async (customProps: object) => {
               const container = this.getPageContainer();
               const isContinues = await runLifecycleHook('beforeMount', [scope], {
-                render: (element) => {
-                  this.getRender().mount(element, container, customProps);
-                },
+                render,
               });
               if (isContinues.find((i) => i === false) === false) {
                 return;
               }
 
-              this.getRender().mount(component, container, customProps);
-            },
-            // afterMount
-            async () => {
+              render.mount(component, container, customProps);
+
+              // afterMount
               await runLifecycleHook('afterMount', [scope]);
             },
           ],
           unmount: [
             // beforeUnmount
             async (customProps) => {
-              const isContinues = await runLifecycleHook('beforeUnmount', [scope]);
+              const isContinues = await runLifecycleHook('beforeUnmount', [scope], {
+                render,
+              });
               if (isContinues.find((i) => i === false) === false) {
                 return;
               }
 
               const container = this.getPageContainer();
-              this.getRender().unmount(component, container, customProps);
-            },
-            // afterUnmount
-            async () => {
+              render.unmount(container, customProps);
+
+              // afterUnmount
               await runLifecycleHook('afterUnmount', [scope]);
             },
           ],
@@ -127,7 +132,12 @@ export default class Page extends Base {
     const config = this.getConfig();
     const { route, routeIgnore, afterRouteDiscover } = config;
 
-    let activityFunction: ActivityFunction;
+    let { activityFunction } = config;
+
+    // hook添加的页面会返回activityFunction
+    if (activityFunction) {
+      return activityFunction;
+    }
 
     if (route === true && !routeIgnore) {
       activityFunction = () => {

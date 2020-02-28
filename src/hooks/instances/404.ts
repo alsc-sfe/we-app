@@ -1,3 +1,8 @@
+/**
+ * 404的判断方式：
+ * 1. singleSpa里有页面，但是没有匹配到
+ * 2. 匹配到的页面全部被排除了
+ */
 import { getPageName } from '../../helpers';
 import { Hook, HookScope } from '../type';
 
@@ -17,15 +22,25 @@ const hook404: Hook<Hook404Opts> = function () {
   return {
     page: {
       activityFunction: () => is404,
+      hooks: false,
       render: {
-        mount({ productName, weAppName, pageName, page, opts: { element } }) {
-          const render = page?.getRender();
-          render?.mount(
-            element,
-            { productName, weAppName, pageName }
-          );
+        mount(_component, container, { weApp, page }) {
+          // 获得原始的渲染函数
+          // 从weApp取，而不是page，因为
+          // 当前页面对应render就是hook.page.render
+          const render = weApp?.getRender();
+          const Component = page?.getConfig('404');
+          if (Component) {
+            render?.mount(
+              Component,
+              container,
+            );
+          }
         },
-        unmount() {},
+        unmount(container, { weApp }) {
+          const render = weApp?.getRender();
+          render?.unmount(container);
+        },
       },
     },
 

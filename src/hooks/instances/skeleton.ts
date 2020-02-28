@@ -30,6 +30,7 @@ function DefaultGetPageContainer(scope: HookScope<HookSkeletonOpts>) {
       const elContent = elSkeleton.querySelector(contentSelector);
       if (elContent) {
         elPageContainer = document.createElement('div');
+        elPageContainer.id = pageContainerId;
         elContent.appendChild(elPageContainer);
       }
     }
@@ -118,7 +119,7 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
 
       return undefined;
     },
-    async afterUmount(scope: HookScope<HookSkeletonOpts>) {
+    async afterUnmount(scope: HookScope<HookSkeletonOpts>) {
       // 隐藏页面容器
       const { getPageContainer } = scope.page;
 

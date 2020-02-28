@@ -5,7 +5,7 @@ export default {
   mount(Component, container, customProps) {
     ReactDOM.render(React.createElement(Component, customProps), container);
   },
-  unmount(Component, container, customProps) {
+  unmount(container) {
     ReactDOM.unmountComponentAtNode(container);
   },
 };

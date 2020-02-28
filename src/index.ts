@@ -7,16 +7,19 @@ import { start as startSingleSpa } from 'single-spa';
 import { startRouting } from './routing/routing';
 
 import { ProductConfig } from './weapp/product';
-import { registerProducts, registerWeApps, setConfig, getChildrenInitStatus,
-  startRootProduct, specifyHooks, setHomepage } from './weapp';
-import { registerHooks } from './hooks';
+import { registerProducts, registerWeApps, setConfig, requireChildrenInited,
+  startRootProduct, specifyHooks, setHomepage, hookWeApp } from './weapp';
+import { registerHooks, getLifecycleHook } from './hooks';
 
 let startPromise: Promise<any>;
 
 async function _start(config?: ProductConfig) {
   setConfig(config);
-  // 所有的级别都已经注册完成
-  await getChildrenInitStatus();
+  // 注册hook.page
+  const pageConfigs = getLifecycleHook('page');
+  hookWeApp.registerPages(pageConfigs);
+  // 确保所有节点都已经注册完成
+  await requireChildrenInited();
   // 首次进入，触发路由拦截
   await startRouting();
   // 初始化页面
