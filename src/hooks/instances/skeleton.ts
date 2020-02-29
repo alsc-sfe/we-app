@@ -119,6 +119,16 @@ const hookSkeleton: Hook<HookSkeletonOpts> = () => {
 
       return undefined;
     },
+    async beforeMount(scope: HookScope<HookSkeletonOpts>) {
+      const { page } = scope;
+
+      const elPageContainer = page.getPageContainer();
+      if (elPageContainer) {
+        elPageContainer.style.display = '';
+      }
+
+      return undefined;
+    },
     async afterUnmount(scope: HookScope<HookSkeletonOpts>) {
       // 隐藏页面容器
       const { page } = scope;

@@ -40,7 +40,7 @@ setConfig({
   useSystem: ['url'],
   render,
   404: function Page404() {
-    return <div>404</div>
+    return <div>This is 404 page</div>
   },
 });
 
@@ -66,7 +66,9 @@ specifyHooks([
     },
   ],
   'basicLibs',
-  '404',
+  ['404', {
+    excludePages: ['bcommon/navbar', 'bcommon/menu'],
+  }],
 ]);
 
 registerWeApps([

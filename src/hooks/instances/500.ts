@@ -9,7 +9,6 @@ const hook500: Hook<Hook500Opts> = function () {
   return {
     page: {
       activityFunction: () => is500,
-      hooks: false,
       render: {
         mount(_component, container, { weApp, page }) {
           // 获得原始的渲染函数

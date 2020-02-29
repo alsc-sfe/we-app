@@ -6,12 +6,6 @@
 import { getPageName } from '../../helpers';
 import { Hook, HookScope } from '../type';
 
-const ExcludePages = [
-  getPageName({ hookName: '404' }),
-  getPageName({ hookName: '403' }),
-  getPageName({ hookName: '500' }),
-];
-
 export interface Hook404Opts {
   element: any;
   excludePages?: string[];
@@ -22,7 +16,6 @@ const hook404: Hook<Hook404Opts> = function () {
   return {
     page: {
       activityFunction: () => is404,
-      hooks: false,
       render: {
         mount(_component, container, { weApp, page }) {
           // 获得原始的渲染函数
@@ -45,10 +38,15 @@ const hook404: Hook<Hook404Opts> = function () {
     },
 
     async beforeRouting(scope: HookScope<Hook404Opts>) {
-      const { opts: { excludePages = [] } } = scope;
-      const pageName = getPageName(scope);
+      const { opts: { excludePages = [] }, activeScopes = [], hookPages = [] } = scope;
+      const exPages = hookPages.concat(excludePages);
+      const activePages = activeScopes.map((activeScope) => {
+        return getPageName(activeScope);
+      }).filter((activePage) => {
+        return exPages.indexOf(activePage) === -1;
+      });
       // 需要排除的页面
-      is404 = ExcludePages.concat(excludePages).indexOf(pageName) === -1;
+      is404 = activePages.length === 0;
       // 返回false将阻止routing
       return undefined;
     },

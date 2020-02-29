@@ -1,18 +1,6 @@
 import { getPageName } from '../../helpers';
 import { Hook, HookScope } from '../type';
 
-const ExcludePages = [
-  getPageName({
-    hookName: '404',
-  }),
-  getPageName({
-    hookName: '403',
-  }),
-  getPageName({
-    hookName: '500',
-  }),
-];
-
 export interface Hook403Opts {
   element: any;
   excludePages: string[];
@@ -26,7 +14,6 @@ const hook403: Hook<Hook403Opts> = () => {
   return {
     page: {
       activityFunction: () => is403,
-      hooks: false,
       render: {
         // 已经进入页面渲染环节，需要拿到需要渲染的对象
         mount(_component, container, { weApp, page }) {
@@ -50,10 +37,10 @@ const hook403: Hook<Hook403Opts> = () => {
     },
 
     async beforeRouting(scope: HookScope<Hook403Opts>) {
-      const { opts: { excludePages = [] } } = scope;
+      const { opts: { excludePages = [] }, hookPages = [] } = scope;
       const pageName = getPageName(scope);
       // 从当前路由解析出当前激活的页面
-      if (ExcludePages.concat(excludePages).indexOf(pageName) === -1) {
+      if (hookPages.concat(excludePages).indexOf(pageName) === -1) {
         const { page } = scope;
         // 获取当前页面对应的权限码
         if (page) {

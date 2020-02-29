@@ -80,13 +80,14 @@ export default class Page extends Base {
           mount: [
             // beforeMount
             async (customProps: object) => {
-              const container = this.getPageContainer();
               const isContinues = await runLifecycleHook('beforeMount', [scope], {
                 render,
               });
               if (isContinues.find((i) => i === false) === false) {
                 return;
               }
+
+              const container = this.getPageContainer();
 
               render.mount(component, container, customProps);
 

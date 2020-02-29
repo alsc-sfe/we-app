@@ -41,6 +41,8 @@ export interface HookScope<HookOpts> {
 
   opts?: HookOpts;
 
+  hookPages?: string[];
+  activeScopes?: HookScope<any>[];
   enabledScope?: HookScope<HookOpts>;
 
   errorHandler?: (error: Event) => Promise<any[]>;

@@ -217,6 +217,7 @@ function cachePage(hookDescPage: HookDesc<any>['page'], hookDesc: HookDesc<any>)
     pageConfig = {
       hookName: hookDesc.hookName,
       name: hookDesc.hookName,
+      hooks: false,
       activityFunction: scopeActivityFunction,
       render,
     };
@@ -372,6 +373,8 @@ export async function runLifecycleHook(lifecycleType: string, activeScopes: Hook
           return exec({
             ...hookMatchedActiveScope,
             ...props,
+            hookPages: getLifecycleHook('page').map((hookPage) => getPageName({ hookName: hookPage.hookName })),
+            activeScopes,
             errorHandler: (error: Event) => {
               return errorHandler(error, [hookMatchedActiveScope]);
             },
