@@ -101,6 +101,7 @@ export default class Base {
   async requireChildrenInited() {
     let initStatus: Base[] = [];
     const initedPs = this.children.map(async (child) => {
+      // 为undefined，则直接向下一级探索
       const inited = await child.getInited();
       if (inited) {
         initStatus.push(inited);
@@ -140,6 +141,7 @@ export default class Base {
     let render = this.getConfig('render') as Render;
     if (render) {
       if (this.type === BaseType.page) {
+        // @ts-ignore
         const container = this.getPageContainer();
         render = {
           mount: (element, node, opts) => {

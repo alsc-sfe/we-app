@@ -3,7 +3,7 @@ import { BaseType } from './weapp/base';
 
 export const InnerProductName = '__WeApp';
 export const HookWeAppName = 'hook';
-const PageNameDivider = '/';
+export const ScopeNameDivider = '/';
 
 export interface GetPageNameOpts {
   productName?: string;
@@ -21,39 +21,12 @@ export function getPageName({
   let pname = '';
   if (hookName) {
     // hook
-    pname = `${InnerProductName}${PageNameDivider}${HookWeAppName}${PageNameDivider}${hookName}`;
+    pname = `${InnerProductName}${ScopeNameDivider}${HookWeAppName}${ScopeNameDivider}${hookName}`;
   } else {
     // page
-    pname = `${productName}${PageNameDivider}${weAppName}${PageNameDivider}${pageName}`;
+    pname = `${productName}${ScopeNameDivider}${weAppName}${ScopeNameDivider}${pageName}`;
   }
-  return pname.replace(new RegExp(`(${PageNameDivider})+`), PageNameDivider);
-}
-
-export function parsePageName(pageName: string) {
-  const result: HookScope<any> = {
-    productName: '',
-    weAppName: '',
-    pageName: '',
-    hookName: '',
-  };
-  const paths = pageName.split(PageNameDivider);
-
-  if (paths.length === 3) {
-    result.productName = paths[0];
-    result.weAppName = paths[1];
-    result.pageName = paths[2];
-
-    if (paths[1] === HookWeAppName) {
-      result.hookName = paths[1];
-    }
-  }
-
-  if (paths.length === 2) {
-    result.weAppName = paths[0];
-    result.pageName = paths[1];
-  }
-
-  return result;
+  return pname.replace(new RegExp(`(${ScopeNameDivider})+`), ScopeNameDivider);
 }
 
 export function isAncestorScope(ancestor: HookScope<any>, descendant: HookScope<any>) {
