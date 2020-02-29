@@ -9,6 +9,8 @@
 import WeApp, { WeAppConfig } from './weapp';
 import Base, { BaseConfig, BaseType, Render } from './base';
 import { ResourceLoader } from '../resource-loader';
+import { AppConfig, transformAppConfig } from './helper';
+import { checkUseSystem } from '../helpers';
 
 export interface ProductConfig extends BaseConfig {
   parent?: Product;
@@ -34,15 +36,57 @@ class Product extends Base {
   }
 
   registerWeApps(cfgs: WeAppConfig[]) {
-    return this.registerChildren(cfgs, WeApp) as WeApp[];
+    this.setInitDeferred();
+    const pWeApps = this.registerChildren(cfgs, WeApp) as Promise<WeApp[]>;
+    pWeApps.then(() => {
+      this.setInited();
+    });
+    return pWeApps;
   }
 
   registerWeApp(cfg: WeAppConfig) {
-    return this.registerChild(cfg, WeApp) as WeApp;
+    this.setInitDeferred();
+    const pWeApp = this.registerChild(cfg, WeApp);
+    pWeApp.then(() => {
+      this.setInited();
+    });
+    return pWeApp;
   }
 
   getWeApp(weAppName: string) {
     return this.getChild(weAppName) as WeApp;
+  }
+
+  protected async registerChild(config: AppConfig, Child: typeof WeApp|typeof Product) {
+    let childConfig = config;
+
+    if (Child === WeApp && config?.url) {
+      childConfig = await this.loadAppConfig(config);
+    }
+
+    const child = await super.registerChild(childConfig, Child) as WeApp|Product;
+    return child;
+  }
+
+  private async loadAppConfig(config: WeAppConfig) {
+    const { url } = config;
+    const resourceLoader = this.getConfig('resourceLoader') as ResourceLoader;
+    const useSystem = this.getConfig('useSystem') as string[];
+
+    let weAppConfig = await resourceLoader.mount(
+      url,
+      this.compoundScope(this),
+      { useSystem: checkUseSystem(useSystem, 'url') }
+    );
+
+    weAppConfig = transformAppConfig(weAppConfig.default || weAppConfig);
+
+    weAppConfig = {
+      ...weAppConfig,
+      ...config,
+    };
+
+    return weAppConfig;
   }
 }
 

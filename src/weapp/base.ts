@@ -99,18 +99,26 @@ export default class Base {
   }
 
   async requireChildrenInited() {
-    let initStatus: Base[] = [];
-    const initedPs = this.children.map(async (child) => {
-      // 为undefined，则直接向下一级探索
-      const inited = await child.getInited();
-      if (inited) {
-        initStatus.push(inited);
-      } else {
-        const inits = await child.requireChildrenInited();
-        initStatus = initStatus.concat(inits);
-      }
-    });
-    await Promise.all(initedPs);
+    const pInited: Promise<any>[] = [];
+
+    const pSelfInited = this.getInited();
+
+    if (pSelfInited) {
+      pInited.push(pSelfInited);
+    } else if (this.children) {
+      this.children.forEach((child) => {
+        // 为undefined，则直接向下一级探索
+        const pChildInited = child.getInited();
+        if (pChildInited) {
+          pInited.push(pChildInited);
+        } else {
+          const pChildrenInited = child.requireChildrenInited();
+          pInited.push(pChildrenInited);
+        }
+      });
+    }
+
+    const initStatus = await Promise.all(pInited);
     return initStatus;
   }
 
@@ -138,12 +146,13 @@ export default class Base {
   }
 
   getRender() {
-    let render = this.getConfig('render') as Render;
+    const render = this.getConfig('render') as Render;
     if (render) {
+      let renderWrapper = render;
       if (this.type === BaseType.page) {
         // @ts-ignore
         const container = this.getPageContainer();
-        render = {
+        renderWrapper = {
           mount: (element, node, opts) => {
             render.mount(element, node || container, opts);
           },
@@ -152,7 +161,7 @@ export default class Base {
           },
         };
       }
-      return render;
+      return renderWrapper;
     }
   }
 
@@ -184,16 +193,19 @@ export default class Base {
     specifyHooks(params, compoundScope(this));
   }
 
-  protected registerChildren(cfgs: BaseConfig[], Child: typeof Base) {
-    return cfgs.map((config) => this.registerChild(config, Child)).filter((child) => child);
+  protected async registerChildren(cfgs: BaseConfig[], Child: typeof Base) {
+    const pChildren = cfgs.map((config) => this.registerChild(config, Child));
+    const children = await Promise.all(pChildren);
+    return children.filter((child) => child);
   }
 
-  protected registerChild(config: BaseConfig, Child: typeof Base) {
-    if (this.getChild(config.name)) {
-      return;
+  protected async registerChild(config: BaseConfig, Child: typeof Base) {
+    let child = this.getChild(config.name);
+    if (child) {
+      return child;
     }
 
-    const child = new Child({
+    child = new Child({
       ...config,
       parent: this,
     });
@@ -204,7 +216,7 @@ export default class Base {
   }
 
   protected setInitDeferred() {
-    if (!this.initDeferred) {
+    if (!this.initDeferred || this.initDeferred.finished()) {
       this.initDeferred = new Deferred();
     }
   }

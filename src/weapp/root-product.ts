@@ -4,7 +4,7 @@ import WeApp, { getActiveScopes } from './weapp';
 import Base, { BaseType } from './base';
 import { DefaultResourceLoader } from '../resource-loader';
 import { RouterType } from '../routing/enum';
-import { UseHooksParams } from '../hooks';
+import { getLifecycleHook } from '../hooks';
 import { HookScope } from '../hooks/type';
 
 class RootProduct extends Product {
@@ -12,14 +12,12 @@ class RootProduct extends Product {
 
   parent: Product = this;
 
-  hookWeApp: WeApp;
-
   registerProducts(cfgs: ProductConfig[] = []) {
-    return this.registerChildren(cfgs, Product) as Product[];
+    return this.registerChildren(cfgs, Product) as Promise<Product[]>;
   }
 
   registerProduct(cfg: ProductConfig) {
-    return this.registerChild(cfg, Product) as Product;
+    return this.registerChild(cfg, Product) as Promise<Product>;
   }
 
   getProduct(productName: string) {
@@ -29,7 +27,9 @@ class RootProduct extends Product {
   getScope(pageName: string) {
     const scope = this.parseScopeName(pageName);
     if (scope.hookName) {
-      scope.page = this.hookWeApp.getPage(scope.hookName);
+      const innerProduct = this.getProduct(InnerProductName);
+      const hookWeApp = innerProduct.getWeApp(HookWeAppName);
+      scope.page = hookWeApp.getPage(scope.hookName);
     } else if (scope.pageName) {
       if (!scope.productName) {
         scope.product = this;
@@ -42,6 +42,22 @@ class RootProduct extends Product {
       }
     }
     return scope;
+  }
+
+  async start() {
+    // 注册内置产品
+    const innerProduct = await this.registerProduct({
+      name: InnerProductName,
+    });
+    // 注册hook微应用
+    const hookWeApp = await innerProduct.registerWeApp({
+      name: HookWeAppName,
+    }) as WeApp;
+    // 注册hook页面
+    const pageConfigs = getLifecycleHook('page');
+    hookWeApp.registerPages(pageConfigs);
+
+    super.start();
   }
 
   private parseScopeName(scopeName: string) {
@@ -82,31 +98,23 @@ const rootProduct = new RootProduct({
   resourceLoader: DefaultResourceLoader,
   routerType: RouterType.browser,
 });
-// 注册内置子产品，用于挂载hook等微应用
-const innerProduct = rootProduct.registerProduct({
-  name: InnerProductName,
-});
-const hookWeApp = innerProduct.registerWeApp({
-  name: HookWeAppName,
-});
-
-rootProduct.hookWeApp = hookWeApp;
 
 export const registerProducts = rootProduct.registerProducts.bind(rootProduct) as RootProduct['registerProducts'];
 export const registerWeApps = rootProduct.registerWeApps.bind(rootProduct) as RootProduct['registerWeApps'];
 export const specifyHooks = rootProduct.specifyHooks.bind(rootProduct) as RootProduct['specifyHooks'];
+
 export const startRootProduct = rootProduct.start.bind(rootProduct) as RootProduct['start'];
+
 export const getScope = rootProduct.getScope.bind(rootProduct) as RootProduct['getScope'];
 export const setConfig = rootProduct.setConfig.bind(rootProduct) as RootProduct['setConfig'];
 export const compoundScope = (base?: Base) => {
   return rootProduct.compoundScope(base || rootProduct);
 };
 export const requireChildrenInited = rootProduct.requireChildrenInited.bind(rootProduct) as RootProduct['requireChildrenInited'];
+
 export const setData = rootProduct.setData.bind(rootProduct) as RootProduct['setData'];
 export const getData = rootProduct.getData.bind(rootProduct) as RootProduct['getData'];
 
 export {
-  innerProduct,
-  hookWeApp,
   getActiveScopes,
 };

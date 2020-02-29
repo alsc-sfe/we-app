@@ -8,16 +8,13 @@ import { startRouting } from './routing/routing';
 
 import { ProductConfig } from './weapp/product';
 import { registerProducts, registerWeApps, setConfig, requireChildrenInited,
-  startRootProduct, specifyHooks, setHomepage, hookWeApp } from './weapp';
-import { registerHooks, getLifecycleHook } from './hooks';
+  startRootProduct, specifyHooks, setHomepage } from './weapp';
+import { registerHooks } from './hooks';
 
 let startPromise: Promise<any>;
 
 async function _start(config?: ProductConfig) {
   setConfig(config);
-  // 注册hook.page
-  const pageConfigs = getLifecycleHook('page');
-  hookWeApp.registerPages(pageConfigs);
   // 确保所有节点都已经注册完成
   await requireChildrenInited();
   // 首次进入，触发路由拦截
@@ -40,10 +37,11 @@ export function start(config?: ProductConfig) {
 
 export {
   registerHooks,
+  specifyHooks,
 
   registerProducts,
   registerWeApps,
+
   setConfig,
-  specifyHooks,
   setHomepage,
 };

@@ -1,9 +1,7 @@
 import Page, { PageConfig } from './page';
 import Product from './product';
 import Base, { BaseConfig, BaseType } from './base';
-import { checkUseSystem, getPageName } from '../helpers';
-import { ResourceLoader, ResourceFunction } from '../resource-loader';
-import { Route as TRoute } from '../routing';
+import { getPageName } from '../helpers';
 import { HookScope } from '../hooks/type';
 
 export interface WeAppConfig extends BaseConfig {
@@ -14,58 +12,8 @@ export interface WeAppConfig extends BaseConfig {
   pages?: PageConfig[];
 
   filterPages?: (cfgs: PageConfig|PageConfig[]) => PageConfig|PageConfig[]|undefined;
-}
 
-interface Route {
-  pathname: string;
-  absolute?: boolean;
-  exact?: boolean;
-  strict?: boolean;
-}
-interface Module {
-  moduleName: string;
-  route: string|string[]|boolean|Route|Route[];
-  routeIgnore: Route[];
-  getComponent: ResourceFunction;
   [prop: string]: any;
-}
-interface AppConfig {
-  microAppName: string;
-  modules: Module[];
-}
-
-function transformRoute(route: string|string[]|boolean|Route|Route[]): TRoute {
-  if (['string', 'boolean', 'undefined'].indexOf(typeof route) > -1) {
-    return route as string|boolean;
-  }
-  const routes = Array.isArray(route) ? route : [route];
-  return routes.map((r) => {
-    if (typeof r === 'string') {
-      return r;
-    }
-
-    const rt = r as Route;
-    return {
-      ...rt,
-      path: rt.absolute ? `~${rt.pathname}` : rt.pathname,
-    };
-  });
-}
-
-function transformAppConfig(appConfig: AppConfig): WeAppConfig {
-  return {
-    name: appConfig.microAppName,
-    pages: appConfig.modules.map((module): PageConfig => {
-      return {
-        ...module,
-        name: module.moduleName,
-        url: [module.getComponent],
-        route: transformRoute(module.route),
-        routeIgnore: transformRoute(module.routeIgnore),
-      };
-    }),
-    ...appConfig,
-  };
 }
 
 // 已注册页面都记录在这里
@@ -81,53 +29,23 @@ export default class WeApp extends Base {
     super(config);
 
     if (config) {
-      if (config.url) {
-        this.setInitDeferred();
-        this.loadConfig(config).then(() => {
-          this.setInited();
-        });
-      } else {
-        this.registerPages(config.pages);
-      }
+      this.registerPages(config.pages);
     }
   }
 
-  async loadConfig(config: WeAppConfig) {
-    const { url } = config;
-    const resourceLoader = this.getConfig('resourceLoader') as ResourceLoader;
-    const useSystem = this.getConfig('useSystem') as string[];
-
-    let weAppConfig = await resourceLoader.mount(
-      url,
-      this.compoundScope(this),
-      { useSystem: checkUseSystem(useSystem, 'url') }
-    );
-
-    weAppConfig = transformAppConfig(weAppConfig.default || weAppConfig);
-
-    weAppConfig = {
-      ...weAppConfig,
-      ...config,
-    };
-
-    this.setConfig(weAppConfig);
-
-    this.registerPages(weAppConfig.pages);
-  }
-
-  registerPages(configs: PageConfig[] = []) {
+  async registerPages(configs: PageConfig[] = []) {
     const cfgs = this.filterPages(configs) as PageConfig[];
     if (cfgs) {
-      const pages = this.registerChildren(cfgs, Page) as Page[];
+      const pages = await this.registerChildren(cfgs, Page) as Page[];
       registedPages = registedPages.concat(pages);
       return pages;
     }
   }
 
-  registerPage(cfg: PageConfig) {
+  async registerPage(cfg: PageConfig) {
     const config = this.filterPages(cfg) as PageConfig;
     if (config) {
-      const page = this.registerChild(config, Page) as Page;
+      const page = await this.registerChild(config, Page) as Page;
       page && registedPages.push(page);
       return page;
     }

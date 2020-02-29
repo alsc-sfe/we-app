@@ -71,7 +71,6 @@ specifyHooks([
 
 registerWeApps([
   {
-    name: 'bcommon',
     url: 'https://g.alicdn.com/alsc-saas/web-boh-common/1.3.3/app-config.js',
   },
 ]);
@@ -88,7 +87,6 @@ registerProducts([
     name: 'boh',
     weApps: [
       {
-        name: 'org',
         url: 'https://g.alicdn.com/alsc-saas/web-boh-org/1.0.4/app-config.js',
       },
     ],
