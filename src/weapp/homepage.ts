@@ -1,18 +1,18 @@
 import { HookScope, Hook } from '../hooks/type';
 import { getScope } from './root-product';
 
-let homepage: HookScope<any>;
+let homepage: HookScope;
 
-export function setHomepage(s: HookScope<any>|string) {
-  let scope = s as HookScope<any>;
+export function setHomepage(s: HookScope|string) {
+  let scope = s as HookScope;
   if (typeof s === 'string') {
     scope = getScope(s);
   }
   homepage = scope;
 }
 
-export function matchHomepage(s: HookScope<any>|string) {
-  let scope = s as HookScope<any>;
+export function matchHomepage(s: HookScope|string) {
+  let scope = s as HookScope;
   if (typeof s === 'string') {
     scope = getScope(s);
   }

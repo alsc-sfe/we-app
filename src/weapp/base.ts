@@ -7,8 +7,8 @@ import Product from './product';
 import Deferred from '../utils/deferred';
 
 export interface Render {
-  mount: (element: any, container?: HTMLElement, opts?: HookScope<any>) => any;
-  unmount: (container?: HTMLElement, opts?: HookScope<any>) => any;
+  mount: (element: any, container?: HTMLElement, opts?: HookScope) => any;
+  unmount: (container?: HTMLElement, opts?: HookScope) => any;
 }
 
 export interface BaseConfig {
@@ -34,7 +34,7 @@ export enum BaseType {
   page = 'page'
 }
 
-function compoundScope(base: Base, scope: HookScope<any> = {}): HookScope<any> {
+function compoundScope(base: Base, scope: HookScope = {}): HookScope {
   if (base.type === BaseType.root) {
     if (!scope.product) {
       scope.product = base as Product;
@@ -44,6 +44,12 @@ function compoundScope(base: Base, scope: HookScope<any> = {}): HookScope<any> {
 
   scope[`${base.type}Name`] = base.name;
   scope[base.type as string] = base;
+
+  // @ts-ignore
+  if (base.hookName) {
+    // @ts-ignore
+    scope.hookName = base.hookName;
+  }
 
   return compoundScope(base.parent, scope);
 }

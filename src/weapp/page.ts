@@ -6,7 +6,7 @@
  * 在首次访问时，通过调用page的makeActivityFunction，手动获取activeScopes
  */
 import { registerApplication } from 'single-spa';
-import { getPageName, checkUseSystem } from '../helpers';
+import { getScopeName, checkUseSystem } from '../helpers';
 import Base, { BaseConfig, BaseType, Render } from './base';
 import { HookScope } from '../hooks/type';
 import WeApp from './weapp';
@@ -18,6 +18,8 @@ import { matchHomepage } from './homepage';
 
 export interface PageConfig extends BaseConfig {
   parent?: WeApp;
+
+  hookName?: string;
 
   activityFunction?: ActivityFunction;
 
@@ -38,10 +40,16 @@ export default class Page extends Base {
 
   parent: WeApp;
 
+  hookName: string;
+
   private pageContainer: HTMLElement;
 
   constructor(config: PageConfig) {
     super(config);
+
+    if (config.hookName) {
+      this.hookName = config.hookName;
+    }
 
     this.setInited();
   }
@@ -51,12 +59,12 @@ export default class Page extends Base {
     const url = this.getConfig('url') || [];
     const useSystem = this.getConfig('useSystem') || [];
 
-    const scope: HookScope<any> = this.compoundScope(this);
+    const scope: HookScope = this.compoundScope(this);
 
     const urlUseSystem = checkUseSystem(useSystem, 'url');
 
     registerApplication(
-      getPageName(scope),
+      getScopeName(scope),
       async (appProps: object) => {
         // beforeLoad
         const render = this.getRender() as Render;

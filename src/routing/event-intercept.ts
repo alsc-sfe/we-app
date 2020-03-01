@@ -30,12 +30,13 @@ export function callCapturedEventListeners(eventArguments) {
   }
 }
 
-export type RoutingWithHook = (location: Location, activeScopes?: HookScope<any>) => Promise<boolean>;
+export type RoutingWithHook = (location: Location, activePageScopes?: HookScope) => Promise<boolean>;
 let routingWithHook: RoutingWithHook = async () => true;
 
-export function getRoutingWithHook() {
-  return routingWithHook;
-}
+export const runRoutingWithHook: RoutingWithHook = async function (location: Location, activePageScopes?: HookScope) {
+  const result = await routingWithHook(location, activePageScopes);
+  return result;
+};
 
 export function setRoutingWithHook(fn: RoutingWithHook) {
   routingWithHook = fn;

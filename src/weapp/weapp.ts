@@ -1,7 +1,7 @@
 import Page, { PageConfig } from './page';
 import Product from './product';
 import Base, { BaseConfig, BaseType } from './base';
-import { getPageName } from '../helpers';
+import { getScopeName } from '../helpers';
 import { HookScope } from '../hooks/type';
 
 export interface WeAppConfig extends BaseConfig {
@@ -64,11 +64,11 @@ export default class WeApp extends Base {
   }
 }
 
-export function getActiveScopes(location: Location, excludePageNames: string[] = []) {
-  const activeScopes: HookScope<any>[] = [];
+export function getActivePageScopes(location: Location, excludePageNames: string[] = []) {
+  const activeScopes: HookScope[] = [];
   const activeFns = registedPages.filter((page) => {
     const scope = page.compoundScope(page);
-    const pageName = getPageName(scope);
+    const pageName = getScopeName(scope);
     return excludePageNames.indexOf(pageName) === -1;
   }).map((page) => {
     return {

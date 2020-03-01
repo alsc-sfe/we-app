@@ -1,11 +1,13 @@
-import { callCapturedEventListeners, getRoutingWithHook } from './event-intercept';
+import { callCapturedEventListeners, runRoutingWithHook, RoutingWithHook, setRoutingWithHook } from './event-intercept';
 import { parseUri } from './helper';
-import { HookScope } from '../hooks/type';
-import { getActiveScopes } from '../weapp';
+import { getActivePageScopes, getScope } from '../weapp';
+import { HookScope, LifecycleHookEnum } from '../hooks/type';
+import { checkActivityFunctions } from 'single-spa';
+import { runLifecycleHook } from '../hooks';
 
 async function routingFunctionWithHook(url: string) {
   const destination = parseUri(`${location.protocol}//${location.hostname}${location.port ? `:${location.port}` : ''}${url}`);
-  const isContinue: boolean|undefined = await getRoutingWithHook()(destination);
+  const isContinue: boolean|undefined = await runRoutingWithHook(destination);
   return isContinue;
 }
 
@@ -42,6 +44,28 @@ function createPopStateEvent(state: any) {
   }
 }
 
+// 设置路由生命周期钩子
+// 放在这里是避免出现循环依赖
+const routingWithHook: RoutingWithHook = async (location: Location, activePageScopes: HookScope[] = []) => {
+  let activeScopes: HookScope[] = activePageScopes;
+  // 未注册页面，则使用根产品作为scope
+  if (activeScopes.length === 0) {
+    const activePages = checkActivityFunctions(location);
+    activeScopes = activePages.map((pageName) => {
+      return getScope(pageName);
+    });
+  }
+
+  const continues: (boolean|undefined)[] = await runLifecycleHook(LifecycleHookEnum.beforeRouting, activeScopes);
+  const index = continues.findIndex((c) => c === false);
+  if (index > -1) {
+    return false;
+  }
+  return true;
+};
+
+setRoutingWithHook(routingWithHook);
+
 // 首次进入执行路由拦截
 let isStarted = false;
 export async function startRouting() {
@@ -50,8 +74,8 @@ export async function startRouting() {
   }
   isStarted = true;
 
-  const activeScopes = getActiveScopes(location);
-  await getRoutingWithHook()(location, activeScopes).then((isContinue: boolean|undefined) => {
+  const activeScopes = getActivePageScopes(location);
+  await runRoutingWithHook(location, activeScopes).then((isContinue: boolean|undefined) => {
     if (isContinue !== false) {
       callCapturedEventListeners([createPopStateEvent(null)]);
     }

@@ -28,12 +28,12 @@ export interface ResourceLoader {
   mount: (
     resource: Resource,
     // 沙箱从scope上获取，由Base创建
-    activeScope: HookScope<any>,
+    activeScope: HookScope,
     opts?: { useSystem?: boolean }
   ) => Promise<any>;
   unmount: (
     resource: Resource,
-    activeScope: HookScope<any>,
+    activeScope: HookScope,
     opts?: { useSystem?: boolean }
   ) => Promise<any>;
 }
@@ -41,7 +41,7 @@ export interface ResourceLoader {
 export const DefaultResourceLoader: ResourceLoader = {
   async mount(
     resource: Resource,
-    activeScope: HookScope<any>,
+    activeScope: HookScope,
     opts: { useSystem?: boolean } = {}
   ) {
     const { context = window } = activeScope;
@@ -83,7 +83,7 @@ export const DefaultResourceLoader: ResourceLoader = {
 
   async unmount(
     resource: Resource,
-    activeScope: HookScope<any>,
+    activeScope: HookScope,
     opts: { useSystem?: boolean } = {}
   ) {
     const { context = window } = activeScope;

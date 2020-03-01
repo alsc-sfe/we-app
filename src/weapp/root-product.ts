@@ -1,10 +1,10 @@
 import Product, { ProductConfig } from './product';
 import { InnerProductName, HookWeAppName, ScopeNameDivider } from '../helpers';
-import WeApp, { getActiveScopes } from './weapp';
+import WeApp, { getActivePageScopes } from './weapp';
 import Base, { BaseType } from './base';
 import { DefaultResourceLoader } from '../resource-loader';
 import { RouterType } from '../routing/enum';
-import { getLifecycleHook } from '../hooks';
+import { getPageConfigs } from '../hooks';
 import { HookScope } from '../hooks/type';
 
 class RootProduct extends Product {
@@ -54,14 +54,14 @@ class RootProduct extends Product {
       name: HookWeAppName,
     }) as WeApp;
     // 注册hook页面
-    const pageConfigs = getLifecycleHook('page');
+    const pageConfigs = getPageConfigs();
     hookWeApp.registerPages(pageConfigs);
 
     super.start();
   }
 
   private parseScopeName(scopeName: string) {
-    const scope: HookScope<any> = {};
+    const scope: HookScope = {};
     const paths = scopeName.split(ScopeNameDivider);
     const pathsLen = paths.length;
     if (pathsLen === 3) {
@@ -116,5 +116,5 @@ export const setData = rootProduct.setData.bind(rootProduct) as RootProduct['set
 export const getData = rootProduct.getData.bind(rootProduct) as RootProduct['getData'];
 
 export {
-  getActiveScopes,
+  getActivePageScopes,
 };

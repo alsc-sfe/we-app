@@ -1,4 +1,4 @@
-import { getPageName } from '../../helpers';
+import { getScopeName } from '../../helpers';
 import { Hook, HookScope } from '../type';
 
 export interface Hook403Opts {
@@ -38,7 +38,7 @@ const hook403: Hook<Hook403Opts> = () => {
 
     async beforeRouting(scope: HookScope<Hook403Opts>) {
       const { opts: { excludePages = [] }, hookPages = [] } = scope;
-      const pageName = getPageName(scope);
+      const pageName = getScopeName(scope);
       // 从当前路由解析出当前激活的页面
       if (hookPages.concat(excludePages).indexOf(pageName) === -1) {
         const { page } = scope;

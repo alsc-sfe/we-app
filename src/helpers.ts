@@ -18,7 +18,7 @@ export interface GetPageNameOpts {
   hookName?: string;
 }
 
-export function getPageName({
+export function getScopeName({
   productName = '',
   weAppName = '',
   pageName = '',
@@ -39,7 +39,7 @@ export function getPageName({
   return pname;
 }
 
-export function isAncestorScope(ancestor: HookScope<any>, descendant: HookScope<any>) {
+export function isAncestorScope(ancestor: HookScope, descendant: HookScope) {
   if (ancestor.product.type === BaseType.root) {
     return true;
   }

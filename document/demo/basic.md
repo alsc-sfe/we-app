@@ -66,6 +66,7 @@ specifyHooks([
     },
   ],
   'basicLibs',
+  'pageContainer',
   ['404', {
     excludePages: ['bcommon/navbar', 'bcommon/menu'],
   }],

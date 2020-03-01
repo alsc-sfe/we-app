@@ -9,6 +9,7 @@ import { startRouting } from './routing/routing';
 import { ProductConfig } from './weapp/product';
 import { registerProducts, registerWeApps, setConfig, requireChildrenInited,
   startRootProduct, specifyHooks, setHomepage } from './weapp';
+// 依赖singleSpa
 import { registerHooks } from './hooks';
 
 let startPromise: Promise<any>;

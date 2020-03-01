@@ -3,7 +3,7 @@ import { runLifecycleHook } from '../hooks';
 import { getScope } from '../weapp';
 import { HookScope } from '../hooks/type';
 
-export const errorHandler = (error: Event, activeScopes: HookScope<any>[]) => {
+export const errorHandler = (error: Event, activeScopes: HookScope[]) => {
   // 向外抛出错误
   Promise.reject(error);
   // 执行生命周期钩子
