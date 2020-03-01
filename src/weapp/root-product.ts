@@ -24,8 +24,10 @@ class RootProduct extends Product {
     return this.getChild(productName) as Product;
   }
 
-  getScope(pageName: string) {
-    const scope = this.parseScopeName(pageName);
+  getScope(scopeName: string) {
+    const scope = this.parseScopeName(scopeName);
+    scope.scopeName = scopeName;
+
     if (scope.hookName) {
       const innerProduct = this.getProduct(InnerProductName);
       const hookWeApp = innerProduct.getWeApp(HookWeAppName);
@@ -41,6 +43,7 @@ class RootProduct extends Product {
         scope.page = scope.weApp.getPage(scope.pageName);
       }
     }
+
     return scope;
   }
 

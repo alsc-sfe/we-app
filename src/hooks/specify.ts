@@ -2,7 +2,7 @@ import { HookScope, SpecifyHooksConfig, HookConfig, DisabledHooks } from './type
 import { getScopeName } from '../helpers';
 import { getRegisteredHooks, getHookEntity } from './register';
 
-const HooksScopes: HookScope[] = [];
+const HooksScopes: (HookScope|string)[] = [];
 const ScopesHooks: { [scopeName: string]: { hookName: string; opts?: any }[] } = {};
 
 export function getHooksScopes() {
@@ -29,11 +29,19 @@ export function getScopeHooks(scopeName: string) {
   });
 }
 
-function enableHooks(hooksConfig: SpecifyHooksConfig, scope: HookScope) {
-  const scopeName = getScopeName(scope);
-  scope.scopeName = scopeName;
+function enableHooks(hooksConfig: SpecifyHooksConfig, scope: HookScope|string) {
+  let scopeName = scope as string;
+  if (typeof scope === 'object') {
+    scopeName = getScopeName(scope);
+    scope.scopeName = scopeName;
+  }
   // 保存启用scope
-  const hookScopeIndex = HooksScopes.findIndex((hookScope) => hookScope.scopeName === scopeName);
+  const hookScopeIndex = HooksScopes.findIndex((hookScope) => {
+    if (typeof hookScope === 'string') {
+      return hookScope === scopeName;
+    }
+    return hookScope.scopeName === scopeName;
+  });
   if (hookScopeIndex === -1) {
     HooksScopes.push(scope);
   }
@@ -54,23 +62,25 @@ function enableHooks(hooksConfig: SpecifyHooksConfig, scope: HookScope) {
   });
 }
 
-function configHooks(config: HookConfig, scope: HookScope) {
-  const scopeName = getScopeName(scope);
-  const enabledHooks = ScopesHooks[scopeName];
+function configHooks(config: HookConfig, scope: HookScope|string) {
+  const scopeName = typeof scope === 'string' ? scope : getScopeName(scope);
+  let enabledHooks = ScopesHooks[scopeName];
   if (!enabledHooks) {
     const hookNames = getRegisteredHooks();
     enableHooks(hookNames, scope);
+
+    enabledHooks = ScopesHooks[scopeName];
   }
 
   Object.keys(config).forEach((hookName) => {
-    const enabledHook = enableHooks[hookName];
+    const enabledHook = enabledHooks.find((hook) => hookName === hook.hookName);
     if (enabledHook) {
       enabledHook.opts = config[hookName];
     }
   });
 }
 
-function disableHooks(disabledHooks: DisabledHooks, scope: HookScope) {
+function disableHooks(disabledHooks: DisabledHooks, scope: HookScope|string) {
   const hookNames = getRegisteredHooks();
 
   const enabledHooks = hookNames.filter((hookName) => {
@@ -85,7 +95,7 @@ function disableHooks(disabledHooks: DisabledHooks, scope: HookScope) {
   enableHooks(enabledHooks, scope);
 }
 
-export function specifyHooks(hookConfigs: SpecifyHooksConfig, scope: HookScope) {
+export function specifyHooks(hookConfigs: SpecifyHooksConfig, scope: HookScope|string) {
   if (Array.isArray(hookConfigs)) {
     enableHooks(hookConfigs, scope);
   } else {

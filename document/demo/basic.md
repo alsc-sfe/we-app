@@ -44,10 +44,9 @@ setConfig({
   },
 });
 
-specifyHooks([
-  [
-    'skeleton', 
-    {
+specifyHooks({
+  config: {
+    skeleton: {
       skeleton: `
         <div id="microfe-layout" class="microfe-layout">
           <div class="microfe-navbar" id="__bcommon__navbar"></div>
@@ -64,13 +63,42 @@ specifyHooks([
       container: document.body,
       contentSelector: '.__weapp__content',
     },
-  ],
-  'basicLibs',
-  'pageContainer',
-  ['404', {
-    excludePages: ['bcommon/navbar', 'bcommon/menu'],
-  }],
-]);
+    404: {
+      excludePages: ['bcommon/navbar', 'bcommon/menu'],
+    },
+  },
+});
+
+specifyHooks(['pageContainer'], 'bcommon/navbar');
+specifyHooks(['pageContainer'], 'bcommon/menu');
+
+// specifyHooks([
+//   [
+//     'skeleton', 
+//     {
+//       skeleton: `
+//         <div id="microfe-layout" class="microfe-layout">
+//           <div class="microfe-navbar" id="__bcommon__navbar"></div>
+//           <div class="microfe-body">
+//             <div class="microfe-menu" id="__bcommon__menu"></div>
+//             <div class="microfe-wrapper">
+//               <div class="microfe-root-body">
+//                 <div class="microfe-root-content __weapp__content"></div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       `,
+//       container: document.body,
+//       contentSelector: '.__weapp__content',
+//     },
+//   ],
+//   'basicLibs',
+//   'pageContainer',
+//   ['404', {
+//     excludePages: ['bcommon/navbar', 'bcommon/menu'],
+//   }],
+// ]);
 
 registerWeApps([
   {

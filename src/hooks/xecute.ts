@@ -4,6 +4,7 @@ import { getScopeName } from '../helpers';
 import { BaseType } from '../weapp/base';
 import { getPageConfigs } from './register';
 import { errorHandler } from '../error';
+import { getScope } from '../weapp';
 
 const MatchedPageScope: { [pageName: string]: HookDescRunnerParam<any> } = {};
 let EnabledHookScopes: HookDescRunnerParam<any>[] = [];
@@ -30,13 +31,20 @@ function matchHooksScope(activePageScope: HookScope) {
   const activeScopeNames = [pageScopeName, weAppScopeName, productScopeName];
   // 根据activePageScope匹配hooksScope，一个页面只会有一个hooksScope
   const hooksScopes = getHooksScopes();
-  const matchedHooksScopes = hooksScopes.filter((hookScope) => {
+  const matchedHooksScopes = hooksScopes.map((hooksScope) => {
+    const hookScope = typeof hooksScope === 'string' ? getScope(hooksScope) : hooksScope;
+    return hookScope;
+  }).filter((hookScope) => {
     const matched = activeScopeNames.indexOf(hookScope.scopeName) > -1;
     if (matched) {
       return true;
     }
 
-    return hookScope.product.type === BaseType.root;
+    return (
+      !hookScope.pageName &&
+      !hookScope.weAppName &&
+      hookScope.product.type === BaseType.root
+    );
   });
 
   let matchedHooksScope = matchedHooksScopes[0];

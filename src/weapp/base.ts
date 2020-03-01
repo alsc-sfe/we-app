@@ -202,8 +202,8 @@ export default class Base {
     this.data[pathname] = data;
   }
 
-  specifyHooks(params: SpecifyHooksConfig) {
-    specifyHooks(params, compoundScope(this));
+  specifyHooks(params: SpecifyHooksConfig, scope?: HookScope) {
+    specifyHooks(params, scope || compoundScope(this));
   }
 
   protected async registerChildren(cfgs: BaseConfig[], Child: typeof Base) {
