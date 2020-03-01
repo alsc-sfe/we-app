@@ -90,3 +90,8 @@ export interface HookScope {
 
   [prop: string]: any;
 }
+
+export type EnabledHooks = string[]|[string, any][];
+export interface HookConfig { [hookName: string]: any }
+export type DisabledHooks = string[];
+export type SpecifyHooksConfig = EnabledHooks|{ config: HookConfig; disabled: DisabledHooks };

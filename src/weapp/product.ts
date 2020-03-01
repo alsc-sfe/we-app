@@ -64,7 +64,10 @@ class Product extends Base {
       childConfig = await this.loadAppConfig(config);
     }
 
-    const child = await super.registerChild(childConfig, Child) as WeApp|Product;
+    const child = await super.registerChild({
+      ...childConfig,
+      type: Child === WeApp ? BaseType.weApp : BaseType.product,
+    }, Child) as WeApp|Product;
     return child;
   }
 

@@ -1,7 +1,7 @@
 import get from 'lodash-es/get';
-import { HookScope } from '../hooks/type';
+import { HookScope, SpecifyHooksConfig } from '../hooks/type';
 import { specifyHooks } from '../hooks';
-import { UseHooksParams } from '../hooks/hooks';
+
 import { ResourceLoader } from '../resource-loader';
 import Product from './product';
 import Deferred from '../utils/deferred';
@@ -16,7 +16,7 @@ export interface BaseConfig {
   type?: BaseType;
   parent?: Base;
 
-  hooks?: boolean | UseHooksParams;
+  hooks?: SpecifyHooksConfig;
 
   render?: Render;
 
@@ -63,6 +63,8 @@ export default class Base {
 
   compoundScope = compoundScope;
 
+  hookName: string;
+
   private children: Base[] = [];
 
   private config: BaseConfig;
@@ -79,6 +81,11 @@ export default class Base {
     if (config) {
       this.name = config.name;
       this.parent = config.parent;
+      this.type = config.type;
+
+      if (config.hookName) {
+        this.hookName = config.hookName;
+      }
 
       if (config.hooks) {
         specifyHooks(config.hooks, compoundScope(this));
@@ -178,7 +185,7 @@ export default class Base {
 
     let data = get(this.data, pathname);
     if (traced && !data && this.type !== BaseType.root) {
-      data = this.parent.getData(pathname);
+      data = this.parent.getData(pathname, traced);
     }
     return data;
   }
@@ -195,7 +202,7 @@ export default class Base {
     this.data[pathname] = data;
   }
 
-  specifyHooks(params: boolean|UseHooksParams) {
+  specifyHooks(params: SpecifyHooksConfig) {
     specifyHooks(params, compoundScope(this));
   }
 

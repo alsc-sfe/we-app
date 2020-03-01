@@ -40,16 +40,10 @@ export default class Page extends Base {
 
   parent: WeApp;
 
-  hookName: string;
-
   private pageContainer: HTMLElement;
 
   constructor(config: PageConfig) {
     super(config);
-
-    if (config.hookName) {
-      this.hookName = config.hookName;
-    }
 
     this.setInited();
   }

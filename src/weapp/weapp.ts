@@ -62,6 +62,10 @@ export default class WeApp extends Base {
   getPage(pageName: string) {
     return this.getChild(pageName) as Page;
   }
+
+  protected async registerChild(config: PageConfig, Child: typeof Page) {
+    return super.registerChild({ ...config, type: BaseType.page }, Child);
+  }
 }
 
 export function getActivePageScopes(location: Location, excludePageNames: string[] = []) {

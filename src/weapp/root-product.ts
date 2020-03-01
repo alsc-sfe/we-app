@@ -70,7 +70,7 @@ class RootProduct extends Product {
       scope.pageName = paths[2];
 
       if (paths[1] === HookWeAppName) {
-        scope.hookName = paths[1];
+        scope.hookName = paths[2];
       }
     } else if (pathsLen === 2) {
       scope.weAppName = paths[0];

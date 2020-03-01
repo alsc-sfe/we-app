@@ -18,7 +18,7 @@ function DefaultGetPageContainer(param: HookDescRunnerParam<HookSkeletonOpts>) {
 
   const { product, weApp, page } = param.hookScope;
   const base = page || weApp || product;
-  const elSkeleton: Element = base.getSkeletonContainer();
+  const elSkeleton: Element = base.getSkeletonContainer(true);
   if (elSkeleton) {
     const { opts: { contentSelector = '.__weapp__content' } } = param;
     const { productName = '', weAppName = '', pageName = '' } = param.pageScope;
@@ -70,8 +70,9 @@ const hookPageContainer: HookDesc<HookSkeletonOpts> = {
     const { page } = param.pageScope;
 
     const elPageContainer = page.getPageContainer();
-
-    elPageContainer.style.display = 'none';
+    if (elPageContainer) {
+      elPageContainer.style.display = 'none';
+    }
   },
 };
 

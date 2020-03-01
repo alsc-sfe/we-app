@@ -1,11 +1,6 @@
-import { HookScope } from './type';
+import { HookScope, SpecifyHooksConfig, HookConfig, DisabledHooks } from './type';
 import { getScopeName } from '../helpers';
 import { getRegisteredHooks, getHookEntity } from './register';
-
-type EnabledHooks = string[]|[string, any][];
-interface HookConfig { [hookName: string]: any }
-type DisabledHooks = string[];
-type SpecifyHooksConfig = EnabledHooks|{ config: HookConfig; disabled: DisabledHooks };
 
 const HooksScopes: HookScope[] = [];
 const ScopesHooks: { [scopeName: string]: { hookName: string; opts?: any }[] } = {};
