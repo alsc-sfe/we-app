@@ -8,7 +8,7 @@
 import { registerApplication } from 'single-spa';
 import { getScopeName, checkUseSystem } from '../helpers';
 import Base, { BaseConfig, BaseType, Render } from './base';
-import { HookScope } from '../hooks/type';
+import { HookScope, LifecycleHookEnum } from '../hooks/type';
 import WeApp from './weapp';
 import { Resource } from '../resource-loader';
 import { runLifecycleHook } from '../hooks';
@@ -59,10 +59,10 @@ export default class Page extends Base {
 
     registerApplication(
       getScopeName(scope),
-      async (appProps: object) => {
+      async () => {
         // beforeLoad
         const render = this.getRender() as Render;
-        await runLifecycleHook('beforeLoad', [scope], {
+        await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope], {
           render,
         });
 
@@ -75,14 +75,14 @@ export default class Page extends Base {
           return resource;
         }).then((resource: any) => resource?.default || resource);
 
-        await runLifecycleHook('afterLoad', [scope]);
+        await runLifecycleHook(LifecycleHookEnum.afterLoad, [scope]);
 
         return {
           bootstrap: [async () => component],
           mount: [
             // beforeMount
             async (customProps: object) => {
-              const isContinues = await runLifecycleHook('beforeMount', [scope], {
+              const isContinues = await runLifecycleHook(LifecycleHookEnum.beforeMount, [scope], {
                 render,
               });
               if (isContinues.find((i) => i === false) === false) {
@@ -94,13 +94,13 @@ export default class Page extends Base {
               render.mount(component, container, customProps);
 
               // afterMount
-              await runLifecycleHook('afterMount', [scope]);
+              await runLifecycleHook(LifecycleHookEnum.afterMount, [scope]);
             },
           ],
           unmount: [
             // beforeUnmount
             async (customProps) => {
-              const isContinues = await runLifecycleHook('beforeUnmount', [scope], {
+              const isContinues = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope], {
                 render,
               });
               if (isContinues.find((i) => i === false) === false) {
@@ -111,7 +111,7 @@ export default class Page extends Base {
               render.unmount(container, customProps);
 
               // afterUnmount
-              await runLifecycleHook('afterUnmount', [scope]);
+              await runLifecycleHook(LifecycleHookEnum.afterUnmount, [scope]);
             },
           ],
         };
