@@ -38,6 +38,7 @@ function compoundScope(base: Base, scope: HookScope = {}): HookScope {
   if (base.type === BaseType.root) {
     if (!scope.product) {
       scope.product = base as Product;
+      scope.productName = base.name;
     }
     return scope;
   }

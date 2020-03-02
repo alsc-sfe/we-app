@@ -4,7 +4,7 @@ import { getScopeName } from '../helpers';
 import { BaseType } from '../weapp/base';
 import { getPageConfigs } from './register';
 import { errorHandler } from '../error';
-import { getScope } from '../weapp';
+import { getScope, compoundScope } from '../weapp';
 
 const MatchedPageScope: { [pageName: string]: HookDescRunnerParam<any> } = {};
 let EnabledHookScopes: HookDescRunnerParam<any>[] = [];
@@ -96,6 +96,17 @@ function matchHooksScopes(activePageScopes: HookScope[]) {
 }
 
 export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activePageScopes: HookScope[], props?: any) {
+  const hookPages = getPageConfigs().map((hookPage) => getScopeName({ hookName: hookPage.hookName }));
+  // beforeRouting 区别于其他页面生命周期
+  // 在路由切换时，RootProduct应当是始终都需要执行的
+  if (lifecycleHook === LifecycleHookEnum.beforeRouting) {
+    const RootScope = compoundScope();
+    activePageScopes.unshift(RootScope);
+
+    const RootScopeName = getScopeName(RootScope);
+    hookPages.push(RootScopeName);
+  }
+
   const { enabledHookScopes, disabledHookScopes } = matchHooksScopes(activePageScopes);
 
   const scopeHooksRunners = [];
@@ -111,7 +122,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
           hookScope,
           opts,
           matched: false,
-          hookPages: getPageConfigs().map((hookPage) => getScopeName({ hookName: hookPage.hookName })),
+          hookPages,
           activePageScopes,
           errorHandler: (error: Event) => {
             return errorHandler(error, [pageScope]);
@@ -132,7 +143,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
           hookScope,
           opts,
           matched: true,
-          hookPages: getPageConfigs().map((hookPage) => getScopeName({ hookName: hookPage.hookName })),
+          hookPages,
           activePageScopes,
           errorHandler: (error: Event) => {
             return errorHandler(error, [pageScope]);

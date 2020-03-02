@@ -36,6 +36,9 @@ export function getScopeName({
   if (pname[0] === ScopeNameDivider) {
     pname = pname.slice(1);
   }
+  if (pname[pname.length - 1] === ScopeNameDivider) {
+    pname = pname.slice(0, pname.length - 1);
+  }
   return pname;
 }
 
