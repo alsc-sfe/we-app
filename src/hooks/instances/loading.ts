@@ -1,30 +1,26 @@
-import { Hook, HookScope } from '../type';
+import { HookDescRunnerParam, HookDesc } from '../type';
 
 export interface HookLoadingOpts {
   element: any;
 }
 
-const hookLoading: Hook<HookLoadingOpts> = function () {
-  return {
-    async beforeLoad({ render, opts: { element } }: HookScope<HookLoadingOpts>) {
-      render?.mount(
-        element,
-        /* 默认渲染到当前页面对应的容器内 */
-      );
-    },
+const hookLoading: HookDesc<HookLoadingOpts> = {
+  hookName: 'loading',
+  async beforeLoad({ render, opts: { element } }: HookDescRunnerParam<HookLoadingOpts>) {
+    render?.mount(
+      element,
+      /* 默认渲染到当前页面对应的容器内 */
+    );
+  },
 
-    async onError({ page }: HookScope<HookLoadingOpts>) {
-      const render = page?.getRender();
-      render?.unmount();
-    },
+  async onError({ pageScope: { page } }: HookDescRunnerParam<HookLoadingOpts>) {
+    const render = page?.getRender();
+    render?.unmount();
+  },
 
-    async beforeMount({ render }: HookScope<HookLoadingOpts>) {
-      render?.unmount();
-      return undefined;
-    },
-  };
+  async beforeMount({ render }: HookDescRunnerParam<HookLoadingOpts>) {
+    render?.unmount();
+  },
 };
-
-hookLoading.hookName = 'loading';
 
 export default hookLoading;

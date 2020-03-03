@@ -50,8 +50,6 @@ const hook404: HookDesc<Hook404Opts> = {
     });
     // 需要排除的页面
     is404 = activePages.length === 0;
-    // 返回false将阻止routing
-    return undefined;
   },
 };
 

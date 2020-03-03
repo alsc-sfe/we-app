@@ -2,7 +2,7 @@
  * 骨架必须在路由切换前确定是显示还是隐藏
  * 页面容器在路由切换前显示，在卸载后隐藏
  */
-import { HookScope, HookDesc, HookDescRunnerParam } from '../type';
+import { HookDesc, HookDescRunnerParam } from '../type';
 
 export interface HookSkeletonOpts {
   skeleton: string;
@@ -77,8 +77,6 @@ const hookSkeleton: HookDesc<HookSkeletonOpts> = {
       }
       lastScope = param;
     }
-
-    return undefined;
   },
 };
 
