@@ -8,6 +8,13 @@ export interface WeAppConfig extends BaseConfig {
   parent?: Product;
 
   url?: string;
+  // 子应用标题
+  // 规范：https://yuque.antfin-inc.com/ele-fe/zgm9ar/lmk4t9
+  title?: string;
+  // 子应用描述
+  description?: string;
+  // 页面路由前缀，默认为/${name}，可以通过basename覆盖
+  basename?: string;
 
   pages?: PageConfig[];
 
