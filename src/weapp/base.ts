@@ -151,14 +151,6 @@ export default class Base {
     };
   }
 
-  getSkeletonContainer(traced = false) {
-    return this.getData('skeletonContainer', traced);
-  }
-
-  setSkeletonContainer(skeletonContainer: HTMLElement|Element) {
-    this.setData('skeletonContainer', skeletonContainer);
-  }
-
   getRender() {
     const render = this.getConfig('render') as Render;
     if (render) {

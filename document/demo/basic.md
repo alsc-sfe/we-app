@@ -41,9 +41,6 @@ setConfig({
   // 所有的微应用、页面的资源都用system加载
   useSystem: ['url'],
   render,
-  404: function Page404() {
-    return <div>This is 404 page</div>
-  },
 });
 
 function Page404() {
@@ -62,12 +59,12 @@ specifyHooks({
     skeleton: {
       skeleton: `
         <div id="microfe-layout" class="microfe-layout">
-          <div class="microfe-navbar" id="__bcommon__navbar"></div>
+          <div class="microfe-navbar" id="bcommon__navbar"></div>
           <div class="microfe-body">
-            <div class="microfe-menu" id="__bcommon__menu"></div>
+            <div class="microfe-menu" id="bcommon__menu"></div>
             <div class="microfe-wrapper">
               <div class="microfe-root-body">
-                <div class="microfe-root-content __weapp__content"></div>
+                <div class="microfe-root-content __weapp__content" id="__microfe-root-content"></div>
               </div>
             </div>
           </div>
@@ -81,6 +78,14 @@ specifyHooks({
         url: [Promise.resolve(Page404)],
       },
       excludePages: ['bcommon/navbar', 'bcommon/menu'],
+    },
+  },
+});
+
+specifyHooks({
+  config: {
+    pageContainer: {
+      contentSelector: '#__microfe-root-content',
     },
   },
 });

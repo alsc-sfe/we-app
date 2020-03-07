@@ -2,9 +2,9 @@
  * 骨架必须在路由切换前确定是显示还是隐藏
  * 页面容器在路由切换前显示，在卸载后隐藏
  */
-import { HookDesc, HookDescRunnerParam } from '../type';
+import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
 
-export interface HookSkeletonOpts {
+export interface HookSkeletonOpts extends HookOpts {
   skeleton: string;
   container: HTMLElement;
   contentSelector: string;
@@ -27,18 +27,17 @@ const hookSkeleton: HookDesc<HookSkeletonOpts> = {
     //    所以，lastScope使用链式
     if (lastScope) {
       let { opts: { container: lastContainer } } = lastScope;
-      const { opts: { contentSelector: lastContentSelector },
-        hookScope: lastEnabledScope } = lastScope;
+      const { hookScope: lastEnabledScope } = lastScope;
       const lastBase =
         lastEnabledScope.page || lastEnabledScope.weApp || lastEnabledScope.product;
 
-      const lastSkeleton = lastBase.getSkeletonContainer();
+      const lastSkeleton = lastBase.getData('skeletonContainer');
       // 为父子关系不清除
-      if (base.getSkeletonContainer(true) !== lastSkeleton) {
+      if (base.getData('skeletonContainer', true) !== lastSkeleton) {
         // 需要处理取父骨架的情况，取父骨架的内容区
         if (!lastContainer) {
           // 回溯到父骨架
-          lastContainer = lastBase.getSkeletonContainer(true).querySelector(lastContentSelector);
+          lastContainer = lastBase.getData('contentContainer', true);
         }
         lastContainer.removeChild(lastSkeleton);
         // lastScope链式回溯
@@ -54,7 +53,7 @@ const hookSkeleton: HookDesc<HookSkeletonOpts> = {
     let { opts: { container } } = param;
     const { opts: { skeleton, contentSelector } } = param;
 
-    if (!base.getSkeletonContainer()) {
+    if (!base.getData('skeletonContainer')) {
       const div = document.createElement('div');
       div.innerHTML = skeleton;
       const skeletonContainer = div.children[0];
@@ -64,12 +63,15 @@ const hookSkeleton: HookDesc<HookSkeletonOpts> = {
 
       if (!container) {
         // 回溯到父骨架
-        container = base.getSkeletonContainer(true).querySelector(contentSelector);
+        container = base.getData('contentContainer', true);
       }
 
       container.appendChild(df);
 
-      base.setSkeletonContainer(skeletonContainer);
+      base.setData('skeletonContainer', skeletonContainer);
+
+      const contentContainer = skeletonContainer.querySelector(contentSelector);
+      base.setData('contentContainer', contentContainer);
 
       // lastScope 形成链式
       if (lastScope) {

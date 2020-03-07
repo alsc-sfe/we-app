@@ -2,12 +2,9 @@
  * 骨架必须在路由切换前确定是显示还是隐藏
  * 页面容器在路由切换前显示，在卸载后隐藏
  */
-import { HookDesc, HookDescRunnerParam } from '../type';
+import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
 
-export interface HookSkeletonOpts {
-  skeleton: string;
-  container: HTMLElement;
-  contentSelector: string;
+export interface HookSkeletonOpts extends HookOpts {
   [prop: string]: any;
 }
 
@@ -18,16 +15,15 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookSkeletonOpts>
 
   const { product, weApp, page } = param.hookScope;
   const base = page || weApp || product;
-  const elSkeleton: Element = base.getSkeletonContainer(true);
+  const elSkeleton: Element = base.getData('skeletonContainer', true);
   if (elSkeleton) {
-    const { opts: { contentSelector = '.__weapp__content' } } = param;
     const { productName = '', weAppName = '', pageName = '' } = param.pageScope;
 
-    const pageContainerId = [productName, weAppName, pageName].join('__');
+    const pageContainerId = [productName, weAppName, pageName].filter(n => n).join('__');
     let elPageContainer = elSkeleton.querySelector(`#${pageContainerId}`);
 
     if (!elPageContainer) {
-      const elContent = elSkeleton.querySelector(contentSelector);
+      const elContent = base.getData('contentContainer', true);
       if (elContent) {
         elPageContainer = document.createElement('div');
         elPageContainer.id = pageContainerId;
