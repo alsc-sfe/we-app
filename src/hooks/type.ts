@@ -1,7 +1,6 @@
 import Product from '../weapp/product';
 import WeApp from '../weapp/weapp';
 import Page, { PageConfig } from '../weapp/page';
-import { Render } from '../weapp/base';
 
 export enum LifecycleHookEnum {
   page = 'page',
@@ -44,6 +43,11 @@ export interface HookDescRunner<HookOpts> {
   (props: HookDescRunnerParam<HookOpts>): Promise<undefined|boolean|any>;
 }
 
+export interface HookOpts {
+  page?: PageConfig;
+  [prop: string]: any;
+}
+
 export interface HookDesc<HookOpts> {
   hookName?: string;
   // 定义页面
@@ -61,10 +65,6 @@ export interface HookDesc<HookOpts> {
   afterUnmount?: LifecycleHookRunner<HookOpts>;
   // 页面执行错误
   onError?: LifecycleHookRunner<HookOpts>;
-}
-
-export interface Hook<HookOpts> extends HookDesc<HookOpts> {
-  (opts?: HookOpts): HookDesc<HookOpts>;
 }
 
 export interface HookScope {

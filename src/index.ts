@@ -8,9 +8,8 @@ import { startRouting } from './routing/routing';
 
 import { ProductConfig } from './weapp/product';
 import { registerProducts, registerWeApps, setConfig, requireChildrenInited,
-  startRootProduct, specifyHooks, setHomepage } from './weapp';
-// 依赖singleSpa
-import { registerHooks } from './hooks';
+  startRootProduct, registerHooks, specifyHooks, setHomepage } from './weapp';
+import { buildinHooks } from './hooks';
 
 let startPromise: Promise<any>;
 
@@ -45,4 +44,6 @@ export {
 
   setConfig,
   setHomepage,
+
+  buildinHooks,
 };

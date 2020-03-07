@@ -1,4 +1,4 @@
-import { HookScope, Hook } from '../hooks/type';
+import { HookScope } from '../hooks/type';
 import { getScope } from './root-product';
 
 let homepage: HookScope;

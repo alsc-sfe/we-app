@@ -4,10 +4,9 @@
  * 2. 匹配到的页面全部被排除了
  */
 import { getScopeName } from '../../helpers';
-import { HookDesc, HookDescRunnerParam } from '../type';
+import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
 
-export interface Hook404Opts {
-  element: any;
+export interface Hook404Opts extends HookOpts {
   excludePages?: string[];
 }
 
@@ -18,25 +17,6 @@ const hook404: HookDesc<Hook404Opts> = {
   page: {
     hooks: ['pageContainer'],
     activityFunction: () => is404,
-    render: {
-      mount(_component, container, { weApp, page }) {
-        // 获得原始的渲染函数
-        // 从weApp取，而不是page，因为
-        // 当前页面对应render就是hook.page.render
-        const render = weApp?.getRender();
-        const Component = page?.getConfig('404');
-        if (Component) {
-          render?.mount(
-            Component,
-            container,
-          );
-        }
-      },
-      unmount(container, { weApp }) {
-        const render = weApp?.getRender();
-        render?.unmount(container);
-      },
-    },
   },
 
   async beforeRouting(param: HookDescRunnerParam<Hook404Opts>) {

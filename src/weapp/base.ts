@@ -1,6 +1,6 @@
 import get from 'lodash-es/get';
-import { HookScope, SpecifyHooksConfig } from '../hooks/type';
-import { specifyHooks } from '../hooks';
+import { HookScope, SpecifyHooksConfig, HookDesc } from '../hooks/type';
+import { specifyHooks, registerHooks } from '../hooks';
 
 import { ResourceLoader } from '../resource-loader';
 import Product from './product';
@@ -201,6 +201,10 @@ export default class Base {
     }
 
     this.data[pathname] = data;
+  }
+
+  registerHooks(hookDesc: HookDesc<any>|HookDesc<any>[]|[HookDesc<any>, any][], opts?: any) {
+    registerHooks(hookDesc, opts);
   }
 
   specifyHooks(params: SpecifyHooksConfig, scope?: HookScope) {

@@ -4,13 +4,15 @@ import WeApp, { getActivePageScopes } from './weapp';
 import Base, { BaseType } from './base';
 import { DefaultResourceLoader } from '../resource-loader';
 import { RouterType } from '../routing/enum';
+import { HookScope, HookDesc } from '../hooks/type';
 import { getPageConfigs } from '../hooks';
-import { HookScope } from '../hooks/type';
 
 class RootProduct extends Product {
   type: BaseType = BaseType.root;
 
   parent: Product = this;
+
+  private hookWeApp: WeApp;
 
   registerProducts(cfgs: ProductConfig[] = []) {
     return this.registerChildren(cfgs, Product) as Promise<Product[]>;
@@ -47,7 +49,16 @@ class RootProduct extends Product {
     return scope;
   }
 
-  async start() {
+  async registerHooks(hookDesc: HookDesc<any>|HookDesc<any>[]|[HookDesc<any>, any][], opts?: any) {
+    super.registerHooks(hookDesc, opts);
+
+    // 注册hook页面
+    const pageConfigs = getPageConfigs();
+    const hookWeApp = await this.registerHookApp();
+    hookWeApp.registerPages(pageConfigs);
+  }
+
+  protected async registerHookApp() {
     // 注册内置产品
     const innerProduct = await this.registerProduct({
       name: InnerProductName,
@@ -56,11 +67,8 @@ class RootProduct extends Product {
     const hookWeApp = await innerProduct.registerWeApp({
       name: HookWeAppName,
     }) as WeApp;
-    // 注册hook页面
-    const pageConfigs = getPageConfigs();
-    hookWeApp.registerPages(pageConfigs);
 
-    super.start();
+    return hookWeApp;
   }
 
   private parseScopeName(scopeName: string) {
@@ -104,6 +112,8 @@ const rootProduct = new RootProduct({
 
 export const registerProducts = rootProduct.registerProducts.bind(rootProduct) as RootProduct['registerProducts'];
 export const registerWeApps = rootProduct.registerWeApps.bind(rootProduct) as RootProduct['registerWeApps'];
+
+export const registerHooks = rootProduct.registerHooks.bind(rootProduct) as RootProduct['registerHooks'];
 export const specifyHooks = rootProduct.specifyHooks.bind(rootProduct) as RootProduct['specifyHooks'];
 
 export const startRootProduct = rootProduct.start.bind(rootProduct) as RootProduct['start'];

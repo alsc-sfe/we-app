@@ -15,6 +15,8 @@ import { checkUseSystem } from '../helpers';
 export interface ProductConfig extends BaseConfig {
   parent?: Product;
   // 微应用列表
+  url?: string; // 支持远程获取
+  parseWeAppConfigs?: (configs: any) => WeAppConfig[]; // 解析远程获取的微应用配置
   weApps?: WeAppConfig[];
   // 页面渲染实现
   render?: Render;

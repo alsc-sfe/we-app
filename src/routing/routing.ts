@@ -56,12 +56,8 @@ const routingWithHook: RoutingWithHook = async (location: Location, activePageSc
     });
   }
 
-  const continues: (boolean|undefined)[] = await runLifecycleHook(LifecycleHookEnum.beforeRouting, activeScopes);
-  const index = continues.findIndex((c) => c === false);
-  if (index > -1) {
-    return false;
-  }
-  return true;
+  const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeRouting, activeScopes);
+  return isContinue;
 };
 
 setRoutingWithHook(routingWithHook);

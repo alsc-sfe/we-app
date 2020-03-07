@@ -86,10 +86,10 @@ export default class Page extends Base {
           mount: [
             // beforeMount
             async (customProps: object) => {
-              const isContinues = await runLifecycleHook(LifecycleHookEnum.beforeMount, [scope], {
+              const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeMount, [scope], {
                 render,
               });
-              if (isContinues.find((i) => i === false) === false) {
+              if (!isContinue) {
                 return;
               }
 
@@ -104,10 +104,10 @@ export default class Page extends Base {
           unmount: [
             // beforeUnmount
             async (customProps) => {
-              const isContinues = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope], {
+              const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope], {
                 render,
               });
-              if (isContinues.find((i) => i === false) === false) {
+              if (!isContinue) {
                 return;
               }
 
@@ -123,6 +123,9 @@ export default class Page extends Base {
       this.makeActivityFunction(),
       {
         ...scope,
+
+        opts: {},
+
         basename: this.getBasename(),
         routerType: this.getConfig('routerType'),
       },
@@ -131,7 +134,13 @@ export default class Page extends Base {
 
   getBasename() {
     const scope = this.compoundScope(this);
-    const { productName = '', weAppName = '' } = scope;
+    const { productName = '', weAppName = '', weApp } = scope;
+
+    const basename = weApp.getConfig('basename') as string;
+    if (basename) {
+      return ajustPathname(basename);
+    }
+
     return ajustPathname(`/${productName}/${weAppName}`);
   }
 

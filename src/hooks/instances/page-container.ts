@@ -11,7 +11,7 @@ export interface HookSkeletonOpts {
   [prop: string]: any;
 }
 
-function DefaultGetPageContainer(param: HookDescRunnerParam<HookSkeletonOpts>) {
+function DefaultCreatePageContainer(param: HookDescRunnerParam<HookSkeletonOpts>) {
   if (!param.pageScope.page) {
     return;
   }
@@ -44,9 +44,9 @@ const hookPageContainer: HookDesc<HookSkeletonOpts> = {
 
   async beforeLoad(param: HookDescRunnerParam<HookSkeletonOpts>) {
     // 生成页面容器，容器存储到scope中
-    const { opts: { getPageContainer = DefaultGetPageContainer }, pageScope } = param;
+    const { opts: { createPageContainer = DefaultCreatePageContainer }, pageScope } = param;
 
-    const elPageContainer = getPageContainer(param);
+    const elPageContainer = createPageContainer(param);
     if (elPageContainer) {
       pageScope.page?.setPageContainer(elPageContainer);
     }

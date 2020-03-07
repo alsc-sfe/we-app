@@ -8,7 +8,9 @@ PC模板
 ````jsx
 import './global';
 import './style.less';
-import { setConfig, registerWeApps, registerProducts, start, specifyHooks, setHomepage } from "@alife/we-app";
+import { setConfig, registerWeApps, registerProducts, 
+  start, specifyHooks, setHomepage,
+  registerHooks, buildinHooks } from "@alife/we-app";
 import render from './render';
 
 setConfig({
@@ -44,6 +46,17 @@ setConfig({
   },
 });
 
+function Page404() {
+  return <div>This is 404 page</div>
+}
+
+registerHooks([
+  buildinHooks.hookSkeleton,
+  buildinHooks.hookPageContainer,
+  buildinHooks.hookBasicLibs,
+  buildinHooks.hook404,
+]);
+
 specifyHooks({
   config: {
     skeleton: {
@@ -64,6 +77,9 @@ specifyHooks({
       contentSelector: '.__weapp__content',
     },
     404: {
+      page: {
+        url: [Promise.resolve(Page404)],
+      },
       excludePages: ['bcommon/navbar', 'bcommon/menu'],
     },
   },
@@ -71,34 +87,6 @@ specifyHooks({
 
 specifyHooks(['pageContainer'], 'bcommon/navbar');
 specifyHooks(['pageContainer'], 'bcommon/menu');
-
-// specifyHooks([
-//   [
-//     'skeleton', 
-//     {
-//       skeleton: `
-//         <div id="microfe-layout" class="microfe-layout">
-//           <div class="microfe-navbar" id="__bcommon__navbar"></div>
-//           <div class="microfe-body">
-//             <div class="microfe-menu" id="__bcommon__menu"></div>
-//             <div class="microfe-wrapper">
-//               <div class="microfe-root-body">
-//                 <div class="microfe-root-content __weapp__content"></div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       `,
-//       container: document.body,
-//       contentSelector: '.__weapp__content',
-//     },
-//   ],
-//   'basicLibs',
-//   'pageContainer',
-//   ['404', {
-//     excludePages: ['bcommon/navbar', 'bcommon/menu'],
-//   }],
-// ]);
 
 registerWeApps([
   {
