@@ -1,5 +1,5 @@
 import Product, { ProductConfig } from './product';
-import { InnerProductName, HookWeAppName, ScopeNameDivider } from '../helpers';
+import { BuildinProductName, HookWeAppName, ScopeNameDivider } from '../helpers';
 import WeApp, { getActivePageScopes } from './weapp';
 import Base, { BaseType } from './base';
 import { DefaultResourceLoader } from '../resource-loader';
@@ -31,7 +31,7 @@ class RootProduct extends Product {
     scope.scopeName = scopeName;
 
     if (scope.hookName) {
-      const innerProduct = this.getProduct(InnerProductName);
+      const innerProduct = this.getProduct(BuildinProductName);
       const hookWeApp = innerProduct.getWeApp(HookWeAppName);
       scope.page = hookWeApp.getPage(scope.hookName);
     } else if (scope.pageName) {
@@ -60,11 +60,11 @@ class RootProduct extends Product {
 
   protected async registerHookApp() {
     // 注册内置产品
-    const innerProduct = await this.registerProduct({
-      name: InnerProductName,
+    const buildinProduct = await this.registerProduct({
+      name: BuildinProductName,
     });
     // 注册hook微应用
-    const hookWeApp = await innerProduct.registerWeApp({
+    const hookWeApp = await buildinProduct.registerWeApp({
       name: HookWeAppName,
     }) as WeApp;
 

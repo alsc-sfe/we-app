@@ -1,12 +1,12 @@
 import { HookScope } from './hooks/type';
 import { BaseType } from './weapp/base';
 
-const InnerProductName = '__WeApp';
+const BuildinProductName = '__WeApp';
 const HookWeAppName = 'hook';
 const ScopeNameDivider = '/';
 
 export {
-  InnerProductName,
+  BuildinProductName,
   HookWeAppName,
   ScopeNameDivider,
 };
@@ -27,7 +27,7 @@ export function getScopeName({
   let pname = '';
   if (hookName) {
     // hook
-    pname = `${InnerProductName}${ScopeNameDivider}${HookWeAppName}${ScopeNameDivider}${hookName}`;
+    pname = `${BuildinProductName}${ScopeNameDivider}${HookWeAppName}${ScopeNameDivider}${hookName}`;
   } else {
     // page
     pname = `${productName}${ScopeNameDivider}${weAppName}${ScopeNameDivider}${pageName}`;
