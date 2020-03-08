@@ -154,7 +154,9 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
     disabledHookDescRunnerParams } = matchHookDescRunnerParams(activePageScopes, lifecycleHook);
 
   const scopeHooksRunners: [LifecycleHookRunner<any>, HookDescRunnerParam<any>][] = [];
-
+  const activePages = activePageScopes.map((activeScope) => {
+    return getScopeName(activeScope);
+  });
   // 禁用hook，调用clear
   if (lifecycleHook === LifecycleHookEnum.beforeRouting) {
     const enabledHookScopes = enabledHookDescRunnerParams.map(({ hookScope }) => hookScope);
@@ -174,7 +176,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
             opts,
             matched: false,
             hookPages,
-            activePageScopes,
+            activePages,
             nextHookDescRunnerParam,
             errorHandler: (error: Event) => {
               return errorHandler(error, [pageScope]);
@@ -214,16 +216,22 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
     scopeHooks.forEach(({ hookDescEntity, opts }) => {
       const hookDescRunner = hookDescEntity(lifecycleHook);
       if (hookDescRunner && 'exec' in hookDescRunner) {
+        const hookPageConfig = hookDescEntity(LifecycleHookEnum.page) as PageConfig;
+        let hookPageScope: HookScope;
+        if (hookPageConfig) {
+          const hookPageScopeName = getScopeName({ hookName: hookPageConfig.hookName });
+          hookPageScope = getScope(hookPageScopeName);
+        }
+
         scopeHooksRunners.push([hookDescRunner.exec, {
           ...props,
           pageScope,
           hookScope,
+          hookPageScope,
           opts,
           matched: true,
           hookPages,
-          activePages: activePageScopes.map((activeScope) => {
-            return getScopeName(activeScope);
-          }),
+          activePages,
           errorHandler: (error: Event) => {
             return errorHandler(error, [pageScope]);
           },

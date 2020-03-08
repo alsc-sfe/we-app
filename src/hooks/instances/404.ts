@@ -15,7 +15,7 @@ let is404 = false;
 const hook404: HookDesc<Hook404Opts> = {
   hookName: '404',
   page: {
-    hooks: ['pageContainer'],
+    hooks: ['pageContainer', '500'],
     activityFunction: () => is404,
   },
 

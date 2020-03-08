@@ -58,7 +58,7 @@ export function registerHook(hookDesc: HookDesc<any>, opts?: any) {
       }
 
       if (lifecycleHook === LifecycleHookEnum.page) {
-        const { activityFunction } = lifecycleHookEntity;
+        const { activityFunction } = lifecycleHookEntity as PageConfig;
 
         const scopeActivityFunction = (location: Location) => {
           // 判断当前启用的插件里是否存在当前插件
@@ -73,7 +73,7 @@ export function registerHook(hookDesc: HookDesc<any>, opts?: any) {
           return activityFunction(location);
         };
 
-        const pageConfig = {
+        const pageConfig: PageConfig = {
           ...lifecycleHookEntity,
           ...opts?.page,
           hookName,

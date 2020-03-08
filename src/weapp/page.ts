@@ -34,6 +34,8 @@ export interface PageConfig extends BaseConfig {
   // 一般为一个js、一个css
   url?: Resource[];
 
+  customProps?: object;
+
   [prop: string]: any;
 }
 
@@ -100,7 +102,10 @@ export default class Page extends Base {
 
               const container = this.getPageContainer();
 
-              render.mount(component, container, customProps);
+              render.mount(component, container, {
+                ...this.getConfig('customProps'),
+                ...customProps,
+              });
 
               // afterMount
               await runLifecycleHook(LifecycleHookEnum.afterMount, [scope]);
@@ -119,7 +124,10 @@ export default class Page extends Base {
               }
 
               const container = this.getPageContainer();
-              render.unmount(container, customProps);
+              render.unmount(container, {
+                ...this.getConfig('customProps'),
+                ...customProps,
+              });
 
               // afterUnmount
               await runLifecycleHook(LifecycleHookEnum.afterUnmount, [scope]);
@@ -129,9 +137,7 @@ export default class Page extends Base {
       },
       this.makeActivityFunction(),
       {
-        ...scope,
-
-        opts: {},
+        pageScope: scope,
 
         basename: this.getBasename(),
         routerType: this.getConfig('routerType'),
@@ -200,5 +206,11 @@ export default class Page extends Base {
 
   setPageContainer(pageContainer: HTMLElement) {
     this.pageContainer = pageContainer;
+  }
+
+  setCustomProps(customProps: any) {
+    this.setConfig({
+      customProps,
+    });
   }
 }

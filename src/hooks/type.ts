@@ -16,8 +16,12 @@ export enum LifecycleHookEnum {
 }
 
 export interface HookDescRunnerParam<HookOpts> {
+  // 当前页面对应范围
   pageScope: HookScope;
+  // 当前匹配扩展对应工作范文
   hookScope: HookScope;
+  // 当前匹配扩展的页面对应范围
+  hookPageScope?: HookScope;
   opts?: HookOpts;
   matched?: boolean;
 
@@ -30,6 +34,9 @@ export interface HookDescRunnerParam<HookOpts> {
   errorHandler?: (error: Event) => Promise<any>;
 
   context?: Window;
+
+  // 错误信息
+  error?: Error;
 
   [prop: string]: any;
 }
