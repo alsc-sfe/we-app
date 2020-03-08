@@ -55,25 +55,21 @@ export default class Page extends Base {
   }
 
   start() {
-    const resourceLoader = this.getConfig('resourceLoader');
-    const url = this.getConfig('url') || [];
-    const useSystem = this.getConfig('useSystem') || [];
-
     const scope: HookScope = this.compoundScope(this);
-
-    const urlUseSystem = checkUseSystem(useSystem, 'url');
 
     registerApplication(
       getScopeName(scope),
       async () => {
         await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope], {
           getRender: () => {
-            return this.getRender() as Render;
+            return this.getRender();
           },
         });
 
-        // beforeLoad
-        const render = this.getRender() as Render;
+        const resourceLoader = this.getConfig('resourceLoader');
+        const url = this.getConfig('url') || [];
+        const useSystem = this.getConfig('useSystem') || [];
+        const urlUseSystem = checkUseSystem(useSystem, 'url');
 
         const mountedUrl = url.map((r) => {
           return resourceLoader.mount(r, scope, { useSystem: urlUseSystem });
@@ -93,7 +89,7 @@ export default class Page extends Base {
             async (customProps: object) => {
               const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeMount, [scope], {
                 getRender: () => {
-                  return this.getRender() as Render;
+                  return this.getRender();
                 },
               });
               if (!isContinue) {
@@ -101,8 +97,8 @@ export default class Page extends Base {
               }
 
               const container = this.getPageContainer();
-
-              render.mount(component, container, {
+              const render = this.getRender();
+              render?.mount(component, container, {
                 ...this.getConfig('customProps'),
                 ...customProps,
               });
@@ -116,7 +112,7 @@ export default class Page extends Base {
             async (customProps) => {
               const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope], {
                 getRender: () => {
-                  return this.getRender() as Render;
+                  return this.getRender();
                 },
               });
               if (!isContinue) {
@@ -124,7 +120,8 @@ export default class Page extends Base {
               }
 
               const container = this.getPageContainer();
-              render.unmount(container, {
+              const render = this.getRender();
+              render?.unmount(container, {
                 ...this.getConfig('customProps'),
                 ...customProps,
               });
