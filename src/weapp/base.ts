@@ -7,8 +7,8 @@ import Product from './product';
 import Deferred from '../utils/deferred';
 
 export interface Render {
-  mount: (element: any, container?: HTMLElement, opts?: HookScope) => any;
-  unmount: (container?: HTMLElement, opts?: HookScope) => any;
+  mount: (element: any, container?: Element, opts?: HookScope) => any;
+  unmount: (container?: Element, opts?: HookScope) => any;
 }
 
 export interface BaseConfig {
@@ -46,9 +46,7 @@ function compoundScope(base: Base, scope: HookScope = {}): HookScope {
   scope[`${base.type}Name`] = base.name;
   scope[base.type as string] = base;
 
-  // @ts-ignore
   if (base.hookName) {
-    // @ts-ignore
     scope.hookName = base.hookName;
   }
 
@@ -157,7 +155,7 @@ export default class Base {
       let renderWrapper = render;
       if (this.type === BaseType.page) {
         // @ts-ignore
-        const container = this.getPageContainer();
+        const container = this.getPageContainer() as Element;
         renderWrapper = {
           mount: (element, node, opts) => {
             render.mount(element, node || container, opts);

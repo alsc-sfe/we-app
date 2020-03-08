@@ -46,7 +46,7 @@ export default class Page extends Base {
 
   parent: WeApp;
 
-  private pageContainer: HTMLElement;
+  private pageContainer: Element;
 
   constructor(config: PageConfig) {
     super(config);
@@ -201,7 +201,7 @@ export default class Page extends Base {
     return this.pageContainer;
   }
 
-  setPageContainer(pageContainer: HTMLElement) {
+  setPageContainer(pageContainer: Element) {
     this.pageContainer = pageContainer;
   }
 

@@ -6,7 +6,7 @@ import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
 
 export interface HookSkeletonOpts extends HookOpts {
   skeleton: string;
-  container: HTMLElement;
+  container: Element;
   contentSelector: string;
   [prop: string]: any;
 }
@@ -33,7 +33,7 @@ const hookSkeleton: HookDesc<HookSkeletonOpts> = {
 
         if (!container) {
           // 回溯到父骨架
-          container = base.getData('contentContainer', true);
+          container = base.getData('contentContainer', true) as Element;
         }
 
         container.appendChild(df);
@@ -50,13 +50,13 @@ const hookSkeleton: HookDesc<HookSkeletonOpts> = {
 
       const base = hookScope.page || hookScope.weApp || hookScope.product;
 
-      const elSkeleton = base.getData('skeletonContainer');
+      const elSkeleton = base.getData('skeletonContainer') as Element;
 
       let { opts: { container } } = param;
       // 需要处理取父骨架的情况，取父骨架的内容区
       if (!container) {
         // 回溯到父骨架
-        container = base.getData('contentContainer', true);
+        container = base.getData('contentContainer', true) as Element;
       }
 
       if (!nextHookScope) {
@@ -70,7 +70,7 @@ const hookSkeleton: HookDesc<HookSkeletonOpts> = {
       // 跨产品时，是否需要隐藏当前skeleton
       // 当是父子关系时，父级不可清除
       // 不为父子关系则清除
-      if (nextBase.getData('skeletonContainer', true) !== elSkeleton) {
+      if (nextBase.getData('skeletonContainer', true) as Element !== elSkeleton) {
         container.removeChild(elSkeleton);
       }
     },

@@ -5,6 +5,7 @@
 import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
 
 export interface HookSkeletonOpts extends HookOpts {
+  createPageContainer: (param: HookDescRunnerParam<HookSkeletonOpts>) => Element;
   [prop: string]: any;
 }
 
@@ -53,7 +54,7 @@ const hookPageContainer: HookDesc<HookSkeletonOpts> = {
 
     const elPageContainer = page?.getPageContainer();
     if (elPageContainer) {
-      elPageContainer.style.display = '';
+      (elPageContainer as HTMLElement).style.display = '';
     }
   },
 
@@ -63,7 +64,7 @@ const hookPageContainer: HookDesc<HookSkeletonOpts> = {
 
     const elPageContainer = page?.getPageContainer();
     if (elPageContainer) {
-      elPageContainer.style.display = 'none';
+      (elPageContainer as HTMLElement).style.display = 'none';
     }
   },
 };
