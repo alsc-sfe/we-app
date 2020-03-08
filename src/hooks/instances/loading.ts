@@ -6,19 +6,21 @@ export interface HookLoadingOpts {
 
 const hookLoading: HookDesc<HookLoadingOpts> = {
   hookName: 'loading',
-  async beforeLoad({ render, opts: { element } }: HookDescRunnerParam<HookLoadingOpts>) {
+  async beforeLoad({ getRender, opts: { element } }: HookDescRunnerParam<HookLoadingOpts>) {
+    const render = getRender();
     render?.mount(
       element,
       /* 默认渲染到当前页面对应的容器内 */
     );
   },
 
-  async onError({ pageScope: { page } }: HookDescRunnerParam<HookLoadingOpts>) {
-    const render = page?.getRender();
+  async onError({ getRender }: HookDescRunnerParam<HookLoadingOpts>) {
+    const render = getRender();
     render?.unmount();
   },
 
-  async beforeMount({ render }: HookDescRunnerParam<HookLoadingOpts>) {
+  async beforeMount({ getRender }: HookDescRunnerParam<HookLoadingOpts>) {
+    const render = getRender();
     render?.unmount();
   },
 };

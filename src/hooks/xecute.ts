@@ -1,4 +1,4 @@
-import { HookDescRunnerParam, HookScope, LifecycleHookEnum } from './type';
+import { HookDescRunnerParam, HookScope, LifecycleHookEnum, HookDescRunner, LifecycleHookRunner } from './type';
 import { getHooksScopes, getScopeHooks, getScopeHookNames } from './specify';
 import { getScopeName } from '../helpers';
 import { BaseType } from '../weapp/base';
@@ -153,7 +153,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
     newEnabledHookDescRunnerParams,
     disabledHookDescRunnerParams } = matchHookDescRunnerParams(activePageScopes, lifecycleHook);
 
-  const scopeHooksRunners = [];
+  const scopeHooksRunners: [LifecycleHookRunner<any>, HookDescRunnerParam<any>][] = [];
 
   // 禁用hook，调用clear
   if (lifecycleHook === LifecycleHookEnum.beforeRouting) {

@@ -23,6 +23,13 @@ registerHooks([
   buildinHooks.hookSkeleton,
   buildinHooks.hookPageContainer,
   buildinHooks.hookBasicLibs,
+  [buildinHooks.hookLoading, { 
+    element: function Loading() {
+      return (
+        <div>Loading...</div>
+      );
+    },
+  }],
 ]);
 
 function Page404() {

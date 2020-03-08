@@ -64,11 +64,14 @@ export default class Page extends Base {
     registerApplication(
       getScopeName(scope),
       async () => {
+        await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope], {
+          getRender: () => {
+            return this.getRender() as Render;
+          },
+        });
+
         // beforeLoad
         const render = this.getRender() as Render;
-        await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope], {
-          render,
-        });
 
         const mountedUrl = url.map((r) => {
           return resourceLoader.mount(r, scope, { useSystem: urlUseSystem });
@@ -87,7 +90,9 @@ export default class Page extends Base {
             // beforeMount
             async (customProps: object) => {
               const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeMount, [scope], {
-                render,
+                getRender: () => {
+                  return this.getRender() as Render;
+                },
               });
               if (!isContinue) {
                 return;
@@ -105,7 +110,9 @@ export default class Page extends Base {
             // beforeUnmount
             async (customProps) => {
               const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope], {
-                render,
+                getRender: () => {
+                  return this.getRender() as Render;
+                },
               });
               if (!isContinue) {
                 return;

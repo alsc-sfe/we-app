@@ -1,6 +1,7 @@
 import Product from '../weapp/product';
 import WeApp from '../weapp/weapp';
 import Page, { PageConfig } from '../weapp/page';
+import { Render } from '../weapp/base';
 
 export enum LifecycleHookEnum {
   page = 'page',
@@ -25,6 +26,7 @@ export interface HookDescRunnerParam<HookOpts> {
 
   nextHookDescRunnerParam?: HookDescRunnerParam<HookOpts>;
 
+  getRender?: () => Render;
   errorHandler?: (error: Event) => Promise<any>;
 
   context?: Window;
