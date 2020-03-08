@@ -39,8 +39,6 @@ export interface HookDescRunner<HookOpts> {
   clear?: LifecycleHookRunner<HookOpts>;
   // 当前匹配scope需要执行的逻辑
   exec?: LifecycleHookRunner<HookOpts>;
-  // 默认对应exec
-  (props: HookDescRunnerParam<HookOpts>): Promise<undefined|boolean|any>;
 }
 
 export interface HookOpts {
@@ -53,18 +51,18 @@ export interface HookDesc<HookOpts> {
   // 定义页面
   page?: PageConfig;
   // 路由跳转
-  beforeRouting?: LifecycleHookRunner<HookOpts>;
+  beforeRouting?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
   // 页面资源加载
-  beforeLoad?: LifecycleHookRunner<HookOpts>;
-  afterLoad?: LifecycleHookRunner<HookOpts>;
+  beforeLoad?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
+  afterLoad?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
   // 页面挂载（渲染）
-  beforeMount?: LifecycleHookRunner<HookOpts>;
-  afterMount?: LifecycleHookRunner<HookOpts>;
+  beforeMount?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
+  afterMount?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
   // 页面卸载
-  beforeUnmount?: LifecycleHookRunner<HookOpts>;
-  afterUnmount?: LifecycleHookRunner<HookOpts>;
+  beforeUnmount?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
+  afterUnmount?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
   // 页面执行错误
-  onError?: LifecycleHookRunner<HookOpts>;
+  onError?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
 }
 
 export interface HookScope {

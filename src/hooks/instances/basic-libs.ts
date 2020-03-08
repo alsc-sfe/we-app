@@ -10,17 +10,19 @@ import { DefaultResourceLoader, Resource, ResourceLoader } from '../../resource-
 import { isAncestorScope, checkUseSystem } from '../../helpers';
 
 export interface HookBasicLibsOpts extends HookOpts {
+  url: Resource[];
+  useSystem: string[];
   [prop: string]: any;
 }
 
-function getBasicLibsConfig(scope: HookScope) {
-  const { hookScope } = scope;
+function getBasicLibsConfig(scope: HookDescRunnerParam<HookBasicLibsOpts>) {
+  const { hookScope, opts } = scope;
   const { product, weApp, page } = hookScope || {};
 
   const base = page || weApp || product;
   const resourceLoader = base.getConfig('resourceLoader') as ResourceLoader || DefaultResourceLoader;
-  const basicLibs = base.getConfig('basicLibs') as Resource[];
-  const useSystem = base.getConfig('useSystem') as string[];
+  const basicLibs = opts.url;
+  const useSystem = opts.useSystem || base.getConfig('useSystem') as string[];
 
   const basicLibUseSystem = checkUseSystem(useSystem, 'basicLibs');
 
@@ -32,49 +34,47 @@ function getBasicLibsConfig(scope: HookScope) {
   };
 }
 
-let lastScope: HookDescRunnerParam<HookBasicLibsOpts>;
+const prevHookDescRunnerParams: HookDescRunnerParam<HookBasicLibsOpts>[] = [];
 
 const hookBasicLibs: HookDesc<HookBasicLibsOpts> = {
   hookName: 'basicLibs',
-  async beforeRouting(param: HookDescRunnerParam<HookBasicLibsOpts>) {
-    // scope发生变化时，卸载上一个scope的基础库
-    if (lastScope) {
-      // lastScope与当前scope是父子关系，不清除
-      if (!isAncestorScope(lastScope.hookScope, param.hookScope)) {
-        const lastBasicLibsConfig = getBasicLibsConfig(lastScope);
-        lastBasicLibsConfig.basicLibs.forEach((r) => {
-          lastBasicLibsConfig.resourceLoader.unmount(r, param.pageScope, { useSystem: lastBasicLibsConfig.useSystem });
-        });
-        lastBasicLibsConfig.base.setData({
-          basicLibs: false,
+  beforeRouting: {
+    exec: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
+      // 加载当前scope的基础库
+      const { base, useSystem, basicLibs, resourceLoader } = getBasicLibsConfig(param);
+
+      if (!base.getData('basicLibs')) {
+        await basicLibs.reduce(async (p, r) => {
+          await p;
+          return resourceLoader.mount(r, param.pageScope, { useSystem });
+        }, Promise.resolve());
+
+        base.setData({
+          basicLibs: true,
         });
 
-        if (lastScope.lastScope) {
-          lastScope = lastScope.lastScope;
-        } else {
-          lastScope = null;
+        prevHookDescRunnerParams.push(param);
+      }
+    },
+    clear: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
+      // scope发生变化时，卸载上一个scope的基础库
+      const prevHookDescRunnerParamsLength = prevHookDescRunnerParams.length;
+      if (prevHookDescRunnerParamsLength) {
+        // lastScope与当前scope是父子关系，不清除
+        const lastHookDescRunnerParam = prevHookDescRunnerParams[prevHookDescRunnerParamsLength - 1];
+        if (!isAncestorScope(lastHookDescRunnerParam.hookScope, param.hookScope)) {
+          const { basicLibs, resourceLoader, useSystem, base } = getBasicLibsConfig(lastHookDescRunnerParam);
+          basicLibs.forEach((r) => {
+            resourceLoader.unmount(r, param.pageScope, { useSystem });
+          });
+          base.setData({
+            basicLibs: false,
+          });
+
+          prevHookDescRunnerParams.pop();
         }
       }
-    }
-
-    // 加载当前scope的基础库
-    const basicLibsConfig = getBasicLibsConfig(param);
-
-    if (!basicLibsConfig.base.getData('basicLibs')) {
-      await basicLibsConfig.basicLibs.reduce(async (p, r) => {
-        await p;
-        return basicLibsConfig.resourceLoader.mount(r, param.pageScope, { useSystem: basicLibsConfig.useSystem });
-      }, Promise.resolve());
-
-      basicLibsConfig.base.setData({
-        basicLibs: true,
-      });
-
-      if (lastScope) {
-        param.lastScope = param;
-      }
-      lastScope = param;
-    }
+    },
   },
 };
 

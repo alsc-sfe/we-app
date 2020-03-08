@@ -67,5 +67,5 @@ export function isAncestorScope(ancestor: HookScope, descendant: HookScope) {
 }
 
 export function checkUseSystem(useSystem: string[], type: string) {
-  return useSystem.findIndex((s) => s === type) > -1;
+  return useSystem?.findIndex((s) => s === type) > -1;
 }
