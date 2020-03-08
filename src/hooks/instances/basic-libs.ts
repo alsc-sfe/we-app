@@ -5,7 +5,7 @@
  * JS沙箱是级联式沙箱，当前沙箱没有对象则会向上级查找，需阻止修改对象的值(用proxy拦截)
  * 写入则只能写在当前JS沙箱里
  */
-import { HookScope, HookDesc, HookDescRunnerParam, HookOpts } from '../type';
+import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
 import { DefaultResourceLoader, Resource, ResourceLoader } from '../../resource-loader';
 import { isAncestorScope, checkUseSystem } from '../../helpers';
 
@@ -34,8 +34,6 @@ function getBasicLibsConfig(scope: HookDescRunnerParam<HookBasicLibsOpts>) {
   };
 }
 
-const prevHookDescRunnerParams: HookDescRunnerParam<HookBasicLibsOpts>[] = [];
-
 const hookBasicLibs: HookDesc<HookBasicLibsOpts> = {
   hookName: 'basicLibs',
   beforeRouting: {
@@ -43,36 +41,30 @@ const hookBasicLibs: HookDesc<HookBasicLibsOpts> = {
       // 加载当前scope的基础库
       const { base, useSystem, basicLibs, resourceLoader } = getBasicLibsConfig(param);
 
-      if (!base.getData('basicLibs')) {
+      if (!base.getData('basicLibsLoaded')) {
         await basicLibs.reduce(async (p, r) => {
           await p;
           return resourceLoader.mount(r, param.pageScope, { useSystem });
         }, Promise.resolve());
 
         base.setData({
-          basicLibs: true,
+          basicLibsLoaded: true,
         });
-
-        prevHookDescRunnerParams.push(param);
       }
     },
     clear: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
       // scope发生变化时，卸载上一个scope的基础库
-      const prevHookDescRunnerParamsLength = prevHookDescRunnerParams.length;
-      if (prevHookDescRunnerParamsLength) {
-        // lastScope与当前scope是父子关系，不清除
-        const lastHookDescRunnerParam = prevHookDescRunnerParams[prevHookDescRunnerParamsLength - 1];
-        if (!isAncestorScope(lastHookDescRunnerParam.hookScope, param.hookScope)) {
-          const { basicLibs, resourceLoader, useSystem, base } = getBasicLibsConfig(lastHookDescRunnerParam);
-          basicLibs.forEach((r) => {
-            resourceLoader.unmount(r, param.pageScope, { useSystem });
-          });
-          base.setData({
-            basicLibs: false,
-          });
-
-          prevHookDescRunnerParams.pop();
-        }
+      const { hookScope, nextHookDescRunnerParam } = param;
+      const { hookScope: nextHookScope } = nextHookDescRunnerParam;
+      // nextHookScope与当前hookScope是父子关系，不清除
+      if (!nextHookScope || !isAncestorScope(hookScope, nextHookScope)) {
+        const { basicLibs, resourceLoader, useSystem, base } = getBasicLibsConfig(param);
+        basicLibs.forEach((r) => {
+          resourceLoader.unmount(r, param.pageScope, { useSystem });
+        });
+        base.setData({
+          basicLibsLoaded: false,
+        });
       }
     },
   },

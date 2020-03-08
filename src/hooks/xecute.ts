@@ -20,20 +20,13 @@ export function getEnabledHookNames() {
   return Array.from(new Set(enabledHookNames));
 }
 
-function matchHooksScope(activePageScope: HookScope) {
-  const pageScopeName = getScopeName(activePageScope);
-  activePageScope.scopeName = pageScopeName;
-
-  if (MatchedPageScope[pageScopeName]) {
-    return MatchedPageScope[pageScopeName];
-  }
-
-  const weAppScopeName = getScopeName({ ...activePageScope, pageName: '' });
-  const productScopeName = getScopeName({ ...activePageScope, weAppName: '', pageName: '' });
+function matchHookDescRunnerParam(sourceHookScope: HookScope, forMatchedHookScopes: (string | HookScope)[]) {
+  const pageScopeName = sourceHookScope.scopeName;
+  const weAppScopeName = getScopeName({ ...sourceHookScope, pageName: '' });
+  const productScopeName = getScopeName({ ...sourceHookScope, weAppName: '', pageName: '' });
   const activeScopeNames = [pageScopeName, weAppScopeName, productScopeName];
   // 根据activePageScope匹配hooksScope，一个页面只会有一个hooksScope
-  const hooksScopes = getHooksScopes();
-  const matchedHooksScopes = hooksScopes.map((hooksScope) => {
+  const matchedHookScopes = forMatchedHookScopes.map((hooksScope) => {
     const hookScope = typeof hooksScope === 'string' ? getScope(hooksScope) : hooksScope;
     return hookScope;
   }).filter((hookScope) => {
@@ -49,12 +42,12 @@ function matchHooksScope(activePageScope: HookScope) {
     );
   });
 
-  let matchedHooksScope = matchedHooksScopes[0];
-  if (matchedHooksScopes.length > 1) {
+  let matchedHookScope = matchedHookScopes[0];
+  if (matchedHookScopes.length > 1) {
     // 从多个匹配的scope中选择作用域最小的一个
     // 作用域最小则长度最长
     const len = [];
-    matchedHooksScopes.map((scope) => {
+    matchedHookScopes.map((scope) => {
       return [
         scope,
         scope.productName,
@@ -64,55 +57,84 @@ function matchHooksScope(activePageScope: HookScope) {
     }).forEach((m) => {
       len[m.length] = m;
     });
-    matchedHooksScope = len[len.length - 1][0];
+    matchedHookScope = len[len.length - 1][0];
   }
 
-  const hookDescRunnerParam = {
-    pageScope: activePageScope,
-    hookScope: matchedHooksScope,
+  const hookDescRunnerParam: HookDescRunnerParam<any> = {
+    pageScope: sourceHookScope,
+    hookScope: matchedHookScope,
   };
+
+  return hookDescRunnerParam;
+}
+
+function matchActivePageHookDescRunnerParam(activePageScope: HookScope) {
+  const pageScopeName = getScopeName(activePageScope);
+  activePageScope.scopeName = pageScopeName;
+
+  if (MatchedPageScope[pageScopeName]) {
+    return MatchedPageScope[pageScopeName];
+  }
+
+  // 根据activePageScope匹配hooksScope，一个页面只会有一个hooksScope
+  const hooksScopes = getHooksScopes();
+  const hookDescRunnerParam = matchHookDescRunnerParam(activePageScope, hooksScopes);
+
   MatchedPageScope[pageScopeName] = hookDescRunnerParam;
 
   return hookDescRunnerParam;
 }
 
-function matchHooksScopes(activePageScopes: HookScope[]) {
-  const lastEnabledHookScopes = [...EnabledHookScopes];
+function matchHookDescRunnerParams(activePageScopes: HookScope[], lifecycleHook: LifecycleHookEnum) {
+  const lastEnabledHookDescRunnerParams = [...EnabledHookScopes];
   // 根据activePageScope匹配hooksScope，一个页面只会有一个hooksScope
-  const enabledHookScopes = activePageScopes.map((activePageScope) => {
-    return matchHooksScope(activePageScope);
+  const enabledHookDescRunnerParams = activePageScopes.map((activePageScope) => {
+    return matchActivePageHookDescRunnerParam(activePageScope);
   });
-  EnabledHookScopes = enabledHookScopes;
-  // 计算新启用hookScopes
-  const newEnabledHookScopes: HookDescRunnerParam<any>[] = [];
-  // 计算已启用hookScopes
-  const alreadyEnabledHookScopes: HookDescRunnerParam<any>[] = [];
-  // 计算禁用hookScopes
-  // 找到上一个scope在当前scope中不存在的
-  const disabledHookScopes: HookDescRunnerParam<any>[] = [...lastEnabledHookScopes];
 
-  enabledHookScopes.forEach((enabledHookScope) => {
-    const { hookScope } = enabledHookScope;
-    // 不在上一次的启用hookScopes中，则为新启用hookScopes
-    // 在上一次的启用hookScopes中，则为已启用hookScopes，并移除
-    // 上一次启用hookScopes中剩余的就是本次需要禁用的hookScopes
-    const index = disabledHookScopes.findIndex(({ hookScope: lastHookScope }) => {
-      return hookScope.scopeName === lastHookScope.scopeName;
+  if (lifecycleHook === LifecycleHookEnum.beforeRouting) {
+    EnabledHookScopes = enabledHookDescRunnerParams;
+
+    // 计算新启用hookScopes
+    const newEnabledHookDescRunnerParams: HookDescRunnerParam<any>[] = [];
+    // 计算已启用hookScopes
+    const alreadyEnabledHookDescRunnerParams: HookDescRunnerParam<any>[] = [];
+    // 计算禁用hookScopes
+    // 找到上一个scope在当前scope中不存在的
+    const disabledHookDescRunnerParams: HookDescRunnerParam<any>[] = [...lastEnabledHookDescRunnerParams];
+
+    enabledHookDescRunnerParams.forEach((enabledHookDescRunnerParam) => {
+      const { hookScope } = enabledHookDescRunnerParam;
+      // 不在上一次的启用hookScopes中，则为新启用hookScopes
+      // 在上一次的启用hookScopes中，则为已启用hookScopes，并移除
+      // 上一次启用hookScopes中剩余的就是本次需要禁用的hookScopes
+      const index = disabledHookDescRunnerParams.findIndex(({ hookScope: lastHookScope }) => {
+        return hookScope.scopeName === lastHookScope.scopeName;
+      });
+      if (index === -1) {
+        newEnabledHookDescRunnerParams.push(enabledHookDescRunnerParam);
+      } else {
+        alreadyEnabledHookDescRunnerParams.push(enabledHookDescRunnerParam);
+        disabledHookDescRunnerParams.splice(index, 1);
+      }
     });
-    if (index === -1) {
-      newEnabledHookScopes.push(enabledHookScope);
-    } else {
-      alreadyEnabledHookScopes.push(enabledHookScope);
-      disabledHookScopes.splice(index, 1);
-    }
-  });
 
-  return {
-    enabledHookScopes,
-    newEnabledHookScopes,
-    alreadyEnabledHookScopes,
-    disabledHookScopes,
-  };
+    const matchedHookDescRunnerParams = {
+      enabledHookDescRunnerParams,
+      newEnabledHookDescRunnerParams,
+      alreadyEnabledHookDescRunnerParams,
+      disabledHookDescRunnerParams,
+    };
+
+    return matchedHookDescRunnerParams;
+  } else {
+    return {
+      enabledHookDescRunnerParams,
+      newEnabledHookDescRunnerParams: enabledHookDescRunnerParams,
+      alreadyEnabledHookDescRunnerParams: [],
+      disabledHookDescRunnerParams: [],
+    };
+  }
 }
 
 export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activePageScopes: HookScope[], props?: any) {
@@ -127,35 +149,45 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
     hookPages.push(RootScopeName);
   }
 
-  const { enabledHookScopes, newEnabledHookScopes, disabledHookScopes } = matchHooksScopes(activePageScopes);
+  const { enabledHookDescRunnerParams,
+    newEnabledHookDescRunnerParams,
+    disabledHookDescRunnerParams } = matchHookDescRunnerParams(activePageScopes, lifecycleHook);
 
   const scopeHooksRunners = [];
 
-  disabledHookScopes.forEach(({ pageScope, hookScope }) => {
-    const scopeHooks = getScopeHooks(hookScope.scopeName);
-    scopeHooks.forEach(({ hookDescEntity, opts }) => {
-      // 生命周期钩子函数获取
-      const hookDescRunner = hookDescEntity(lifecycleHook);
-      if (hookDescRunner && 'clear' in hookDescRunner) {
-        scopeHooksRunners.push([hookDescRunner.clear, {
-          ...props,
-          pageScope,
-          hookScope,
-          opts,
-          matched: false,
-          hookPages,
-          activePageScopes,
-          errorHandler: (error: Event) => {
-            return errorHandler(error, [pageScope]);
-          },
-        }]);
-      }
+  // 禁用hook，调用clear
+  if (lifecycleHook === LifecycleHookEnum.beforeRouting) {
+    const enabledHookScopes = enabledHookDescRunnerParams.map(({ hookScope }) => hookScope);
+    disabledHookDescRunnerParams.forEach(({ pageScope, hookScope }) => {
+      // 像skeleton、basicLibs等扩展，如果前后hookScope存在祖孙关系，则不能清理
+      // 所以需要在新启用的hookScope中找到与当前禁用hookScope相匹配的项，供扩展进行判断
+      const nextHookDescRunnerParam = matchHookDescRunnerParam(hookScope, enabledHookScopes);
+      const scopeHooks = getScopeHooks(hookScope.scopeName);
+      scopeHooks.forEach(({ hookDescEntity, opts }) => {
+        // 生命周期钩子函数获取
+        const hookDescRunner = hookDescEntity(lifecycleHook);
+        if (hookDescRunner && 'clear' in hookDescRunner) {
+          scopeHooksRunners.push([hookDescRunner.clear, {
+            ...props,
+            pageScope,
+            hookScope,
+            opts,
+            matched: false,
+            hookPages,
+            activePageScopes,
+            nextHookDescRunnerParam,
+            errorHandler: (error: Event) => {
+              return errorHandler(error, [pageScope]);
+            },
+          }]);
+        }
+      });
     });
-  });
+  }
 
   // 新启用hook，如果有页面，则先卸载页面，更新配置
   if (lifecycleHook === LifecycleHookEnum.beforeRouting) {
-    newEnabledHookScopes.forEach(({ hookScope }) => {
+    newEnabledHookDescRunnerParams.forEach(({ hookScope }) => {
       const scopeHooks = getScopeHooks(hookScope.scopeName);
       scopeHooks.forEach(({ hookDescEntity, opts }) => {
         const hookPageConfig = hookDescEntity(LifecycleHookEnum.page) as PageConfig;
@@ -176,7 +208,8 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
     });
   }
 
-  enabledHookScopes.forEach(({ pageScope, hookScope }) => {
+  // 启用hook，调用exec
+  enabledHookDescRunnerParams.forEach(({ pageScope, hookScope }) => {
     const scopeHooks = getScopeHooks(hookScope.scopeName);
     scopeHooks.forEach(({ hookDescEntity, opts }) => {
       const hookDescRunner = hookDescEntity(lifecycleHook);
@@ -188,7 +221,9 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
           opts,
           matched: true,
           hookPages,
-          activePageScopes,
+          activePages: activePageScopes.map((activeScope) => {
+            return getScopeName(activeScope);
+          }),
           errorHandler: (error: Event) => {
             return errorHandler(error, [pageScope]);
           },

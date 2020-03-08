@@ -20,16 +20,13 @@ const hook404: HookDesc<Hook404Opts> = {
   },
 
   async beforeRouting(param: HookDescRunnerParam<Hook404Opts>) {
-    const { opts: { excludePages = [] }, activePageScopes = [], hookPages = [] } = param;
+    const { opts: { excludePages = [] }, activePages = [], hookPages = [] } = param;
     const exPages = hookPages.concat(excludePages);
-    console.log(param.pageScope.scopeName, param.hookScope.scopeName, param);
-    const activePages = activePageScopes.map((activeScope) => {
-      return getScopeName(activeScope);
-    }).filter((activePage) => {
+
+    const alivePages = activePages.filter((activePage) => {
       return exPages.indexOf(activePage) === -1;
     });
-    // 需要排除的页面
-    is404 = activePages.length === 0;
+    is404 = alivePages.length === 0;
   },
 };
 

@@ -51,7 +51,7 @@ const hookPageContainer: HookDesc<HookSkeletonOpts> = {
   async beforeMount(param: HookDescRunnerParam<HookSkeletonOpts>) {
     const { page } = param.pageScope;
 
-    const elPageContainer = page.getPageContainer();
+    const elPageContainer = page?.getPageContainer();
     if (elPageContainer) {
       elPageContainer.style.display = '';
     }
@@ -61,7 +61,7 @@ const hookPageContainer: HookDesc<HookSkeletonOpts> = {
     // 隐藏页面容器
     const { page } = param.pageScope;
 
-    const elPageContainer = page.getPageContainer();
+    const elPageContainer = page?.getPageContainer();
     if (elPageContainer) {
       elPageContainer.style.display = 'none';
     }

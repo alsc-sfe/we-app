@@ -23,6 +23,8 @@ export interface HookDescRunnerParam<HookOpts> {
   hookPages?: string[];
   activePageScopes?: HookScope[];
 
+  nextHookDescRunnerParam?: HookDescRunnerParam<HookOpts>;
+
   errorHandler?: (error: Event) => Promise<any>;
 
   context?: Window;
@@ -53,16 +55,16 @@ export interface HookDesc<HookOpts> {
   // 路由跳转
   beforeRouting?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
   // 页面资源加载
-  beforeLoad?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
-  afterLoad?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
+  beforeLoad?: LifecycleHookRunner<HookOpts>;
+  afterLoad?: LifecycleHookRunner<HookOpts>;
   // 页面挂载（渲染）
-  beforeMount?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
-  afterMount?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
+  beforeMount?: LifecycleHookRunner<HookOpts>;
+  afterMount?: LifecycleHookRunner<HookOpts>;
   // 页面卸载
-  beforeUnmount?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
-  afterUnmount?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
+  beforeUnmount?: LifecycleHookRunner<HookOpts>;
+  afterUnmount?: LifecycleHookRunner<HookOpts>;
   // 页面执行错误
-  onError?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
+  onError?: LifecycleHookRunner<HookOpts>;
 }
 
 export interface HookScope {
