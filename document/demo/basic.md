@@ -33,7 +33,12 @@ registerHooks([
 ]);
 
 function Page404() {
-  return <div>This is 404 page</div>
+  return (
+    <div>
+      <h1>This is 404 page</h1>
+      <div>Please check pages routes</div>
+    </div>
+  );
 }
 
 registerHooks(
@@ -67,7 +72,7 @@ registerHooks(
       url: [Promise.resolve(Page403)],
     },
     excludePages: ['bcommon/navbar', 'bcommon/menu'],
-    check403: async () => ({ hasOrg: true, hasSign: true, orgPass: false }),
+    check403: async () => false, // ({ hasOrg: true, hasSign: true, orgPass: false }),
   },
 );
 

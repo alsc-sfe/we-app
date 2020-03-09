@@ -93,6 +93,11 @@ export default class Page extends Base {
                 },
               });
               if (!isContinue) {
+                await runLifecycleHook(LifecycleHookEnum.onMountPrevented, [scope], {
+                  getRender: () => {
+                    return this.getRender();
+                  },
+                });
                 return;
               }
 

@@ -58,7 +58,27 @@ const hookPageContainer: HookDesc<HookSkeletonOpts> = {
     }
   },
 
+  async onMountPrevented(param: HookDescRunnerParam<HookSkeletonOpts>) {
+    // 隐藏页面容器
+    const { page } = param.pageScope;
+
+    const elPageContainer = page?.getPageContainer();
+    if (elPageContainer) {
+      (elPageContainer as HTMLElement).style.display = 'none';
+    }
+  },
+
   async afterUnmount(param: HookDescRunnerParam<HookSkeletonOpts>) {
+    // 隐藏页面容器
+    const { page } = param.pageScope;
+
+    const elPageContainer = page?.getPageContainer();
+    if (elPageContainer) {
+      (elPageContainer as HTMLElement).style.display = 'none';
+    }
+  },
+
+  async onError(param: HookDescRunnerParam<HookSkeletonOpts>) {
     // 隐藏页面容器
     const { page } = param.pageScope;
 

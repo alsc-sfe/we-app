@@ -9,6 +9,7 @@ export enum LifecycleHookEnum {
   beforeLoad = 'beforeLoad',
   afterLoad = 'afterLoad',
   beforeMount = 'beforeMount',
+  onMountPrevented = 'onMountPrevented',
   afterMount = 'afterMount',
   beforeUnmount = 'beforeUnmount',
   afterUnmount = 'afterUnmount',
