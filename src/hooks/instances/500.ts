@@ -1,4 +1,4 @@
-import { HookDesc, HookOpts, HookDescRunnerParam } from '../type';
+import { HookDesc, HookOpts, HookDescRunnerParam, UsingHookOpts } from '../type';
 
 export interface Hook500Opts extends HookOpts {
   [prop: string]: any;
@@ -6,7 +6,7 @@ export interface Hook500Opts extends HookOpts {
 
 let is500 = false;
 
-const hook500: HookDesc<Hook500Opts> = {
+const hook500Desc: HookDesc<Hook500Opts> = {
   hookName: '500',
   page: {
     hooks: ['pageContainer', '500'],
@@ -25,6 +25,11 @@ const hook500: HookDesc<Hook500Opts> = {
 
     is500 = true;
   },
+};
+
+const hook500: UsingHookOpts<Hook500Opts> = {
+  hookName: '500',
+  hookDesc: hook500Desc,
 };
 
 export default hook500;

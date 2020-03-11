@@ -1,5 +1,5 @@
-import { HookDescRunnerParam, HookScope, LifecycleHookEnum, HookDescRunner, LifecycleHookRunner } from './type';
-import { getHooksScopes, getScopeHooks, getScopeHookNames } from './specify';
+import { HookDescRunnerParam, HookScope, LifecycleHookEnum, LifecycleHookRunner } from './type';
+import { getHooksScopes, getScopeHooks, getScopeHookNames } from './using';
 import { getScopeName } from '../helpers';
 import { BaseType } from '../weapp/base';
 import { getPageConfigs } from './register';
@@ -7,6 +7,7 @@ import { errorHandler } from '../error';
 import { getScope, compoundScope } from '../weapp';
 import { PageConfig } from '../weapp/page';
 import { getAppStatus, unloadApplication, UNLOADING, NOT_LOADED } from 'single-spa';
+import { getContext } from '../context';
 
 const MatchedPageScope: { [pageName: string]: HookDescRunnerParam<any> } = {};
 let EnabledHookScopes: HookDescRunnerParam<any>[] = [];
@@ -181,6 +182,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
             errorHandler: (error: Event) => {
               return errorHandler(error, [pageScope]);
             },
+            context: getContext(),
           }]);
         }
       });
@@ -235,6 +237,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
           errorHandler: (error: Event) => {
             return errorHandler(error, [pageScope]);
           },
+          context: getContext(),
         }]);
       }
     });

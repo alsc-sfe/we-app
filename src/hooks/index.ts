@@ -1,12 +1,11 @@
-import { registerHooks, getPageConfigs } from './register';
-import { specifyHooks } from './specify';
-import { runLifecycleHook } from './xecute';
+import { getPageConfigs } from './register';
+import { usingHooks } from './using';
+import { runLifecycleHook } from './execute';
 import buildinHooks from './instances';
 
 export {
-  registerHooks,
   getPageConfigs,
-  specifyHooks,
+  usingHooks,
   runLifecycleHook,
 
   buildinHooks,

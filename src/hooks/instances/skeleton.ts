@@ -2,16 +2,16 @@
  * 骨架必须在路由切换前确定是显示还是隐藏
  * 页面容器在路由切换前显示，在卸载后隐藏
  */
-import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
+import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
 
 export interface HookSkeletonOpts extends HookOpts {
-  skeleton: string;
+  template: string;
   container: Element;
   contentSelector: string;
   [prop: string]: any;
 }
 
-const hookSkeleton: HookDesc<HookSkeletonOpts> = {
+const hookSkeletonDesc: HookDesc<HookSkeletonOpts> = {
   hookName: 'skeleton',
   beforeRouting: {
     exec: async (param: HookDescRunnerParam<HookSkeletonOpts>) => {
@@ -21,11 +21,11 @@ const hookSkeleton: HookDesc<HookSkeletonOpts> = {
 
       // 渲染骨架
       let { opts: { container } } = param;
-      const { opts: { skeleton, contentSelector } } = param;
+      const { opts: { template, contentSelector } } = param;
 
       if (!base.getData('skeletonContainer')) {
         const div = document.createElement('div');
-        div.innerHTML = skeleton;
+        div.innerHTML = template;
         const skeletonContainer = div.children[0];
 
         const df = document.createDocumentFragment();
@@ -75,6 +75,11 @@ const hookSkeleton: HookDesc<HookSkeletonOpts> = {
       }
     },
   },
+};
+
+const hookSkeleton: UsingHookOpts<HookSkeletonOpts> = {
+  hookName: 'skeleton',
+  hookDesc: hookSkeletonDesc,
 };
 
 export default hookSkeleton;

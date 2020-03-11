@@ -4,7 +4,7 @@ import WeApp, { getActivePageScopes } from './weapp';
 import Base, { BaseType } from './base';
 import { DefaultResourceLoader } from '../resource-loader';
 import { RouterType } from '../routing/enum';
-import { HookScope, HookDesc } from '../hooks/type';
+import { HookScope } from '../hooks/type';
 import { getPageConfigs } from '../hooks';
 
 class RootProduct extends Product {
@@ -12,10 +12,18 @@ class RootProduct extends Product {
 
   parent: Product = this;
 
-  private hookWeApp: WeApp;
-
   registerProducts(cfgs: ProductConfig[] = []) {
-    return this.registerChildren(cfgs, Product) as Promise<Product[]>;
+    this.setInitDeferred();
+
+    const pProducts = cfgs.map((cfg) => {
+      return this.registerProduct(cfg) as Promise<Product>;
+    });
+
+    Promise.all(pProducts).then(() => {
+      this.setInited();
+    });
+
+    return pProducts;
   }
 
   registerProduct(cfg: ProductConfig) {
@@ -23,7 +31,11 @@ class RootProduct extends Product {
   }
 
   getProduct(productName: string) {
-    return this.getChild(productName) as Product;
+    const product = this.getChild(productName) as Product;
+    if (product.type !== BaseType.product) {
+      return;
+    }
+    return product;
   }
 
   getScope(scopeName: string) {
@@ -31,8 +43,8 @@ class RootProduct extends Product {
     scope.scopeName = scopeName;
 
     if (scope.hookName) {
-      const innerProduct = this.getProduct(BuildinProductName);
-      const hookWeApp = innerProduct.getWeApp(HookWeAppName);
+      const buildinProduct = this.getProduct(BuildinProductName);
+      const hookWeApp = buildinProduct.getWeApp(HookWeAppName);
       scope.page = hookWeApp.getPage(scope.hookName);
     } else if (scope.pageName) {
       if (!scope.productName) {
@@ -49,9 +61,7 @@ class RootProduct extends Product {
     return scope;
   }
 
-  async registerHooks(hookDesc: HookDesc<any>|HookDesc<any>[]|[HookDesc<any>, any][], opts?: any) {
-    super.registerHooks(hookDesc, opts);
-
+  async registerHookPages() {
     // 注册hook页面
     const pageConfigs = getPageConfigs();
     const hookWeApp = await this.registerHookApp();
@@ -84,9 +94,19 @@ class RootProduct extends Product {
         scope.hookName = paths[2];
       }
     } else if (pathsLen === 2) {
-      scope.weAppName = paths[0];
-      scope.pageName = paths[1];
+      // 可能是产品、微应用，也可能是微应用、页面
+      const name = paths[0];
+      const product = this.getProduct(name);
+      if (product) {
+        scope.productName = name;
+        scope.product = product;
+        scope.weAppName = paths[1];
+      } else {
+        scope.weAppName = paths[0];
+        scope.pageName = paths[1];
+      }
     } else if (pathsLen === 1) {
+      // 可能是产品，可能是微应用
       const name = paths[0];
       const product = this.getProduct(name);
       if (product) {
@@ -110,11 +130,11 @@ const rootProduct = new RootProduct({
   routerType: RouterType.browser,
 });
 
-export const registerProducts = rootProduct.registerProducts.bind(rootProduct) as RootProduct['registerProducts'];
 export const registerWeApps = rootProduct.registerWeApps.bind(rootProduct) as RootProduct['registerWeApps'];
 
-export const registerHooks = rootProduct.registerHooks.bind(rootProduct) as RootProduct['registerHooks'];
-export const specifyHooks = rootProduct.specifyHooks.bind(rootProduct) as RootProduct['specifyHooks'];
+export const usingHooks = rootProduct.usingHooks.bind(rootProduct) as RootProduct['usingHooks'];
+export const configHooks = rootProduct.configHooks.bind(rootProduct) as RootProduct['configHooks'];
+export const registerHookPages = rootProduct.registerHookPages.bind(rootProduct) as RootProduct['registerHookPages'];
 
 export const startRootProduct = rootProduct.start.bind(rootProduct) as RootProduct['start'];
 
@@ -127,6 +147,10 @@ export const requireChildrenInited = rootProduct.requireChildrenInited.bind(root
 
 export const setData = rootProduct.setData.bind(rootProduct) as RootProduct['setData'];
 export const getData = rootProduct.getData.bind(rootProduct) as RootProduct['getData'];
+
+export const setResourceLoader = rootProduct.setResourceLoader.bind(rootProduct) as RootProduct['setResourceLoader'];
+export const setPageContainer = rootProduct.setPageContainer.bind(rootProduct) as RootProduct['setPageContainer'];
+export const setRender = rootProduct.setRender.bind(rootProduct) as RootProduct['setRender'];
 
 export {
   getActivePageScopes,

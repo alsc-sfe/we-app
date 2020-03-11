@@ -3,8 +3,7 @@
  * 1. singleSpa里有页面，但是没有匹配到
  * 2. 匹配到的页面全部被排除了
  */
-import { getScopeName } from '../../helpers';
-import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
+import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
 
 export interface Hook404Opts extends HookOpts {
   excludePages?: string[];
@@ -12,7 +11,7 @@ export interface Hook404Opts extends HookOpts {
 
 let is404 = false;
 
-const hook404: HookDesc<Hook404Opts> = {
+const hook404Desc: HookDesc<Hook404Opts> = {
   hookName: '404',
   page: {
     hooks: ['pageContainer', '500'],
@@ -28,6 +27,11 @@ const hook404: HookDesc<Hook404Opts> = {
     });
     is404 = alivePages.length === 0;
   },
+};
+
+const hook404: UsingHookOpts<Hook404Opts> = {
+  hookName: '404',
+  hookDesc: hook404Desc,
 };
 
 export default hook404;

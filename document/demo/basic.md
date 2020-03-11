@@ -8,118 +8,19 @@ PC模板
 ````jsx
 import './global';
 import './style.less';
-import { setConfig, registerWeApps, registerProducts, 
-  start, specifyHooks, setHomepage,
-  registerHooks, buildinHooks } from "@alife/we-app";
+import { 
+  setResourceLoader, setPageContainer, setRender,
+  registerApps, 
+  start, setHomepage, setContext,
+  usingHooks, configHooks } from "@alife/we-app";
 import render from './render';
 
-setConfig({
-  // 所有的微应用、页面的资源都用system加载
-  useSystem: ['url'],
-  render,
-});
+setRender(render);
 
-registerHooks([
-  buildinHooks.hookSkeleton,
-  buildinHooks.hookPageContainer,
-  buildinHooks.hookBasicLibs,
-  [buildinHooks.hookLoading, { 
-    element: function Loading() {
-      return (
-        <div>Loading...</div>
-      );
-    },
-  }],
-]);
-
-function Page404() {
-  return (
-    <div>
-      <h1>This is 404 page</h1>
-      <div>Please check pages routes</div>
-    </div>
-  );
-}
-
-registerHooks(
-  buildinHooks.hook404,
+configHooks([
   {
-    page: {
-      url: [Promise.resolve(Page404)],
-    },
-    excludePages: ['bcommon/navbar', 'bcommon/menu'],
-  },
-);
-
-function Page403(props) {
-  console.log('403 props', props);
-  return (
-    <div>
-      <h1>This is 403 page</h1>
-      <div>原因：
-      {!props.hasOrg && '请创建组织'}
-      {!props.hasOrg && '请签约'}
-      {!props.orgPass && '组织不匹配'}
-      </div>
-    </div>
-  );
-}
-
-registerHooks(
-  buildinHooks.hook403,
-  {
-    page: {
-      url: [Promise.resolve(Page403)],
-    },
-    excludePages: ['bcommon/navbar', 'bcommon/menu'],
-    check403: async () => false, // ({ hasOrg: true, hasSign: true, orgPass: false }),
-  },
-);
-
-function Page500(props) {
-  console.log('500 props', props);
-  return (
-    <div>
-      <h1>This is 500 page</h1>
-      <div>{props.error.message}</div>
-    </div>
-  );
-}
-
-registerHooks(
-  buildinHooks.hook500,
-  {
-    page: {
-      url: [Promise.resolve(Page500)],
-    },
-  },
-);
-
-specifyHooks({
-  config: {
-    skeleton: {
-      skeleton: `
-        <div id="microfe-layout" class="microfe-layout">
-          <div class="microfe-navbar" id="bcommon__navbar"></div>
-          <div class="microfe-body">
-            <div class="microfe-menu" id="bcommon__menu"></div>
-            <div class="microfe-wrapper">
-              <div class="microfe-root-body">
-                <div class="microfe-root-content __weapp__content" id="__microfe-root-content"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `,
-      container: document.body,
-      contentSelector: '.__weapp__content',
-    },
-  },
-});
-
-specifyHooks({
-  config: {
-    basicLibs: {
+    hookName: 'basicLibs',
+    config: {
       url: [
         '//gw.alipayobjects.com/os/lib/alife/cook-pc/3.22.7-beta.7/dist/antd.min.css',
         'https://gw.alipayobjects.com/os/mentor/saas-node-crm-main/1.0.19/umd/index.css',
@@ -146,34 +47,122 @@ specifyHooks({
       ],
     },
   },
-});
+  {
+    hookName: 'skeleton',
+    config: {
+      template: `
+        <div class="microfe-layout">
+          <div class="microfe-navbar __common_navbar"></div>
+          <div class="microfe-body">
+            <div class="microfe-menu __common_menu"></div>
+            <div class="microfe-wrapper">
+              <div class="microfe-root-body">
+                <div class="microfe-root-content __content"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `,
+      container: document.body,
+      contentSelector: '.__content',
+    },
+  },
+  {
+    hookName: 'pageContainer',
+    config: {
+      specialSelectors: {
+        'bcommon__navbar': '.__common_navbar',
+        'bcommon__menu': '.__common_menu',
+      },
+    },
+    scopes: [
+      'bcommon/navbar',
+      'bcommon/menu',
+    ],
+  },
+  {
+    hookName: 'loading',
+    config: {
+      element: function Loading() {
+        return (
+          <div>Loading...</div>
+        );
+      },
+    },
+  },
+  {
+    hookName: '404',
+    config: {
+      page: {
+        url: [Promise.resolve(Page404)],
+      },
+      excludePages: ['bcommon/navbar', 'bcommon/menu'],
+    },
+  },
+  {
+    hookName: '403',
+    config: {
+      page: {
+        url: [Promise.resolve(Page403)],
+      },
+      excludePages: ['bcommon/navbar', 'bcommon/menu'],
+      check403: async () => ({ hasOrg: true, hasSign: true, orgPass: false }),
+    },
+  },
+  {
+    hookName: '500',
+    config: {
+      page: {
+        url: [Promise.resolve(Page500)],
+      },
+    },
+  },
+]);
 
-specifyHooks(['pageContainer'], 'bcommon/navbar');
-specifyHooks(['pageContainer'], 'bcommon/menu');
+function Page404() {
+  return (
+    <div>
+      <h1>This is 404 page</h1>
+      <div>Please check pages routes</div>
+    </div>
+  );
+}
 
-registerWeApps([
+function Page403(props) {
+  console.log('403 props', props);
+  return (
+    <div>
+      <h1>This is 403 page</h1>
+      <div>原因：
+      {!props.hasOrg && '请创建组织'}
+      {!props.hasOrg && '请签约'}
+      {!props.orgPass && '组织不匹配'}
+      </div>
+    </div>
+  );
+}
+
+function Page500(props) {
+  console.log('500 props', props);
+  return (
+    <div>
+      <h1>This is 500 page</h1>
+      <div>{props.error.message}</div>
+    </div>
+  );
+}
+
+registerApps([
   {
     url: 'https://g.alicdn.com/alsc-saas/web-boh-common/1.3.3/app-config.js',
   },
-]);
-
-setHomepage({
-  weAppName: 'bcommon',
-  pageName: 'account-settings',
-});
-
-start();
-
-registerProducts([
   {
-    name: 'boh',
-    weApps: [
-      {
-        url: 'https://g.alicdn.com/alsc-saas/web-boh-org/1.0.4/app-config.js',
-      },
-    ],
+    basename: '/boh/org',
+    url: 'https://g.alicdn.com/alsc-saas/web-boh-org/1.0.4/app-config.js',
   },
 ]);
+
+setHomepage('bcommon/account-settings');
 
 start();
 ````

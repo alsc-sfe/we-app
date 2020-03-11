@@ -1,15 +1,15 @@
 import { getScopeName } from '../../helpers';
-import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
+import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
 
 export interface Hook403Opts extends HookOpts {
-  excludePages: string[];
-  check403: (pageAuthCode: string) => Promise<boolean|object>;
+  excludePages?: string[];
+  check403?: (pageAuthCode: string) => Promise<boolean|object>;
   [prop: string]: any;
 }
 
 let is403 = false;
 
-const hook403: HookDesc<Hook403Opts> = {
+const hook403Desc: HookDesc<Hook403Opts> = {
   hookName: '403',
   page: {
     hooks: ['pageContainer', '500'],
@@ -26,6 +26,12 @@ const hook403: HookDesc<Hook403Opts> = {
       if (page) {
         const { opts: { check403 } } = param;
         const pageAuth = page.getConfig('pageAuth') || page.getConfig('pageAuthCode');
+
+        if (!check403) {
+          is403 = false;
+          return;
+        }
+
         const res = await check403(pageAuth);
         is403 = !!res;
 
@@ -41,6 +47,11 @@ const hook403: HookDesc<Hook403Opts> = {
     // 阻止渲染
     return !is403;
   },
+};
+
+const hook403: UsingHookOpts<Hook403Opts> = {
+  hookName: '403',
+  hookDesc: hook403Desc,
 };
 
 export default hook403;

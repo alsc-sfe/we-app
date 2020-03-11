@@ -7,7 +7,7 @@
  * 1. 全局手动引入，部署多一步
  * 2. 默认resourceLoader内置systemjs依赖，可能造成全局污染
  */
-import { HookScope } from '../hooks/type';
+import { HookScope, UsingScope } from '../hooks/type';
 import 'systemjs/dist/system';
 
 declare global {
@@ -24,33 +24,43 @@ const { System } = window;
 export type ResourceFunction = () => Promise<any>;
 export type Resource = string | Promise<any> | ResourceFunction;
 
-export interface ResourceLoader {
+export interface ResourceLoaderOpts {
+  useSystem?: boolean;
+}
+
+export interface ResourceLoaderDesc {
   mount: (
     resource: Resource,
     // 沙箱从scope上获取，由Base创建
     activeScope: HookScope,
-    opts?: { useSystem?: boolean }
+    opts?: ResourceLoaderOpts
   ) => Promise<any>;
   unmount: (
     resource: Resource,
     activeScope: HookScope,
-    opts?: { useSystem?: boolean }
+    opts?: ResourceLoaderOpts
   ) => Promise<any>;
 }
 
-export const DefaultResourceLoader: ResourceLoader = {
+export interface ResourceLoader {
+  desc?: ResourceLoaderDesc;
+  config?: ResourceLoaderOpts;
+  scopes?: UsingScope[];
+}
+
+const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
   async mount(
     resource: Resource,
     activeScope: HookScope,
-    opts: { useSystem?: boolean } = {}
+    opts: ResourceLoaderOpts = { useSystem: true }
   ) {
-    const { context = window } = activeScope;
+    const { root = window } = activeScope;
     const { useSystem } = opts;
 
     if (typeof resource === 'string') {
       if (resource.indexOf('.js') > -1) {
         if (useSystem) {
-          return context.System ? context.System.import(resource) : System.import(resource);
+          return root.System ? root.System.import(resource) : System.import(resource);
         }
 
         return new Promise((resolve, reject) => {
@@ -84,9 +94,9 @@ export const DefaultResourceLoader: ResourceLoader = {
   async unmount(
     resource: Resource,
     activeScope: HookScope,
-    opts: { useSystem?: boolean } = {}
+    opts: ResourceLoaderOpts = { useSystem: true }
   ) {
-    const { context = window } = activeScope;
+    const { root = window } = activeScope;
     const { useSystem } = opts;
 
     if (typeof resource === 'string') {
@@ -94,7 +104,7 @@ export const DefaultResourceLoader: ResourceLoader = {
 
       if (resource.indexOf('.js') > -1) {
         if (useSystem) {
-          context.System && context.System.delete(resource);
+          root.System && root.System.delete(resource);
           return;
         }
 
@@ -109,4 +119,8 @@ export const DefaultResourceLoader: ResourceLoader = {
       }
     }
   },
+};
+
+export const DefaultResourceLoader: ResourceLoader = {
+  desc: DefaultResourceLoaderDesc,
 };

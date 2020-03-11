@@ -1,4 +1,4 @@
-import { HookScope } from './hooks/type';
+import { HookScope, UsingScope } from './hooks/type';
 import { BaseType } from './weapp/base';
 
 const BuildinProductName = '__WeApp';
@@ -11,19 +11,18 @@ export {
   ScopeNameDivider,
 };
 
-export interface GetPageNameOpts {
-  productName?: string;
-  weAppName?: string;
-  pageName?: string;
-  hookName?: string;
-}
+export function getScopeName(scope: UsingScope) {
+  if (typeof scope === 'string') {
+    return scope;
+  }
 
-export function getScopeName({
-  productName = '',
-  weAppName = '',
-  pageName = '',
-  hookName = '',
-}: GetPageNameOpts) {
+  const {
+    productName = '',
+    weAppName = '',
+    pageName = '',
+    hookName = '',
+  } = scope;
+
   let pname = '';
   if (hookName) {
     // hook
@@ -64,8 +63,4 @@ export function isAncestorScope(ancestor: HookScope, descendant: HookScope) {
   }
 
   return false;
-}
-
-export function checkUseSystem(useSystem: string[], type: string) {
-  return useSystem?.findIndex((s) => s === type) > -1;
 }

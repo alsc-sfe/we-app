@@ -1,12 +1,16 @@
-import { HookDescRunnerParam, HookDesc } from '../type';
+import { HookDescRunnerParam, HookDesc, HookOpts, UsingHookOpts } from '../type';
 
-export interface HookLoadingOpts {
+export interface HookLoadingOpts extends HookOpts {
   element: any;
 }
 
-const hookLoading: HookDesc<HookLoadingOpts> = {
+const hookLoadingDesc: HookDesc<HookLoadingOpts> = {
   hookName: 'loading',
   async beforeLoad({ getRender, opts: { element } }: HookDescRunnerParam<HookLoadingOpts>) {
+    if (!element) {
+      return;
+    }
+
     const render = getRender();
     render?.mount(
       element,
@@ -23,6 +27,11 @@ const hookLoading: HookDesc<HookLoadingOpts> = {
     const render = getRender();
     render?.unmount();
   },
+};
+
+const hookLoading: UsingHookOpts<HookLoadingOpts> = {
+  hookName: 'loading',
+  hookDesc: hookLoadingDesc,
 };
 
 export default hookLoading;

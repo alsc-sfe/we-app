@@ -7,21 +7,15 @@
  *    hooks被启用的位置，决定了其判断条件
  */
 import WeApp, { WeAppConfig } from './weapp';
-import Base, { BaseConfig, BaseType, Render } from './base';
+import Base, { BaseConfig, BaseType } from './base';
 import { ResourceLoader } from '../resource-loader';
-import { AppConfig, transformAppConfig } from './helper';
-import { checkUseSystem } from '../helpers';
+import { transformAppConfig } from './helper';
 
 export interface ProductConfig extends BaseConfig {
   parent?: Product;
   // 微应用列表
   url?: string; // 支持远程获取
-  parseWeAppConfigs?: (configs: any) => WeAppConfig[]; // 解析远程获取的微应用配置
   weApps?: WeAppConfig[];
-  // 页面渲染实现
-  render?: Render;
-  // 资源加载器
-  resourceLoader?: ResourceLoader;
 }
 
 class Product extends Base {
@@ -39,49 +33,48 @@ class Product extends Base {
 
   registerWeApps(cfgs: WeAppConfig[]) {
     this.setInitDeferred();
-    const pWeApps = this.registerChildren(cfgs, WeApp) as Promise<WeApp[]>;
-    pWeApps.then(() => {
+
+    const pWeApps = cfgs.map((cfg) => {
+      return this.registerWeApp(cfg) as Promise<WeApp>;
+    });
+
+    Promise.all(pWeApps).then(() => {
       this.setInited();
     });
+
     return pWeApps;
   }
 
-  registerWeApp(cfg: WeAppConfig) {
+  async registerWeApp(config: WeAppConfig) {
     this.setInitDeferred();
-    const pWeApp = this.registerChild(cfg, WeApp);
-    pWeApp.then(() => {
-      this.setInited();
-    });
-    return pWeApp;
+
+    let childConfig = config;
+    if (config?.url) {
+      childConfig = await this.loadAppConfig(config);
+    }
+    const child = await this.registerChild(childConfig, WeApp);
+
+    this.setInited();
+
+    return child;
   }
 
   getWeApp(weAppName: string) {
-    return this.getChild(weAppName) as WeApp;
-  }
-
-  protected async registerChild(config: AppConfig, Child: typeof WeApp|typeof Product) {
-    let childConfig = config;
-
-    if (Child === WeApp && config?.url) {
-      childConfig = await this.loadAppConfig(config);
+    const weApp = this.getChild(weAppName) as WeApp;
+    if (weApp.type !== BaseType.weApp) {
+      return;
     }
-
-    const child = await super.registerChild({
-      ...childConfig,
-      type: Child === WeApp ? BaseType.weApp : BaseType.product,
-    }, Child) as WeApp|Product;
-    return child;
+    return weApp;
   }
 
   private async loadAppConfig(config: WeAppConfig) {
     const { url } = config;
-    const resourceLoader = this.getConfig('resourceLoader') as ResourceLoader;
-    const useSystem = this.getConfig('useSystem') as string[];
+    const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
 
     let weAppConfig = await resourceLoader.mount(
       url,
       this.compoundScope(this),
-      { useSystem: checkUseSystem(useSystem, 'url') }
+      resourceLoaderOpts
     );
 
     weAppConfig = transformAppConfig(weAppConfig.default || weAppConfig);

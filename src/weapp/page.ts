@@ -6,20 +6,21 @@
  * 在首次访问时，通过调用page的makeActivityFunction，手动获取activeScopes
  */
 import { registerApplication } from 'single-spa';
-import { getScopeName, checkUseSystem } from '../helpers';
+import { getScopeName } from '../helpers';
 import Base, { BaseConfig, BaseType, Render } from './base';
 import { HookScope, LifecycleHookEnum } from '../hooks/type';
 import WeApp from './weapp';
-import { Resource } from '../resource-loader';
+import { Resource, ResourceLoader } from '../resource-loader';
 import { runLifecycleHook } from '../hooks';
 import { DEFAULTRouteMatch as routeMatchFn, Route } from '../routing';
 import { ajustPathname } from '../routing/util';
 import { matchHomepage } from './homepage';
+import { RouterType } from '../routing/enum';
+import { getContext } from '../context';
+
 
 export interface PageConfig extends BaseConfig {
   parent?: WeApp;
-
-  hookName?: string;
 
   activityFunction?: ActivityFunction;
 
@@ -35,8 +36,6 @@ export interface PageConfig extends BaseConfig {
   url?: Resource[];
 
   customProps?: object;
-
-  [prop: string]: any;
 }
 
 export type ActivityFunction = (location?: Location) => boolean;
@@ -45,8 +44,6 @@ export default class Page extends Base {
   type: BaseType = BaseType.page;
 
   parent: WeApp;
-
-  private pageContainer: Element;
 
   constructor(config: PageConfig) {
     super(config);
@@ -66,13 +63,11 @@ export default class Page extends Base {
           },
         });
 
-        const resourceLoader = this.getConfig('resourceLoader');
-        const url = this.getConfig('url') || [];
-        const useSystem = this.getConfig('useSystem') || [];
-        const urlUseSystem = checkUseSystem(useSystem, 'url');
+        const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
+        const url = this.getConfig('url') as Resource[] || [];
 
         const mountedUrl = url.map((r) => {
-          return resourceLoader.mount(r, scope, { useSystem: urlUseSystem });
+          return resourceLoader.mount(r, scope, resourceLoaderOpts);
         });
         // 获取第一个不为空的返回值
         const component = await Promise.all(mountedUrl).then((resources) => {
@@ -106,6 +101,7 @@ export default class Page extends Base {
               render?.mount(component, container, {
                 ...this.getConfig('customProps'),
                 ...customProps,
+                context: getContext(),
               });
 
               // afterMount
@@ -129,6 +125,11 @@ export default class Page extends Base {
               render?.unmount(container, {
                 ...this.getConfig('customProps'),
                 ...customProps,
+                context: getContext(),
+              });
+
+              url.map((r) => {
+                return resourceLoader.unmount(r, scope, resourceLoaderOpts);
               });
 
               // afterUnmount
@@ -147,6 +148,25 @@ export default class Page extends Base {
     );
   }
 
+  getRender() {
+    const render = this.getConfig('render') as Render;
+    if (render) {
+      let renderWrapper = render;
+      if (this.type === BaseType.page) {
+        const container = this.getPageContainer() as Element;
+        renderWrapper = {
+          mount: (element, node, opts) => {
+            render.mount(element, node || container, opts);
+          },
+          unmount: (node, opts) => {
+            render.unmount(node || container, opts);
+          },
+        };
+      }
+      return renderWrapper;
+    }
+  }
+
   getBasename() {
     const scope = this.compoundScope(this);
     const { productName = '', weAppName = '', weApp } = scope;
@@ -161,6 +181,7 @@ export default class Page extends Base {
 
   makeActivityFunction() {
     const config = this.getConfig();
+    const routerType = this.getConfig('routerType') as RouterType;
     const { routeIgnore, afterRouteDiscover } = config;
 
     let { route } = config;
@@ -190,6 +211,7 @@ export default class Page extends Base {
             ...config,
             basename: this.getBasename(),
             locate: location,
+            routerType,
           });
         }
 
@@ -203,11 +225,11 @@ export default class Page extends Base {
   }
 
   getPageContainer() {
-    return this.pageContainer;
+    return this.getConfig('pageContainer') as Element;
   }
 
   setPageContainer(pageContainer: Element) {
-    this.pageContainer = pageContainer;
+    this.setConfig('pageContainer', pageContainer);
   }
 
   setCustomProps(customProps: any) {

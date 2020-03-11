@@ -6,15 +6,24 @@ import { start as startSingleSpa } from 'single-spa';
 // 路由方法拦截
 import { startRouting } from './routing/routing';
 
-import { ProductConfig } from './weapp/product';
-import { registerProducts, registerWeApps, setConfig, requireChildrenInited,
-  startRootProduct, registerHooks, specifyHooks, setHomepage } from './weapp';
+import { registerWeApps as registerApps, requireChildrenInited,
+  startRootProduct, usingHooks, configHooks, setHomepage, registerHookPages,
+  setResourceLoader, setPageContainer, setRender } from './weapp';
 import { buildinHooks } from './hooks';
+import { setContext } from './context';
+import { DefaultResourceLoader } from './resource-loader';
 
 let startPromise: Promise<any>;
 
-async function _start(config?: ProductConfig) {
-  setConfig(config);
+// 设置resourceLoader
+setResourceLoader(DefaultResourceLoader);
+
+// 注册内置扩展
+usingHooks(buildinHooks);
+
+async function _start() {
+  // 注册扩展页面
+  await registerHookPages();
   // 确保所有节点都已经注册完成
   await requireChildrenInited();
   // 首次进入，触发路由拦截
@@ -25,25 +34,28 @@ async function _start(config?: ProductConfig) {
   startSingleSpa();
 }
 
-export function start(config?: ProductConfig) {
+export async function start() {
   if (!startPromise) {
-    startPromise = _start(config);
+    // 启动父应用
+    startPromise = _start();
   } else {
+    // 重启父应用，需要在上次启动之后
     startPromise.then(() => {
-      startPromise = _start(config);
+      startPromise = _start();
     });
   }
 }
 
 export {
-  registerHooks,
-  specifyHooks,
+  setResourceLoader,
+  setPageContainer,
+  setRender,
 
-  registerProducts,
-  registerWeApps,
+  usingHooks,
+  configHooks,
 
-  setConfig,
+  registerApps,
+
   setHomepage,
-
-  buildinHooks,
+  setContext,
 };

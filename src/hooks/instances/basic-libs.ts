@@ -5,51 +5,50 @@
  * JS沙箱是级联式沙箱，当前沙箱没有对象则会向上级查找，需阻止修改对象的值(用proxy拦截)
  * 写入则只能写在当前JS沙箱里
  */
-import { HookDesc, HookDescRunnerParam, HookOpts } from '../type';
-import { DefaultResourceLoader, Resource, ResourceLoader } from '../../resource-loader';
-import { isAncestorScope, checkUseSystem } from '../../helpers';
+import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
+import { Resource, ResourceLoader } from '../../resource-loader';
+import { isAncestorScope } from '../../helpers';
 
 export interface HookBasicLibsOpts extends HookOpts {
-  url: Resource[];
-  useSystem: string[];
+  url?: Resource[];
+  useSystem?: boolean;
   [prop: string]: any;
 }
 
-function getBasicLibsConfig(scope: HookDescRunnerParam<HookBasicLibsOpts>) {
-  const { hookScope, opts } = scope;
+function getBasicLibsConfig(param: HookDescRunnerParam<HookBasicLibsOpts>) {
+  const { hookScope, opts } = param;
   const { product, weApp, page } = hookScope || {};
 
   const base = page || weApp || product;
-  const resourceLoader = base.getConfig('resourceLoader') as ResourceLoader || DefaultResourceLoader;
+  const { desc: resourceLoader, config: resourceLoaderOpts } = base.getConfig('resourceLoader') as ResourceLoader;
   const basicLibs = opts.url;
-  const useSystem = opts.useSystem || base.getConfig('useSystem') as string[];
-
-  const basicLibUseSystem = checkUseSystem(useSystem, 'basicLibs');
+  const { useSystem } = opts;
 
   return {
     base,
     basicLibs,
     resourceLoader,
-    useSystem: basicLibUseSystem,
+    resourceLoaderOpts: {
+      ...resourceLoaderOpts,
+      useSystem,
+    },
   };
 }
 
-const hookBasicLibs: HookDesc<HookBasicLibsOpts> = {
+const hookBasicLibsDesc: HookDesc<HookBasicLibsOpts> = {
   hookName: 'basicLibs',
   beforeRouting: {
     exec: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
       // 加载当前scope的基础库
-      const { base, useSystem, basicLibs, resourceLoader } = getBasicLibsConfig(param);
+      const { base, resourceLoaderOpts, basicLibs, resourceLoader } = getBasicLibsConfig(param);
 
       if (!base.getData('basicLibsLoaded')) {
         await basicLibs.reduce(async (p, r) => {
           await p;
-          return resourceLoader.mount(r, param.pageScope, { useSystem });
+          return resourceLoader.mount(r, param.pageScope, resourceLoaderOpts);
         }, Promise.resolve());
 
-        base.setData({
-          basicLibsLoaded: true,
-        });
+        base.setData('basicLibsLoaded', true);
       }
     },
     clear: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
@@ -58,15 +57,21 @@ const hookBasicLibs: HookDesc<HookBasicLibsOpts> = {
       const { hookScope: nextHookScope } = nextHookDescRunnerParam;
       // nextHookScope与当前hookScope是父子关系，不清除
       if (!nextHookScope || !isAncestorScope(hookScope, nextHookScope)) {
-        const { basicLibs, resourceLoader, useSystem, base } = getBasicLibsConfig(param);
+        const { basicLibs, resourceLoader, resourceLoaderOpts, base } = getBasicLibsConfig(param);
         basicLibs.forEach((r) => {
-          resourceLoader.unmount(r, param.pageScope, { useSystem });
+          resourceLoader.unmount(r, param.pageScope, resourceLoaderOpts);
         });
-        base.setData({
-          basicLibsLoaded: false,
-        });
+        base.setData('basicLibsLoaded', false);
       }
     },
+  },
+};
+
+const hookBasicLibs: UsingHookOpts<HookBasicLibsOpts> = {
+  hookName: 'basicLibs',
+  hookDesc: hookBasicLibsDesc,
+  config: {
+    useSystem: false,
   },
 };
 

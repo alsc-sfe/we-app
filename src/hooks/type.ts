@@ -34,7 +34,8 @@ export interface HookDescRunnerParam<HookOpts> {
   getRender?: () => Render;
   errorHandler?: (error: Event) => Promise<any>;
 
-  context?: Window;
+  root?: Window;
+  context?: any;
 
   // 错误信息
   error?: Error;
@@ -58,23 +59,27 @@ export interface HookOpts {
   [prop: string]: any;
 }
 
-export interface HookDesc<HookOpts> {
+type LifecycleHookName = Exclude<keyof typeof LifecycleHookEnum, 'page' | 'beforeRouting'>;
+
+export type HookDesc<HookOpts> = {
+  [hook in LifecycleHookName]?: LifecycleHookRunner<HookOpts>;
+} & {
   hookName?: string;
   // 定义页面
   page?: PageConfig;
   // 路由跳转
-  beforeRouting?: LifecycleHookRunner<HookOpts>|HookDescRunner<HookOpts>;
-  // 页面资源加载
-  beforeLoad?: LifecycleHookRunner<HookOpts>;
-  afterLoad?: LifecycleHookRunner<HookOpts>;
-  // 页面挂载（渲染）
-  beforeMount?: LifecycleHookRunner<HookOpts>;
-  afterMount?: LifecycleHookRunner<HookOpts>;
-  // 页面卸载
-  beforeUnmount?: LifecycleHookRunner<HookOpts>;
-  afterUnmount?: LifecycleHookRunner<HookOpts>;
-  // 页面执行错误
-  onError?: LifecycleHookRunner<HookOpts>;
+  beforeRouting?: LifecycleHookRunner<HookOpts> | HookDescRunner<HookOpts>;
+};
+
+export type UsingScope = string|HookScope;
+export interface UsingHookOpts<HookOpts> {
+  hookName: string;
+  // 自定义插件
+  hookDesc?: HookDesc<HookOpts>;
+  // 配置
+  config?: HookOpts;
+  // 工作范围
+  scopes?: UsingScope[];
 }
 
 export interface HookScope {
@@ -96,12 +101,11 @@ export interface HookScope {
 
   errorHandler?: (error: Event) => Promise<any[]>;
 
-  context?: Window;
+  root?: Window;
+
+  context?: any;
 
   [prop: string]: any;
 }
 
-export type EnabledHooks = string[]|[string, any][];
-export interface HookConfig { [hookName: string]: any }
-export type DisabledHooks = string[];
-export type SpecifyHooksConfig = EnabledHooks|{ config: HookConfig; disabled: DisabledHooks };
+export type UsingHooksConfigs = (UsingHookOpts<any>|string)[]|null;

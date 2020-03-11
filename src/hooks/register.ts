@@ -1,6 +1,6 @@
 import { LifecycleHookEnum, HookDescEntity, HookDesc } from './type';
 import { PageConfig } from '../weapp/page';
-import { getEnabledHookNames } from './xecute';
+import { getEnabledHookNames } from './execute';
 
 const HookNames: string[] = [];
 const HookEntities: {
@@ -9,6 +9,10 @@ const HookEntities: {
     opts: any;
   };
 } = {};
+
+export function hasHookName(hookName: string) {
+  return HookNames.indexOf(hookName) > -1;
+}
 
 export function getRegisteredHooks() {
   return HookNames;

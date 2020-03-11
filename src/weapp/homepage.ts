@@ -1,28 +1,30 @@
-import { HookScope } from '../hooks/type';
+import { UsingScope, HookScope } from '../hooks/type';
 import { getScope } from './root-product';
 
-let homepage: HookScope;
+let homepage: UsingScope;
 
-export function setHomepage(s: HookScope|string) {
-  let scope = s as HookScope;
-  if (typeof s === 'string') {
-    scope = getScope(s);
-  }
+export function setHomepage(scope: UsingScope) {
   homepage = scope;
 }
 
-export function matchHomepage(s: HookScope|string) {
+export function matchHomepage(s: UsingScope) {
   let scope = s as HookScope;
   if (typeof s === 'string') {
     scope = getScope(s);
   }
+
+  let homepageScope = homepage as HookScope;
+  if (typeof homepage === 'string') {
+    homepageScope = getScope(homepage);
+  }
+
   if (
-    homepage && scope &&
-    homepage.weAppName && scope.weAppName &&
-    homepage.pageName && scope.pageName &&
-    homepage.productName === scope.productName &&
-    homepage.weAppName === scope.weAppName &&
-    homepage.pageName === scope.pageName
+    homepageScope && scope &&
+    homepageScope.weAppName && scope.weAppName &&
+    homepageScope.pageName && scope.pageName &&
+    homepageScope.productName === scope.productName &&
+    homepageScope.weAppName === scope.weAppName &&
+    homepageScope.pageName === scope.pageName
   ) {
     return true;
   }

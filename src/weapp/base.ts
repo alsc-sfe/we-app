@@ -1,10 +1,13 @@
 import get from 'lodash-es/get';
-import { HookScope, SpecifyHooksConfig, HookDesc } from '../hooks/type';
-import { specifyHooks, registerHooks } from '../hooks';
+import { HookScope, UsingHooksConfigs, UsingScope } from '../hooks/type';
+import { usingHooks } from '../hooks';
 
-import { ResourceLoader } from '../resource-loader';
+import { ResourceLoader, Resource } from '../resource-loader';
 import Product from './product';
 import Deferred from '../utils/deferred';
+import { configHooks } from '../hooks/using';
+import { getGlobalConfig, setResourceLoader, setPageContainer, setRender } from './config';
+import { getScopeName } from '../helpers';
 
 export interface Render {
   mount: (element: any, container?: Element, opts?: HookScope) => any;
@@ -16,13 +19,7 @@ export interface BaseConfig {
   type?: BaseType;
   parent?: Base;
 
-  hooks?: SpecifyHooksConfig;
-
-  render?: Render;
-
-  resourceLoader?: ResourceLoader;
-  basicLibs?: string[];
-  useSystem?: string[];
+  url?: Resource|Resource[];
 
   [prop: string]: any;
 }
@@ -34,33 +31,12 @@ export enum BaseType {
   page = 'page'
 }
 
-function compoundScope(base: Base, scope: HookScope = {}): HookScope {
-  if (base.type === BaseType.root) {
-    if (!scope.product) {
-      scope.product = base as Product;
-      scope.productName = base.name;
-    }
-    return scope;
-  }
-
-  scope[`${base.type}Name`] = base.name;
-  scope[base.type as string] = base;
-
-  if (base.hookName) {
-    scope.hookName = base.hookName;
-  }
-
-  return compoundScope(base.parent, scope);
-}
-
 export default class Base {
   type: BaseType;
 
   name: string;
 
   parent: Base;
-
-  compoundScope = compoundScope;
 
   hookName: string;
 
@@ -77,6 +53,8 @@ export default class Base {
   private initDeferred: Deferred<Base>;
 
   constructor(config?: BaseConfig) {
+    this.config = config;
+
     if (config) {
       this.name = config.name;
       this.parent = config.parent;
@@ -85,12 +63,6 @@ export default class Base {
       if (config.hookName) {
         this.hookName = config.hookName;
       }
-
-      if (config.hooks) {
-        specifyHooks(config.hooks, compoundScope(this));
-      }
-
-      this.config = config;
     }
   }
 
@@ -104,6 +76,25 @@ export default class Base {
     this.children.forEach((child) => {
       child.start();
     });
+  }
+
+  compoundScope(base: Base, scope: HookScope = {}): HookScope {
+    if (base.type === BaseType.root) {
+      if (!scope.product) {
+        scope.product = base as Product;
+        scope.productName = base.name;
+      }
+      return scope;
+    }
+
+    scope[`${base.type}Name`] = base.name;
+    scope[base.type as string] = base;
+
+    if (base.hookName) {
+      scope.hookName = base.hookName;
+    }
+
+    return this.compoundScope(base.parent, scope);
   }
 
   getInited() {
@@ -134,39 +125,36 @@ export default class Base {
     return initStatus;
   }
 
-  getConfig(pathname?: string) {
-    let config = pathname ? get(this.config, pathname) : this.config;
+  getConfig(pathname?: string): any {
+    let { config } = this;
+    // 先从全局设置对应scope中获取配置
+    if (pathname) {
+      const scope = this.compoundScope(this);
+      const scopeName = getScopeName(scope);
+      config = getGlobalConfig(pathname, scopeName);
+
+      if (!config) {
+        config = get(this.config, pathname);
+      }
+    }
+    // 再向上级查找
     if (!config && this.type !== BaseType.root) {
       config = this.parent.getConfig(pathname);
     }
+
     return config;
   }
 
-  setConfig(config: BaseConfig) {
+  setConfig(config: BaseConfig|string, value?: any) {
+    if (typeof config === 'string') {
+      this.config[config] = value;
+      return;
+    }
+
     this.config = {
       ...this.config,
       ...config,
     };
-  }
-
-  getRender() {
-    const render = this.getConfig('render') as Render;
-    if (render) {
-      let renderWrapper = render;
-      if (this.type === BaseType.page) {
-        // @ts-ignore
-        const container = this.getPageContainer() as Element;
-        renderWrapper = {
-          mount: (element, node, opts) => {
-            render.mount(element, node || container, opts);
-          },
-          unmount: (node, opts) => {
-            render.unmount(node || container, opts);
-          },
-        };
-      }
-      return renderWrapper;
-    }
   }
 
   getData(pathname: string, traced = false) {
@@ -193,12 +181,24 @@ export default class Base {
     this.data[pathname] = data;
   }
 
-  registerHooks(hookDesc: HookDesc<any>|HookDesc<any>[]|[HookDesc<any>, any][], opts?: any) {
-    registerHooks(hookDesc, opts);
+  usingHooks(params: UsingHooksConfigs, scopes?: HookScope[]) {
+    usingHooks(params, scopes || [this.compoundScope(this)]);
   }
 
-  specifyHooks(params: SpecifyHooksConfig, scope?: HookScope) {
-    specifyHooks(params, scope || compoundScope(this));
+  configHooks(params: UsingHooksConfigs, scopes?: HookScope[]) {
+    configHooks(params, scopes || [this.compoundScope(this)]);
+  }
+
+  setResourceLoader(resourceLoader: ResourceLoader, scopes?: UsingScope[]) {
+    setResourceLoader(resourceLoader, resourceLoader?.scopes || scopes || [this.compoundScope(this)]);
+  }
+
+  setPageContainer(pageContainer: Element, scopes?: UsingScope[]) {
+    setPageContainer(pageContainer, scopes || [this.compoundScope(this)]);
+  }
+
+  setRender(render: Render, scopes?: UsingScope[]) {
+    setRender(render, scopes || [this.compoundScope(this)]);
   }
 
   protected async registerChildren(cfgs: BaseConfig[], Child: typeof Base) {
@@ -220,7 +220,7 @@ export default class Base {
 
     this.children.push(child);
 
-    return child;
+    return child as Base;
   }
 
   protected setInitDeferred() {
