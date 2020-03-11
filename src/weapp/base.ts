@@ -21,6 +21,8 @@ export interface BaseConfig {
 
   url?: Resource|Resource[];
 
+  hooks?: UsingHooksConfigs;
+
   [prop: string]: any;
 }
 
@@ -62,6 +64,10 @@ export default class Base {
 
       if (config.hookName) {
         this.hookName = config.hookName;
+      }
+
+      if (config.hooks) {
+        usingHooks(config.hooks, [this.compoundScope(this)]);
       }
     }
   }
