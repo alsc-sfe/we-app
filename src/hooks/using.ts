@@ -54,7 +54,6 @@ function setHooksOpts(hooksConfig: UsingHooksConfigs, scope: UsingScope) {
     throw new Error(`请指定需要启用的扩展，工作范围 ${scopeName}`);
   }
   // 在当前scope上保存扩展配置
-  ScopesHooks[scopeName] = ScopesHooks[scopeName] || [];
   const scopeHooks = ScopesHooks[scopeName];
   hooksConfig.forEach((hookConfig) => {
     let hookName = hookConfig as string;
@@ -205,6 +204,6 @@ export function configHooks(hookConfigs: (UsingHookOpts<any>|string)[], scopes: 
   // 设置scope hook opts
   Object.keys(scopeHooksOpts).forEach((scopeName) => {
     const scopeHookOpts = scopeHooksOpts[scopeName];
-    setHooksOpts(scopeHookOpts, scopeMap[scopeName]);
+    enableHooks(scopeHookOpts, scopeMap[scopeName]);
   });
 }
