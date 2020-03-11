@@ -1,5 +1,5 @@
 window.MicroAppLoader = {
-  routerType: '/',
+  routerType: '#/',
   RouterType: {
     hash: '#/',
     browser: '/',

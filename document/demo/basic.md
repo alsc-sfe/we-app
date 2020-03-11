@@ -10,12 +10,14 @@ import './global';
 import './style.less';
 import { 
   setResourceLoader, setPageContainer, setRender,
-  registerApps, 
-  start, setHomepage, setContext,
+  registerApps, start, 
+  setHomepage, setContext, setRouterType, RouterType,
   usingHooks, configHooks } from "@alife/we-app";
 import render from './render';
 
 setRender(render);
+
+setRouterType(RouterType.hash);
 
 configHooks([
   {

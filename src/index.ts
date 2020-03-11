@@ -8,10 +8,11 @@ import { startRouting } from './routing/routing';
 
 import { registerWeApps as registerApps, requireChildrenInited,
   startRootProduct, usingHooks, configHooks, setHomepage, registerHookPages,
-  setResourceLoader, setPageContainer, setRender } from './weapp';
+  setResourceLoader, setPageContainer, setRender, setConfig } from './weapp';
 import { buildinHooks } from './hooks';
 import { setContext } from './context';
 import { DefaultResourceLoader } from './resource-loader';
+import { RouterType } from './routing/enum';
 
 let startPromise: Promise<any>;
 
@@ -58,4 +59,12 @@ export {
 
   setHomepage,
   setContext,
+
+  RouterType,
+};
+
+export const setRouterType = (routerType: RouterType) => {
+  setConfig({
+    routerType,
+  });
 };
