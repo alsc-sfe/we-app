@@ -41,7 +41,7 @@ function transformRoute(route: string|string[]|boolean|Route|Route[]): TRoute {
   });
 }
 
-export function transformAppConfig(appConfig: AppConfig): WeAppConfig {
+export async function transformAppConfig(appConfig: AppConfig): Promise<WeAppConfig> {
   return {
     name: appConfig.microAppName,
     pages: appConfig.modules.map((module): PageConfig => {
