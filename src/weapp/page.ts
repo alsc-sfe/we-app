@@ -192,7 +192,11 @@ export default class Page extends Base {
 
     // hook添加的页面会返回activityFunction
     if (activityFunction) {
-      return activityFunction;
+      return (location: Location) => {
+        const match = activityFunction(location);
+        afterRouteDiscover && afterRouteDiscover(match);
+        return match;
+      };
     }
 
     if (route === true && !routeIgnore) {
@@ -202,8 +206,12 @@ export default class Page extends Base {
       };
     } else {
       activityFunction = (location: Location) => {
+        let { pathname } = location;
+        if (routerType === RouterType.hash) {
+          pathname = location.hash.replace('#', '') || '/';
+        }
         // 匹配首页
-        let match = location.pathname === '/' &&
+        let match = pathname === '/' &&
           matchHomepage(this.compoundScope(this));
         // 匹配页面路由
         if (!match) {
