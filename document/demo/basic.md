@@ -106,7 +106,19 @@ configHooks([
         url: [Promise.resolve(Page403)],
       },
       excludePages: ['bcommon/navbar', 'bcommon/menu'],
-      check403: async () => ({ hasOrg: true, hasSign: true, orgPass: false }),
+      check403: async () => {
+        const n = Math.random();
+        const hasOrg = n < 0.2;
+        const hasSign = n > 0.3 && n < 0.4;
+        const orgPass = n > 0.8;
+        const is403 = hasOrg || hasSign || orgPass;
+        
+        if (!is403) {
+          return false;
+        }
+
+        return { hasOrg, hasSign, orgPass };
+      },
     },
   },
   {
