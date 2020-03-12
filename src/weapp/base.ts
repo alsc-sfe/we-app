@@ -139,12 +139,12 @@ export default class Base {
       const scopeName = getScopeName(scope);
       config = getGlobalConfig(pathname, scopeName);
 
-      if (!config) {
+      if (config === undefined) {
         config = get(this.config, pathname);
       }
     }
     // 再向上级查找
-    if (!config && this.type !== BaseType.root) {
+    if (config === undefined && this.type !== BaseType.root) {
       config = this.parent.getConfig(pathname);
     }
 

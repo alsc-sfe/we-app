@@ -25,7 +25,10 @@ const hook403Desc: HookDesc<Hook403Opts> = {
       // 获取当前页面对应的权限码
       if (page) {
         const { opts: { check403 } } = param;
-        const pageAuth = page.getConfig('pageAuth') || page.getConfig('pageAuthCode');
+        let pageAuth = page.getConfig('pageAuth');
+        if (pageAuth === undefined) {
+          pageAuth = page.getConfig('pageAuthCode');
+        }
 
         if (!check403) {
           is403 = false;
