@@ -1,5 +1,5 @@
 import Product from '../weapp/product';
-import WeApp from '../weapp/weapp';
+import App from '../weapp/app';
 import Page, { PageConfig } from '../weapp/page';
 import { Render } from '../weapp/base';
 
@@ -86,13 +86,13 @@ export interface HookScope {
   scopeName?: string;
 
   productName?: string;
-  weAppName?: string;
+  appName?: string;
   pageName?: string;
 
   hookName?: string;
 
   product?: Product;
-  weApp?: WeApp;
+  app?: App;
   page?: Page;
 
   hookPages?: string[];

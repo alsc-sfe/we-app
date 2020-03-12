@@ -1,9 +1,9 @@
 ---
 order: 1
-title: demo1
+title: 微应用框架
 ---
 
-PC模板
+微应用框架
 
 ````jsx
 import './style.less';

@@ -6,7 +6,7 @@ import { start as startSingleSpa } from 'single-spa';
 // 路由方法拦截
 import { startRouting } from './routing/routing';
 
-import { registerWeApps as registerApps, requireChildrenInited,
+import { registerApps, requireChildrenInited,
   startRootProduct, usingHooks, configHooks, setHomepage, registerHookPages,
   setResourceLoader, setPageContainer, setRender, setConfig } from './weapp';
 import { buildinHooks } from './hooks';

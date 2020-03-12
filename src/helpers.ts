@@ -3,12 +3,12 @@ import { HookScope, UsingScope } from './hooks/type';
 import { BaseType } from './weapp/base';
 
 const BuildinProductName = '__buildin';
-const HookWeAppName = 'hook';
+const HookAppName = 'hook';
 const ScopeNameDivider = '/';
 
 export {
   BuildinProductName,
-  HookWeAppName,
+  HookAppName,
   ScopeNameDivider,
 };
 
@@ -19,7 +19,7 @@ export function getScopeName(scope: UsingScope) {
 
   const {
     productName = '',
-    weAppName = '',
+    appName = '',
     pageName = '',
     hookName = '',
   } = scope;
@@ -27,10 +27,10 @@ export function getScopeName(scope: UsingScope) {
   let pname = '';
   if (hookName) {
     // hook
-    pname = `${BuildinProductName}${ScopeNameDivider}${HookWeAppName}${ScopeNameDivider}${hookName}`;
+    pname = `${BuildinProductName}${ScopeNameDivider}${HookAppName}${ScopeNameDivider}${hookName}`;
   } else {
     // page
-    pname = `${productName}${ScopeNameDivider}${weAppName}${ScopeNameDivider}${pageName}`;
+    pname = `${productName}${ScopeNameDivider}${appName}${ScopeNameDivider}${pageName}`;
   }
   pname = pname.replace(new RegExp(`(${ScopeNameDivider})+`), ScopeNameDivider);
   if (pname[0] === ScopeNameDivider) {
@@ -48,16 +48,16 @@ export function isAncestorScope(ancestor: HookScope, descendant: HookScope) {
   }
 
   if (
-    ancestor.productName && !ancestor.weAppName &&
+    ancestor.productName && !ancestor.appName &&
     ancestor.productName === descendant.productName
   ) {
     return true;
   }
 
   if (
-    ancestor.productName && ancestor.weAppName && !ancestor.pageName &&
+    ancestor.productName && ancestor.appName && !ancestor.pageName &&
     ancestor.productName === descendant.productName &&
-    ancestor.weAppName === descendant.weAppName &&
+    ancestor.appName === descendant.appName &&
     descendant.pageName
   ) {
     return true;
@@ -71,12 +71,12 @@ export function makeSafeScope(scope: HookScope) {
     return;
   }
 
-  const { page, weApp, product } = scope;
-  const base = page || weApp || product;
+  const { page, app, product } = scope;
+  const base = page || app || product;
 
   const safeScope: HookScope = {};
 
-  const safeProperties = ['productName', 'weAppName', 'pageName', 'hookName'];
+  const safeProperties = ['productName', 'appName', 'pageName', 'hookName'];
   safeProperties.forEach((property) => {
     safeScope[property] = get(scope, property);
   });

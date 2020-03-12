@@ -6,7 +6,7 @@
  * 4. 生命周期钩子，每个产品可单独定义，各个钩子根据条件(当前激活的产品、微应用、页面)决定是否被调用
  *    hooks被启用的位置，决定了其判断条件
  */
-import WeApp, { WeAppConfig } from './weapp';
+import App, { AppConfig } from './app';
 import Base, { BaseConfig, BaseType } from './base';
 import { ResourceLoader } from '../resource-loader';
 import { transformAppConfig } from './helper';
@@ -16,15 +16,19 @@ export interface ProductConfig extends BaseConfig {
   parent?: Product;
   // 微应用列表
   url?: string; // 支持远程获取
-  weApps?: WeAppConfig[];
+  apps?: AppConfig[];
 }
 
-export type WeAppListParser = (weAppList: any, opts?: { context: any; [props: string]: any }) => Promise<WeAppConfig[]>;
-export type WeAppConfigParser = (weAppConfig: any, opts?: { context: any; [props: string]: any }) => Promise<WeAppConfig>;
+export interface ParserOpts {
+  context?: any;
+  [props: string]: any;
+}
+export type AppListParser = (appList: any, opts?: ParserOpts) => Promise<AppConfig[]>;
+export type AppConfigParser = (appConfig: any, opts?: ParserOpts) => Promise<AppConfig>;
 
 export interface Parser {
-  appListParser: WeAppListParser;
-  appConfigParser: WeAppConfigParser;
+  appListParser: AppListParser;
+  appConfigParser: AppConfigParser;
 }
 
 class Product extends Base {
@@ -35,96 +39,96 @@ class Product extends Base {
   constructor(config: ProductConfig) {
     super(config);
 
-    if (config.weApps) {
-      this.registerWeApps(config.weApps);
+    if (config.apps) {
+      this.registerApps(config.apps);
     }
   }
 
-  async registerWeApps(cfgs: string|WeAppConfig[], parser?: Parser|WeAppListParser) {
+  async registerApps(cfgs: string|AppConfig[]|any, parser?: Parser|AppListParser) {
     this.setInitDeferred();
 
-    let weAppConfigs = cfgs as WeAppConfig[];
+    let appConfigs = cfgs as AppConfig[];
 
-    const appListParser = (parser as Parser)?.appListParser || parser as WeAppListParser;
+    const appListParser = (parser as Parser)?.appListParser || parser as AppListParser;
     if (typeof cfgs === 'string') {
-      weAppConfigs = await this.loadWeAppConfigs(cfgs, appListParser);
+      appConfigs = await this.loadAppConfigs(cfgs, appListParser);
     } else if (typeof appListParser === 'function') {
-      weAppConfigs = await appListParser(cfgs, {
+      appConfigs = await appListParser(cfgs, {
         context: getContext(),
       });
     }
 
-    const pWeApps = weAppConfigs.map((cfg) => {
-      return this.registerWeApp(cfg, (parser as Parser)?.appConfigParser) as Promise<WeApp>;
+    const pApps = appConfigs.map((cfg) => {
+      return this.registerApp(cfg, (parser as Parser)?.appConfigParser) as Promise<App>;
     });
 
-    const weApps = await Promise.all(pWeApps);
+    const apps = await Promise.all(pApps);
 
     this.setInited();
 
-    return weApps;
+    return apps;
   }
 
-  getWeApp(weAppName: string) {
-    const weApp = this.getChild(weAppName) as WeApp;
-    if (weApp.type !== BaseType.weApp) {
+  getApp(appName: string) {
+    const app = this.getChild(appName) as App;
+    if (app.type !== BaseType.app) {
       return;
     }
-    return weApp;
+    return app;
   }
 
-  async registerWeApp(config: WeAppConfig, parser?: WeAppConfigParser) {
+  async registerApp(config: AppConfig, parser?: AppConfigParser) {
     let childConfig = config;
 
     if (config?.url) {
-      childConfig = await this.loadWeAppConfig(config, parser);
+      childConfig = await this.loadAppConfig(config, parser);
     } else if (typeof parser === 'function') {
       childConfig = await parser(config, {
         context: getContext(),
       });
     }
 
-    const child = await this.registerChild(childConfig, WeApp);
+    const child = await this.registerChild(childConfig, App);
 
     return child;
   }
 
-  private async loadWeAppConfigs(url: string, parser?: WeAppListParser) {
+  private async loadAppConfigs(url: string, parser?: AppListParser) {
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
-    const weAppList = await resourceLoader.mount(
+    const appList = await resourceLoader.mount(
       url,
       this.compoundScope(this),
       resourceLoaderOpts
     );
-    let weAppConfigs = weAppList as WeAppConfig[];
+    let appConfigs = appList as AppConfig[];
     if (typeof parser === 'function') {
-      weAppConfigs = await parser(weAppList, {
+      appConfigs = await parser(appList, {
         context: getContext(),
       });
     }
-    return weAppConfigs;
+    return appConfigs;
   }
 
-  private async loadWeAppConfig(config: WeAppConfig, parser: WeAppConfigParser = transformAppConfig) {
+  private async loadAppConfig(config: AppConfig, parser: AppConfigParser = transformAppConfig) {
     const { url } = config;
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
 
-    let weAppConfig = await resourceLoader.mount(
+    let appConfig = await resourceLoader.mount(
       url,
       this.compoundScope(this),
       resourceLoaderOpts
     );
 
-    weAppConfig = await parser(weAppConfig.default || weAppConfig, {
+    appConfig = await parser(appConfig.default || appConfig, {
       context: getContext(),
     });
 
-    weAppConfig = {
-      ...weAppConfig,
+    appConfig = {
+      ...appConfig,
       ...config,
     };
 
-    return weAppConfig;
+    return appConfig;
   }
 }
 

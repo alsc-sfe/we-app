@@ -1,6 +1,6 @@
 import { ResourceFunction } from '../resource-loader';
 import { Route as TRoute } from '../routing';
-import { WeAppConfig } from './weapp';
+import { AppConfig } from './app';
 import { PageConfig } from './page';
 
 interface Route {
@@ -18,7 +18,7 @@ interface Module {
   [prop: string]: any;
 }
 
-export interface AppConfig extends WeAppConfig {
+export interface MicroAppConfig extends AppConfig {
   microAppName?: string;
   modules?: Module[];
 }
@@ -41,7 +41,7 @@ function transformRoute(route: string|string[]|boolean|Route|Route[]): TRoute {
   });
 }
 
-export async function transformAppConfig(appConfig: AppConfig): Promise<WeAppConfig> {
+export async function transformAppConfig(appConfig: MicroAppConfig): Promise<AppConfig> {
   return {
     name: appConfig.microAppName,
     pages: appConfig.modules.map((module): PageConfig => {

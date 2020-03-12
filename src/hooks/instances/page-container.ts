@@ -21,9 +21,9 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
   const elSkeleton: Element = hookScope.getData('skeletonContainer', true) || document.body;
   if (elSkeleton) {
     const { specialSelectors = {} } = param.opts;
-    const { productName = '', weAppName = '', pageName = '' } = param.pageScope;
+    const { productName = '', appName = '', pageName = '' } = param.pageScope;
 
-    const pageContainerId = [productName, weAppName, pageName].filter(n => n).join('__');
+    const pageContainerId = [productName, appName, pageName].filter(n => n).join('__');
     const selector = specialSelectors[pageContainerId];
     let elPageContainer = selector && elSkeleton.querySelector(selector);
 

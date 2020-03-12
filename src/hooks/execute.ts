@@ -23,9 +23,9 @@ export function getEnabledHookNames() {
 
 function matchHookDescRunnerParam(sourceHookScope: HookScope, forMatchedHookScopes: (string | HookScope)[]) {
   const pageScopeName = sourceHookScope.scopeName;
-  const weAppScopeName = getScopeName({ ...sourceHookScope, pageName: '' });
-  const productScopeName = getScopeName({ ...sourceHookScope, weAppName: '', pageName: '' });
-  const activeScopeNames = [pageScopeName, weAppScopeName, productScopeName];
+  const appScopeName = getScopeName({ ...sourceHookScope, pageName: '' });
+  const productScopeName = getScopeName({ ...sourceHookScope, appName: '', pageName: '' });
+  const activeScopeNames = [pageScopeName, appScopeName, productScopeName];
   // 根据activePageScope匹配hooksScope，一个页面只会有一个hooksScope
   const matchedHookScopes = forMatchedHookScopes.map((hooksScope) => {
     const hookScope = typeof hooksScope === 'string' ? getScope(hooksScope) : hooksScope;
@@ -38,7 +38,7 @@ function matchHookDescRunnerParam(sourceHookScope: HookScope, forMatchedHookScop
 
     return (
       !hookScope.pageName &&
-      !hookScope.weAppName &&
+      !hookScope.appName &&
       hookScope.product.type === BaseType.root
     );
   });
@@ -52,7 +52,7 @@ function matchHookDescRunnerParam(sourceHookScope: HookScope, forMatchedHookScop
       return [
         scope,
         scope.productName,
-        scope.pageName,
+        scope.appName,
         scope.pageName,
       ].filter((m) => m);
     }).forEach((m) => {

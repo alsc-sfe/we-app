@@ -10,8 +10,8 @@ import { getGlobalConfig, setResourceLoader, setPageContainer, setRender } from 
 import { getScopeName } from '../helpers';
 
 export interface Render {
-  mount: (element: any, container?: Element, opts?: HookScope) => any;
-  unmount: (container?: Element, opts?: HookScope) => any;
+  mount: (element: any, container?: Element, customProps?: any) => any;
+  unmount: (container?: Element, customProps?: any) => any;
 }
 
 export interface BaseConfig {
@@ -29,7 +29,7 @@ export interface BaseConfig {
 export enum BaseType {
   root = 'root',
   product = 'product',
-  weApp = 'weApp',
+  app = 'app',
   page = 'page'
 }
 

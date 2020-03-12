@@ -20,10 +20,10 @@ export function matchHomepage(s: UsingScope) {
 
   if (
     homepageScope && scope &&
-    homepageScope.weAppName && scope.weAppName &&
+    homepageScope.appName && scope.appName &&
     homepageScope.pageName && scope.pageName &&
     homepageScope.productName === scope.productName &&
-    homepageScope.weAppName === scope.weAppName &&
+    homepageScope.appName === scope.appName &&
     homepageScope.pageName === scope.pageName
   ) {
     return true;

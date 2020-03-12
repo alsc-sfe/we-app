@@ -9,7 +9,7 @@ import { registerApplication } from 'single-spa';
 import { getScopeName, makeSafeScope } from '../helpers';
 import Base, { BaseConfig, BaseType, Render } from './base';
 import { HookScope, LifecycleHookEnum } from '../hooks/type';
-import WeApp from './weapp';
+import App from './app';
 import { Resource, ResourceLoader } from '../resource-loader';
 import { runLifecycleHook } from '../hooks';
 import { DEFAULTRouteMatch as routeMatchFn, Route } from '../routing';
@@ -20,7 +20,7 @@ import { getContext } from '../context';
 
 
 export interface PageConfig extends BaseConfig {
-  parent?: WeApp;
+  parent?: App;
 
   activityFunction?: ActivityFunction;
 
@@ -43,7 +43,7 @@ export type ActivityFunction = (location?: Location) => boolean;
 export default class Page extends Base {
   type: BaseType = BaseType.page;
 
-  parent: WeApp;
+  parent: App;
 
   constructor(config: PageConfig) {
     super(config);
@@ -155,11 +155,11 @@ export default class Page extends Base {
       if (this.type === BaseType.page) {
         const container = this.getPageContainer() as Element;
         renderWrapper = {
-          mount: (element, node, opts) => {
-            render.mount(element, node || container, opts);
+          mount: (element, node, customProps) => {
+            render.mount(element, node || container, customProps);
           },
-          unmount: (node, opts) => {
-            render.unmount(node || container, opts);
+          unmount: (node, customProps) => {
+            render.unmount(node || container, customProps);
           },
         };
       }
@@ -169,14 +169,14 @@ export default class Page extends Base {
 
   getBasename() {
     const scope = this.compoundScope(this);
-    const { productName = '', weAppName = '', weApp } = scope;
+    const { productName = '', appName = '', app } = scope;
 
-    const basename = weApp.getConfig('basename') as string;
+    const basename = app.getConfig('basename') as string;
     if (basename) {
       return ajustPathname(basename);
     }
 
-    return ajustPathname(`/${productName}/${weAppName}`);
+    return ajustPathname(`/${productName}/${appName}`);
   }
 
   makeActivityFunction() {

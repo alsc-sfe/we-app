@@ -1,6 +1,6 @@
 import Product, { ProductConfig } from './product';
-import { BuildinProductName, HookWeAppName, ScopeNameDivider } from '../helpers';
-import WeApp, { getActivePageScopes } from './weapp';
+import { BuildinProductName, HookAppName, ScopeNameDivider } from '../helpers';
+import App, { getActivePageScopes } from './app';
 import Base, { BaseType } from './base';
 import { DefaultResourceLoader } from '../resource-loader';
 import { RouterType } from '../routing/enum';
@@ -44,17 +44,17 @@ class RootProduct extends Product {
 
     if (scope.hookName) {
       const buildinProduct = this.getProduct(BuildinProductName);
-      const hookWeApp = buildinProduct.getWeApp(HookWeAppName);
-      scope.page = hookWeApp.getPage(scope.hookName);
+      const hookApp = buildinProduct.getApp(HookAppName);
+      scope.page = hookApp.getPage(scope.hookName);
     } else if (scope.pageName) {
       if (!scope.productName) {
         scope.product = this;
-        scope.weApp = this.getWeApp(scope.weAppName);
-        scope.page = scope.weApp.getPage(scope.pageName);
+        scope.app = this.getApp(scope.appName);
+        scope.page = scope.app.getPage(scope.pageName);
       } else {
         scope.product = this.getProduct(scope.productName);
-        scope.weApp = scope.product.getWeApp(scope.weAppName);
-        scope.page = scope.weApp.getPage(scope.pageName);
+        scope.app = scope.product.getApp(scope.appName);
+        scope.page = scope.app.getPage(scope.pageName);
       }
     }
 
@@ -64,8 +64,8 @@ class RootProduct extends Product {
   async registerHookPages() {
     // 注册hook页面
     const pageConfigs = getPageConfigs();
-    const hookWeApp = await this.registerHookApp();
-    hookWeApp.registerPages(pageConfigs);
+    const hookApp = await this.registerHookApp();
+    hookApp.registerPages(pageConfigs);
   }
 
   protected async registerHookApp() {
@@ -74,11 +74,11 @@ class RootProduct extends Product {
       name: BuildinProductName,
     });
     // 注册hook微应用
-    const hookWeApp = await buildinProduct.registerWeApp({
-      name: HookWeAppName,
-    }) as WeApp;
+    const hookApp = await buildinProduct.registerApp({
+      name: HookAppName,
+    }) as App;
 
-    return hookWeApp;
+    return hookApp;
   }
 
   private parseScopeName(scopeName: string) {
@@ -87,10 +87,10 @@ class RootProduct extends Product {
     const pathsLen = paths.length;
     if (pathsLen === 3) {
       scope.productName = paths[0];
-      scope.weAppName = paths[1];
+      scope.appName = paths[1];
       scope.pageName = paths[2];
 
-      if (paths[1] === HookWeAppName) {
+      if (paths[1] === HookAppName) {
         scope.hookName = paths[2];
       }
     } else if (pathsLen === 2) {
@@ -100,9 +100,9 @@ class RootProduct extends Product {
       if (product) {
         scope.productName = name;
         scope.product = product;
-        scope.weAppName = paths[1];
+        scope.appName = paths[1];
       } else {
-        scope.weAppName = paths[0];
+        scope.appName = paths[0];
         scope.pageName = paths[1];
       }
     } else if (pathsLen === 1) {
@@ -113,10 +113,10 @@ class RootProduct extends Product {
         scope.productName = name;
         scope.product = product;
       } else {
-        const weApp = this.getWeApp(name);
-        if (weApp) {
-          scope.weAppName = name;
-          scope.weApp = weApp;
+        const app = this.getApp(name);
+        if (app) {
+          scope.appName = name;
+          scope.app = app;
         }
       }
     }
@@ -130,7 +130,7 @@ const rootProduct = new RootProduct({
   routerType: RouterType.browser,
 });
 
-export const registerWeApps = rootProduct.registerWeApps.bind(rootProduct) as RootProduct['registerWeApps'];
+export const registerApps = rootProduct.registerApps.bind(rootProduct) as RootProduct['registerApps'];
 
 export const usingHooks = rootProduct.usingHooks.bind(rootProduct) as RootProduct['usingHooks'];
 export const configHooks = rootProduct.configHooks.bind(rootProduct) as RootProduct['configHooks'];

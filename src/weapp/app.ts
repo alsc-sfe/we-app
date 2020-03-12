@@ -4,7 +4,7 @@ import Base, { BaseConfig, BaseType } from './base';
 import { getScopeName } from '../helpers';
 import { HookScope } from '../hooks/type';
 
-export interface WeAppConfig extends BaseConfig {
+export interface AppConfig extends BaseConfig {
   parent?: Product;
 
   url?: string;
@@ -27,12 +27,12 @@ export interface WeAppConfig extends BaseConfig {
 // 主要用于首次访问时获取activeScopes
 let registedPages: Page[] = [];
 
-export default class WeApp extends Base {
-  type: BaseType = BaseType.weApp;
+export default class App extends Base {
+  type: BaseType = BaseType.app;
 
   parent: Product;
 
-  constructor(config: WeAppConfig) {
+  constructor(config: AppConfig) {
     super(config);
 
     if (config) {
@@ -59,7 +59,7 @@ export default class WeApp extends Base {
   }
 
   filterPages(cfgs: PageConfig|PageConfig[]) {
-    const filter = this.getConfig('filterPages') as WeAppConfig['filterPages'];
+    const filter = this.getConfig('filterPages') as AppConfig['filterPages'];
     if (filter && typeof filter === 'function') {
       return filter(cfgs);
     }

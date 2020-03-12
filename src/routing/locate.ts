@@ -11,9 +11,9 @@ export function getPathnamePrefix({ basename = '', absolute = false }) {
   return ajustPathname(`/${basename}`);
 }
 
-export type Locate = string | Location | WeAppLocation;
+export type Locate = string | Location | AppLocation;
 
-export class WeAppLocation {
+export class AppLocation {
   routerType: RouterType;
 
   pathname: string;
@@ -48,18 +48,18 @@ export function parseLocate({
   basename = '',
   route,
 }: ParseLocationParams) {
-  if (locate instanceof WeAppLocation) {
+  if (locate instanceof AppLocation) {
     return locate;
   }
 
   const defaultPathname = '/';
 
   let locStr: string;
-  let loc: WeAppLocation;
+  let loc: AppLocation;
 
   if (isObj(locate, '[object Location]') || isObj(locate)) {
     if (routerType === RouterType.browser) {
-      loc = new WeAppLocation({
+      loc = new AppLocation({
         routerType,
         basename,
         pathname: (locate as Location).pathname,
@@ -94,7 +94,7 @@ export function parseLocate({
     locStr = locate as string;
   }
 
-  loc = new WeAppLocation({
+  loc = new AppLocation({
     routerType,
     basename,
     pathname: defaultPathname,
@@ -106,7 +106,7 @@ export function parseLocate({
   locStr = locStr.replace('#', '');
   const match = /^([^?]*)(\?[^?]*)?/g.exec(locStr);
   if (match) {
-    loc = new WeAppLocation({
+    loc = new AppLocation({
       routerType,
       basename,
       pathname: match[1],
