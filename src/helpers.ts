@@ -1,7 +1,7 @@
 import { HookScope, UsingScope } from './hooks/type';
 import { BaseType } from './weapp/base';
 
-const BuildinProductName = '__WeApp';
+const BuildinProductName = '__buildin';
 const HookWeAppName = 'hook';
 const ScopeNameDivider = '/';
 

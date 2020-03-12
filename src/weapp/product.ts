@@ -68,7 +68,7 @@ class Product extends Base {
     return weApp;
   }
 
-  protected async registerWeApp(config: WeAppConfig, parser?: WeAppConfigParser) {
+  async registerWeApp(config: WeAppConfig, parser?: WeAppConfigParser) {
     let childConfig = config;
     if (config?.url) {
       childConfig = await this.loadWeAppConfig(config, parser);
