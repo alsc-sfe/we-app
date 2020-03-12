@@ -99,6 +99,7 @@ function enableHooks(hooksConfig: UsingHooksConfigs, scope: UsingScope) {
 
   // 设置scope中hook配置
   if (!hooksConfig) {
+    ScopesHooks[scopeName] = [];
     return;
   }
   setHooksOpts(hooksConfig, scope);

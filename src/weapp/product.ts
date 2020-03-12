@@ -40,17 +40,22 @@ class Product extends Base {
     }
   }
 
-  async registerWeApps(cfgs: string|WeAppConfig[], parser?: Parser) {
+  async registerWeApps(cfgs: string|WeAppConfig[], parser?: Parser|WeAppListParser) {
     this.setInitDeferred();
 
     let weAppConfigs = cfgs as WeAppConfig[];
 
+    const appListParser = (parser as Parser)?.appListParser || parser as WeAppListParser;
     if (typeof cfgs === 'string') {
-      weAppConfigs = await this.loadWeAppConfigs(cfgs, parser?.appListParser);
+      weAppConfigs = await this.loadWeAppConfigs(cfgs, appListParser);
+    } else if (typeof appListParser === 'function') {
+      weAppConfigs = await appListParser(cfgs, {
+        context: getContext(),
+      });
     }
 
     const pWeApps = weAppConfigs.map((cfg) => {
-      return this.registerWeApp(cfg, parser?.appConfigParser) as Promise<WeApp>;
+      return this.registerWeApp(cfg, (parser as Parser)?.appConfigParser) as Promise<WeApp>;
     });
 
     const weApps = await Promise.all(pWeApps);
@@ -70,9 +75,15 @@ class Product extends Base {
 
   async registerWeApp(config: WeAppConfig, parser?: WeAppConfigParser) {
     let childConfig = config;
+
     if (config?.url) {
       childConfig = await this.loadWeAppConfig(config, parser);
+    } else if (typeof parser === 'function') {
+      childConfig = await parser(config, {
+        context: getContext(),
+      });
     }
+
     const child = await this.registerChild(childConfig, WeApp);
 
     return child;
@@ -104,7 +115,9 @@ class Product extends Base {
       resourceLoaderOpts
     );
 
-    weAppConfig = await parser(weAppConfig.default || weAppConfig);
+    weAppConfig = await parser(weAppConfig.default || weAppConfig, {
+      context: getContext(),
+    });
 
     weAppConfig = {
       ...weAppConfig,

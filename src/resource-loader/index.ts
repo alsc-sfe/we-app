@@ -8,7 +8,6 @@
  * 2. 默认resourceLoader内置systemjs依赖，可能造成全局污染
  */
 import { HookScope, UsingScope } from '../hooks/type';
-import 'systemjs/dist/system';
 
 declare global {
   interface Window {
@@ -19,7 +18,24 @@ declare global {
   }
 }
 
-const { System } = window;
+function loadScript(url: string) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = url;
+    script.onload = resolve;
+    script.onerror = reject;
+
+    document.querySelector('head').appendChild(script);
+  });
+}
+
+async function getSystem() {
+  if (!window.System) {
+    await loadScript('https://gw.alipayobjects.com/os/lib/systemjs/6.2.5/dist/system.min.js');
+  }
+
+  return window.System;
+}
 
 export type ResourceFunction = () => Promise<any>;
 export type Resource = string | Promise<any> | ResourceFunction;
@@ -60,7 +76,13 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
     if (typeof resource === 'string') {
       if (resource.indexOf('.js') > -1) {
         if (useSystem) {
-          return root.System ? root.System.import(resource) : System.import(resource);
+          let System;
+          if (root.System) {
+            System = root.System;
+          } else {
+            System = await getSystem();
+          }
+          return System.import(resource);
         }
 
         return new Promise((resolve, reject) => {
