@@ -52,7 +52,7 @@ export function parseLocate({
     return locate;
   }
 
-  const defaultPathname = basename || '/';
+  const defaultPathname = '/';
 
   let locStr: string;
   let loc: WeAppLocation;

@@ -52,9 +52,9 @@ configHooks(hookConfigs);
 
 // setHomepage('bcommon/account-settings');
 
-setPageContainer(document.querySelector('#__microfe-root-content'));
-setPageContainer(document.querySelector('#bcommon__navbar'), ['bcommon/navbar']);
-setPageContainer(document.querySelector('#bcommon__menu'), ['bcommon/menu']);
+// setPageContainer(document.querySelector('#__microfe-root-content'));
+// setPageContainer(document.querySelector('#bcommon__navbar'), ['bcommon/navbar']);
+// setPageContainer(document.querySelector('#bcommon__menu'), ['bcommon/menu']);
 
 registerApps(window[Symbol.for('microAppsInfo')], getMicroApps);
 
