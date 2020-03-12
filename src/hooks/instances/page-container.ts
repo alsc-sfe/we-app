@@ -13,13 +13,12 @@ export interface HookPageContainerOpts extends HookOpts {
 }
 
 function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainerOpts>) {
-  if (!param.pageScope.page) {
+  if (!param.pageScope.pageName) {
     return;
   }
 
-  const { product, weApp, page } = param.hookScope;
-  const base = page || weApp || product;
-  const elSkeleton: Element = base.getData('skeletonContainer', true) || document.body;
+  const { hookScope } = param;
+  const elSkeleton: Element = hookScope.getData('skeletonContainer', true) || document.body;
   if (elSkeleton) {
     const { specialSelectors = {} } = param.opts;
     const { productName = '', weAppName = '', pageName = '' } = param.pageScope;
@@ -29,7 +28,7 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
     let elPageContainer = selector && elSkeleton.querySelector(selector);
 
     if (!elPageContainer) {
-      const elContent = base.getData('contentContainer', true) || document.body;
+      const elContent = hookScope.getData('contentContainer', true) || document.body;
       if (elContent) {
         elPageContainer = document.createElement('div');
         elPageContainer.id = pageContainerId;
@@ -52,20 +51,19 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
       return;
     }
 
-    const { page } = param.pageScope;
-    let elPageContainer = page.getPageContainer();
+    let elPageContainer = pageScope?.getPageContainer();
     if (!elPageContainer) {
       elPageContainer = createPageContainer(param);
       if (elPageContainer) {
-        page?.setPageContainer(elPageContainer);
+        pageScope?.setPageContainer(elPageContainer);
       }
     }
   },
 
   async beforeMount(param: HookDescRunnerParam<HookPageContainerOpts>) {
-    const { page } = param.pageScope;
+    const { pageScope } = param;
 
-    const elPageContainer = page?.getPageContainer();
+    const elPageContainer = pageScope?.getPageContainer();
     if (elPageContainer) {
       (elPageContainer as HTMLElement).style.display = '';
     }
@@ -73,9 +71,9 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
 
   async onMountPrevented(param: HookDescRunnerParam<HookPageContainerOpts>) {
     // 隐藏页面容器
-    const { page } = param.pageScope;
+    const { pageScope } = param;
 
-    const elPageContainer = page?.getPageContainer();
+    const elPageContainer = pageScope?.getPageContainer();
     if (elPageContainer) {
       (elPageContainer as HTMLElement).style.display = 'none';
     }
@@ -83,9 +81,9 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
 
   async afterUnmount(param: HookDescRunnerParam<HookPageContainerOpts>) {
     // 隐藏页面容器
-    const { page } = param.pageScope;
+    const { pageScope } = param;
 
-    const elPageContainer = page?.getPageContainer();
+    const elPageContainer = pageScope?.getPageContainer();
     if (elPageContainer) {
       (elPageContainer as HTMLElement).style.display = 'none';
     }
@@ -93,9 +91,9 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
 
   async onError(param: HookDescRunnerParam<HookPageContainerOpts>) {
     // 隐藏页面容器
-    const { page } = param.pageScope;
+    const { pageScope } = param;
 
-    const elPageContainer = page?.getPageContainer();
+    const elPageContainer = pageScope?.getPageContainer();
     if (elPageContainer) {
       (elPageContainer as HTMLElement).style.display = 'none';
     }

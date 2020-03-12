@@ -17,15 +17,13 @@ export interface HookBasicLibsOpts extends HookOpts {
 
 function getBasicLibsConfig(param: HookDescRunnerParam<HookBasicLibsOpts>) {
   const { hookScope, opts } = param;
-  const { product, weApp, page } = hookScope || {};
 
-  const base = page || weApp || product;
-  const { desc: resourceLoader, config: resourceLoaderOpts } = base.getConfig('resourceLoader') as ResourceLoader;
+  const { desc: resourceLoader, config: resourceLoaderOpts } = hookScope.getConfig('resourceLoader') as ResourceLoader;
   const basicLibs = opts.url;
   const { useSystem } = opts;
 
   return {
-    base,
+    hookScope,
     basicLibs,
     resourceLoader,
     resourceLoaderOpts: {
@@ -40,15 +38,15 @@ const hookBasicLibsDesc: HookDesc<HookBasicLibsOpts> = {
   beforeRouting: {
     exec: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
       // 加载当前scope的基础库
-      const { base, resourceLoaderOpts, basicLibs, resourceLoader } = getBasicLibsConfig(param);
+      const { hookScope, resourceLoaderOpts, basicLibs, resourceLoader } = getBasicLibsConfig(param);
 
-      if (!base.getData('basicLibsLoaded')) {
+      if (!hookScope.getData('basicLibsLoaded')) {
         await basicLibs.reduce(async (p, r) => {
           await p;
           return resourceLoader.mount(r, param.pageScope, resourceLoaderOpts);
         }, Promise.resolve());
 
-        base.setData('basicLibsLoaded', true);
+        hookScope.setData('basicLibsLoaded', true);
       }
     },
     clear: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
@@ -57,7 +55,7 @@ const hookBasicLibsDesc: HookDesc<HookBasicLibsOpts> = {
       const { hookScope: nextHookScope } = nextHookDescRunnerParam;
       // nextHookScope与当前hookScope是父子关系，不清除
       if (!nextHookScope || !isAncestorScope(hookScope, nextHookScope)) {
-        const { basicLibs, resourceLoader, resourceLoaderOpts, base } = getBasicLibsConfig(param);
+        const { basicLibs, resourceLoader, resourceLoaderOpts, hookScope: base } = getBasicLibsConfig(param);
         basicLibs.forEach((r) => {
           resourceLoader.unmount(r, param.pageScope, resourceLoaderOpts);
         });

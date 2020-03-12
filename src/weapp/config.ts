@@ -1,4 +1,4 @@
-import { ResourceLoader, Resource } from '../resource-loader';
+import { ResourceLoader } from '../resource-loader';
 import { Render } from './base';
 import { ScopeNameDivider, getScopeName } from '../helpers';
 import { UsingScope } from '../hooks/type';

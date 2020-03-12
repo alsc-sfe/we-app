@@ -1,6 +1,6 @@
 ---
-title: PC端模板组件
-subtitle: cook pc template
+title: 微应用框架
+subtitle: WeApp Framework
 cols: 2
 ---
 

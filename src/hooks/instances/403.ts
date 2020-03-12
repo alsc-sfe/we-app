@@ -21,13 +21,12 @@ const hook403Desc: HookDesc<Hook403Opts> = {
     const pageName = getScopeName(pageScope);
     // 从当前路由解析出当前激活的页面
     if (hookPages.concat(excludePages).indexOf(pageName) === -1) {
-      const { page } = pageScope;
       // 获取当前页面对应的权限码
-      if (page) {
+      if (pageScope) {
         const { opts: { check403 } } = param;
-        let pageAuth = page.getConfig('pageAuth');
+        let pageAuth = pageScope.getConfig('pageAuth');
         if (pageAuth === undefined) {
-          pageAuth = page.getConfig('pageAuthCode');
+          pageAuth = pageScope.getConfig('pageAuthCode');
         }
 
         if (!check403) {
@@ -40,7 +39,7 @@ const hook403Desc: HookDesc<Hook403Opts> = {
 
         if (is403 && hookPageScope) {
           // 设置hook 403页面渲染参数
-          hookPageScope.page.setCustomProps(res);
+          hookPageScope.setCustomProps(res);
         }
       }
     }

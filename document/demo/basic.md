@@ -6,7 +6,6 @@ title: demo1
 PC模板
 
 ````jsx
-import './global';
 import './style.less';
 import { 
   setResourceLoader, setPageContainer, setRender,
@@ -20,6 +19,13 @@ import initFetch from './fetch';
 import isFrom3rdParty from './3rd-party';
 import checkChooseOrg from '@alife/saas-check-choose-org';
 
+const routerType = RouterType.hash;
+window.MicroAppLoader = {
+  routerType,
+  RouterType,
+};
+setRouterType(routerType);
+
 checkChooseOrg();
 
 initFetch(isFrom3rdParty);
@@ -30,11 +36,9 @@ setContext({
 
 setRender(render);
 
-setRouterType(RouterType.hash);
+// usingHooks(null);
 
-usingHooks(null);
-
-// configHooks(hookConfigs);
+configHooks(hookConfigs);
 
 // registerApps([
 //   {

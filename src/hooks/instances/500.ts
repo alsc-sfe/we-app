@@ -20,7 +20,7 @@ const hook500Desc: HookDesc<Hook500Opts> = {
   async onError(param: HookDescRunnerParam<Hook500Opts>) {
     const { hookPageScope, error } = param;
     if (hookPageScope) {
-      hookPageScope.page.setCustomProps({ error });
+      hookPageScope.setCustomProps({ error });
     }
 
     is500 = true;

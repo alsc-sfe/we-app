@@ -1,3 +1,4 @@
+import get from 'lodash-es/get';
 import { HookScope, UsingScope } from './hooks/type';
 import { BaseType } from './weapp/base';
 
@@ -63,4 +64,40 @@ export function isAncestorScope(ancestor: HookScope, descendant: HookScope) {
   }
 
   return false;
+}
+
+export function makeSafeScope(scope: HookScope) {
+  if (!scope || !scope.product) {
+    return;
+  }
+
+  const { page, weApp, product } = scope;
+  const base = page || weApp || product;
+
+  const safeScope: HookScope = {};
+
+  const safeProperties = ['productName', 'weAppName', 'pageName', 'hookName'];
+  safeProperties.forEach((property) => {
+    safeScope[property] = get(scope, property);
+  });
+
+  const safeBaseFunctions = ['getConfig', 'getData', 'setData'];
+  safeBaseFunctions.forEach((property) => {
+    let fn = get(base, property);
+    if (fn) {
+      fn = (fn as Function).bind(base);
+    }
+    safeScope[property] = fn;
+  });
+
+  const safePageFunctions = ['getPageContainer', 'setPageContainer', 'setCustomProps'];
+  safePageFunctions.forEach((property) => {
+    let fn = get(page, property);
+    if (fn) {
+      fn = (fn as Function).bind(page);
+    }
+    safeScope[property] = fn;
+  });
+
+  return safeScope;
 }

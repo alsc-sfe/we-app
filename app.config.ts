@@ -30,10 +30,10 @@ module.exports = {
   },
   runtime: {
     heads: [
-      `
-      <link rel="stylesheet" href="https://gw.alipayobjects.com/os/lib/alife/cook-pc/3.22.7-beta.4/dist/antd.min.css">
-      <link rel="stylesheet" href="https://gw.alipayobjects.com/os/mentor/saas-node-crm-main/1.0.19/umd/index.css">
-      `,
+      // `
+      // <link rel="stylesheet" href="https://gw.alipayobjects.com/os/lib/alife/cook-pc/3.22.7-beta.4/dist/antd.min.css">
+      // <link rel="stylesheet" href="https://gw.alipayobjects.com/os/mentor/saas-node-crm-main/1.0.19/umd/index.css">
+      // `,
       // `
       // <script src="https://gw.alipayobjects.com/os/lib/core-js-bundle/3.1.4/minified.js" crossorigin="anonymous"></script>
       // <script src="https://gw.alipayobjects.com/os/lib/regenerator-runtime/0.13.3/runtime.js" crossorigin="anonymous"></script>
@@ -42,44 +42,44 @@ module.exports = {
       <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/system.js" crossorigin="anonymous"></script>
       <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/extras/named-register.js" crossorigin="anonymous"></script>
       `,
-      `
-      <script src="https://gw.alipayobjects.com/os/lib/moment/2.24.0/min/moment.min.js" crossorigin="anonymous"></script>
-      <script src="https://gw.alipayobjects.com/os/lib/moment/2.24.0/locale/zh-cn.js" crossorigin="anonymous"></script>
-      <script src="https://gw.alipayobjects.com/os/lib/alife/cook-pc/3.22.7-beta.4/dist/antd-with-locales.min.js" crossorigin="anonymous"></script>
-      <script src="https://gw.alipayobjects.com/os/lib/ant-design/icons/2.1.1/lib/umd.js" crossorigin="anonymous"></script>
-      `,
+      // `
+      // <script src="https://gw.alipayobjects.com/os/lib/moment/2.24.0/min/moment.min.js" crossorigin="anonymous"></script>
+      // <script src="https://gw.alipayobjects.com/os/lib/moment/2.24.0/locale/zh-cn.js" crossorigin="anonymous"></script>
+      // <script src="https://gw.alipayobjects.com/os/lib/alife/cook-pc/3.22.7-beta.4/dist/antd-with-locales.min.js" crossorigin="anonymous"></script>
+      // <script src="https://gw.alipayobjects.com/os/lib/ant-design/icons/2.1.1/lib/umd.js" crossorigin="anonymous"></script>
+      // `,
       `
       <script src="https://gw.alipayobjects.com/os/mentor/saas-fetch/2.0.6/umd/saas-fetch-min.js" crossorigin="anonymous"></script>
       <script src="https://gw.alipayobjects.com/os/mentor/saas-fetch-mtop/1.0.9/umd/saas-fetch-mtop.js" crossorigin="anonymous"></script>
       `,
-      `
-      <script src="https://g.alicdn.com/code/npm/@alife/system-react/1.0.1/library/umd/react-min.js" crossorigin="anonymous"></script>
-      <script src="https://g.alicdn.com/code/npm/@alife/system-react-dom/1.0.0/library/umd/react-dom-min.js" crossorigin="anonymous"></script>
-      `,
-      `
-      <script src="https://g.alicdn.com/code/npm/@alife/system-antd/1.0.1/library/umd/antd-min.js" crossorigin="anonymous"></script>
-      <script src="https://g.alicdn.com/code/npm/@alife/system-cook-pc/1.0.0/library/umd/cook-pc-min.js" crossorigin="anonymous"></script>
-      <script src="https://g.alicdn.com/code/npm/@alife/system-ant-design-icons/1.0.1/library/umd/ant-design-icons-min.js" crossorigin="anonymous"></script>
-      `,
+      // `
+      // <script src="https://g.alicdn.com/code/npm/@alife/system-react/1.0.1/library/umd/react-min.js" crossorigin="anonymous"></script>
+      // <script src="https://g.alicdn.com/code/npm/@alife/system-react-dom/1.0.0/library/umd/react-dom-min.js" crossorigin="anonymous"></script>
+      // `,
+      // `
+      // <script src="https://g.alicdn.com/code/npm/@alife/system-antd/1.0.1/library/umd/antd-min.js" crossorigin="anonymous"></script>
+      // <script src="https://g.alicdn.com/code/npm/@alife/system-cook-pc/1.0.0/library/umd/cook-pc-min.js" crossorigin="anonymous"></script>
+      // <script src="https://g.alicdn.com/code/npm/@alife/system-ant-design-icons/1.0.1/library/umd/ant-design-icons-min.js" crossorigin="anonymous"></script>
+      // `,
       `
       <script src="https://g.alicdn.com/code/npm/@alife/system-saas-fetch/1.0.0/library/umd/saas-fetch-min.js" crossorigin="anonymous"></script>
       <script src="https://g.alicdn.com/code/npm/@alife/system-saas-fetch-mtop/1.0.1/library/umd/saas-fetch-mtop-min.js" crossorigin="anonymous"></script>
       `,
     ],
     bodies: [
-      `
-      <div id="microfe-layout" class="microfe-layout">
-        <div class="microfe-navbar" id="bcommon__navbar"></div>
-        <div class="microfe-body">
-          <div class="microfe-menu" id="bcommon__menu"></div>
-          <div class="microfe-wrapper">
-            <div class="microfe-root-body">
-              <div class="microfe-root-content" id="__microfe-root-content"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      `,
+      // `
+      // <div id="microfe-layout" class="microfe-layout">
+      //   <div class="microfe-navbar" id="bcommon__navbar"></div>
+      //   <div class="microfe-body">
+      //     <div class="microfe-menu" id="bcommon__menu"></div>
+      //     <div class="microfe-wrapper">
+      //       <div class="microfe-root-body">
+      //         <div class="microfe-root-content" id="__microfe-root-content"></div>
+      //       </div>
+      //     </div>
+      //   </div>
+      // </div>
+      // `,
       `
       <script>
       window.antd = window['@alife/cook-pc'] || window.antd;

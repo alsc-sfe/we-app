@@ -1,6 +1,6 @@
 import { HookDescRunnerParam, HookScope, LifecycleHookEnum, LifecycleHookRunner } from './type';
 import { getHooksScopes, getScopeHooks, getScopeHookNames } from './using';
-import { getScopeName } from '../helpers';
+import { getScopeName, makeSafeScope } from '../helpers';
 import { BaseType } from '../weapp/base';
 import { getPageConfigs } from './register';
 import { errorHandler } from '../error';
@@ -172,13 +172,17 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
         if (hookDescRunner && 'clear' in hookDescRunner) {
           scopeHooksRunners.push([hookDescRunner.clear, {
             ...props,
-            pageScope,
-            hookScope,
+            pageScope: makeSafeScope(pageScope),
+            hookScope: makeSafeScope(hookScope),
             opts,
             matched: false,
             hookPages,
             activePages,
-            nextHookDescRunnerParam,
+            nextHookDescRunnerParam: {
+              ...nextHookDescRunnerParam,
+              pageScope: makeSafeScope(nextHookDescRunnerParam.pageScope),
+              hookScope: makeSafeScope(nextHookDescRunnerParam.hookScope),
+            },
             errorHandler: (error: Event) => {
               return errorHandler(error, [pageScope]);
             },
@@ -227,9 +231,9 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
 
         scopeHooksRunners.push([hookDescRunner.exec, {
           ...props,
-          pageScope,
-          hookScope,
-          hookPageScope,
+          pageScope: makeSafeScope(pageScope),
+          hookScope: makeSafeScope(hookScope),
+          hookPageScope: makeSafeScope(hookPageScope),
           opts,
           matched: true,
           hookPages,

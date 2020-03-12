@@ -6,7 +6,7 @@
  * 在首次访问时，通过调用page的makeActivityFunction，手动获取activeScopes
  */
 import { registerApplication } from 'single-spa';
-import { getScopeName } from '../helpers';
+import { getScopeName, makeSafeScope } from '../helpers';
 import Base, { BaseConfig, BaseType, Render } from './base';
 import { HookScope, LifecycleHookEnum } from '../hooks/type';
 import WeApp from './weapp';
@@ -140,7 +140,7 @@ export default class Page extends Base {
       },
       this.makeActivityFunction(),
       {
-        pageScope: scope,
+        pageScope: makeSafeScope(scope),
 
         basename: this.getBasename(),
         routerType: this.getConfig('routerType'),

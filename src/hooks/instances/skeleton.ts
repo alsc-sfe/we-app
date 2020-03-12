@@ -16,14 +16,12 @@ const hookSkeletonDesc: HookDesc<HookSkeletonOpts> = {
   beforeRouting: {
     exec: async (param: HookDescRunnerParam<HookSkeletonOpts>) => {
       const { hookScope } = param;
-      // 使用启用scope的级别获取骨架容器
-      const base = hookScope.page || hookScope.weApp || hookScope.product;
 
       // 渲染骨架
       let { opts: { container } } = param;
       const { opts: { template, contentSelector } } = param;
 
-      if (!base.getData('skeletonContainer')) {
+      if (!hookScope.getData('skeletonContainer')) {
         const div = document.createElement('div');
         div.innerHTML = template;
         const skeletonContainer = div.children[0];
@@ -33,30 +31,28 @@ const hookSkeletonDesc: HookDesc<HookSkeletonOpts> = {
 
         if (!container) {
           // 回溯到父骨架
-          container = base.getData('contentContainer', true) as Element;
+          container = hookScope.getData('contentContainer', true) as Element;
         }
 
         container.appendChild(df);
 
-        base.setData('skeletonContainer', skeletonContainer);
+        hookScope.setData('skeletonContainer', skeletonContainer);
 
         const contentContainer = skeletonContainer.querySelector(contentSelector);
-        base.setData('contentContainer', contentContainer);
+        hookScope.setData('contentContainer', contentContainer);
       }
     },
     clear: async (param: HookDescRunnerParam<HookSkeletonOpts>) => {
       const { hookScope, nextHookDescRunnerParam } = param;
       const { hookScope: nextHookScope } = nextHookDescRunnerParam;
 
-      const base = hookScope.page || hookScope.weApp || hookScope.product;
-
-      const elSkeleton = base.getData('skeletonContainer') as Element;
+      const elSkeleton = hookScope.getData('skeletonContainer') as Element;
 
       let { opts: { container } } = param;
       // 需要处理取父骨架的情况，取父骨架的内容区
       if (!container) {
         // 回溯到父骨架
-        container = base.getData('contentContainer', true) as Element;
+        container = hookScope.getData('contentContainer', true) as Element;
       }
 
       if (!nextHookScope) {
@@ -64,13 +60,10 @@ const hookSkeletonDesc: HookDesc<HookSkeletonOpts> = {
         return;
       }
 
-      // 使用启用scope的级别获取骨架容器
-      const nextBase = nextHookScope.page || nextHookScope.weApp || nextHookScope.product;
-
       // 跨产品时，是否需要隐藏当前skeleton
       // 当是父子关系时，父级不可清除
       // 不为父子关系则清除
-      if (nextBase.getData('skeletonContainer', true) as Element !== elSkeleton) {
+      if (nextHookScope.getData('skeletonContainer', true) as Element !== elSkeleton) {
         container.removeChild(elSkeleton);
       }
     },
