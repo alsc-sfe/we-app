@@ -165,6 +165,9 @@ export function usingHooks(hookConfigs: UsingHooksConfigs, scopes: UsingScope[])
   // 启用hook
   Object.keys(scopeHooksOpts).forEach((scopeName) => {
     const scopeHookOpts = scopeHooksOpts[scopeName];
+    // 清空当前scope已启用扩展
+    ScopesHooks[scopeName] = [];
+
     enableHooks(scopeHookOpts, scopeMap[scopeName]);
   });
 }
