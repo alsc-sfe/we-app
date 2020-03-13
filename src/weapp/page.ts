@@ -33,7 +33,7 @@ export interface PageConfig extends BaseConfig {
   routeIgnore?: Route;
 
   // 一般为一个js、一个css
-  url?: Resource[];
+  url?: Resource|Resource[];
 
   customProps?: object;
 }
@@ -64,7 +64,10 @@ export default class Page extends Base {
         });
 
         const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
-        const url = this.getConfig('url') as Resource[] || [];
+        let url = this.getConfig('url') as Resource[] || [];
+        if (!Array.isArray(url)) {
+          url = [url];
+        }
 
         const mountedUrl = url.map((r) => {
           return resourceLoader.mount(r, scope, resourceLoaderOpts);
