@@ -8,7 +8,7 @@
  */
 import App, { AppConfig } from './app';
 import Base, { BaseConfig, BaseType } from './base';
-import { ResourceLoader } from '../resource-loader';
+import { ResourceLoader, ResourceLoaderOpts } from '../resource-loader';
 import { transformAppConfig } from './helper';
 import { getContext } from '../context';
 
@@ -50,13 +50,7 @@ class Product extends Base {
     let appConfigs = cfgs as AppConfig[];
 
     const appListParser = (parser as Parser)?.appListParser || parser as AppListParser;
-    if (typeof cfgs === 'string') {
-      appConfigs = await this.loadAppConfigs(cfgs, appListParser);
-    } else if (typeof appListParser === 'function') {
-      appConfigs = await appListParser(cfgs, {
-        context: getContext(),
-      });
-    }
+    appConfigs = await this.parseAppConfigs(cfgs, appListParser);
 
     const pApps = appConfigs.map((cfg) => {
       return this.registerApp(cfg, (parser as Parser)?.appConfigParser) as Promise<App>;
@@ -71,7 +65,7 @@ class Product extends Base {
 
   getApp(appName: string) {
     const app = this.getChild(appName) as App;
-    if (app.type !== BaseType.app) {
+    if (!app || app.type !== BaseType.app) {
       return;
     }
     return app;
@@ -80,44 +74,46 @@ class Product extends Base {
   async registerApp(config: AppConfig, parser?: AppConfigParser) {
     let childConfig = config;
 
-    if (config?.url) {
-      childConfig = await this.loadAppConfig(config, parser);
-    } else if (typeof parser === 'function') {
-      childConfig = await parser(config, {
-        context: getContext(),
-      });
-    }
+    childConfig = await this.parseAppConfig(config, parser);
 
     const child = await this.registerChild(childConfig, App);
 
     return child;
   }
 
-  private async loadAppConfigs(url: string, parser?: AppListParser) {
+  private async parseAppConfigs(url: string|AppConfig[]|any, parser?: AppListParser) {
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
-    const appList = await resourceLoader.mount(
-      url,
-      this.compoundScope(this),
-      resourceLoaderOpts
-    );
-    let appConfigs = appList as AppConfig[];
+    let appConfigs: AppConfig[] = url;
     if (typeof parser === 'function') {
-      appConfigs = await parser(appList, {
+      appConfigs = await parser(url, {
         context: getContext(),
+        resourceLoader: (configs: any, opts: ResourceLoaderOpts) => {
+          return resourceLoader.mount(
+            configs,
+            this.compoundScope(this),
+            {
+              ...resourceLoaderOpts,
+              ...opts,
+            }
+          );
+        },
       });
     }
     return appConfigs;
   }
 
-  private async loadAppConfig(config: AppConfig, parser: AppConfigParser = transformAppConfig) {
-    const { url } = config;
+  private async parseAppConfig(config: AppConfig, parser: AppConfigParser = transformAppConfig) {
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
 
-    let appConfig = await resourceLoader.mount(
-      url,
-      this.compoundScope(this),
-      resourceLoaderOpts
-    );
+    let appConfig = config;
+
+    if (config?.url) {
+      appConfig = await resourceLoader.mount(
+        config.url,
+        this.compoundScope(this),
+        resourceLoaderOpts
+      );
+    }
 
     appConfig = await parser(appConfig.default || appConfig, {
       context: getContext(),

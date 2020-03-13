@@ -32,7 +32,7 @@ class RootProduct extends Product {
 
   getProduct(productName: string) {
     const product = this.getChild(productName) as Product;
-    if (product.type !== BaseType.product) {
+    if (!product || product.type !== BaseType.product) {
       return;
     }
     return product;
