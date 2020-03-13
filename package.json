@@ -1,13 +1,13 @@
 {
-  "name": "@alife/we-app",
-  "version": "1.0.0",
+  "name": "@saasfe/we-app",
+  "version": "1.0.2",
   "description": "微应用业务框架",
-  "homepage": "http://gitlab.alibaba-inc.com/saas-biz-components/we-app",
+  "homepage": "https://github.com/alsc-sfe/",
   "repository": {
     "type": "git",
-    "url": "http://gitlab.alibaba-inc.com/saas-biz-components/we-app"
+    "url": "https://github.com/alsc-sfe/"
   },
-  "author": "少楚",
+  "author": "zetay",
   "files": [
     "document",
     "src",
@@ -36,7 +36,6 @@
     "tslib": "1"
   },
   "devDependencies": {
-    "@alife/saas-check-choose-org": "^1.3.8",
     "@types/classnames": "2",
     "@types/react": "16",
     "@types/react-dom": "16",
@@ -77,6 +76,6 @@
     "lint"
   ],
   "publishConfig": {
-    "registry": "http://registry.npm.alibaba-inc.com"
+    "registry": "https://registry.npmjs.org/"
   }
 }

@@ -41,12 +41,12 @@ const hookBasicLibsDesc: HookDesc<HookBasicLibsOpts> = {
       const { hookScope, resourceLoaderOpts, basicLibs, resourceLoader } = getBasicLibsConfig(param);
 
       if (!hookScope.getData('basicLibsLoaded')) {
+        hookScope.setData('basicLibsLoaded', true);
+
         await basicLibs.reduce(async (p, r) => {
           await p;
           return resourceLoader.mount(r, param.pageScope, resourceLoaderOpts);
         }, Promise.resolve());
-
-        hookScope.setData('basicLibsLoaded', true);
       }
     },
     clear: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {

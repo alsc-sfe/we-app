@@ -29,10 +29,13 @@ function loadScript(url: string) {
   });
 }
 
-async function getSystem() {
-  if (!window.System) {
-    await loadScript('https://gw.alipayobjects.com/os/lib/systemjs/6.2.5/dist/system.min.js');
+let pLoadSystem;
+export async function getSystem() {
+  if (!(window.System && window.System.import) && !pLoadSystem) {
+    pLoadSystem = loadScript('https://gw.alipayobjects.com/os/lib/systemjs/6.2.5/dist/system.min.js');
   }
+
+  await pLoadSystem;
 
   return window.System;
 }
@@ -77,7 +80,7 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
       if (resource.indexOf('.js') > -1) {
         if (useSystem) {
           let System;
-          if (root.System) {
+          if (root.System && root.System.import) {
             System = root.System;
           } else {
             System = await getSystem();

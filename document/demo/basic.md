@@ -11,13 +11,12 @@ import {
   setResourceLoader, setPageContainer, setRender,
   registerApps, start, 
   setHomepage, setContext, setRouterType, RouterType,
-  usingHooks, configHooks } from "@alife/we-app";
+  usingHooks, configHooks } from "@saasfe/we-app";
 import render from './render';
 import hookConfigs from './hook-configs';
 import { getMicroApps } from './parser';
 import initFetch from './fetch';
 import isFrom3rdParty from './3rd-party';
-import checkChooseOrg from '@alife/saas-check-choose-org';
 
 const routerType = RouterType.hash;
 window.MicroAppLoader = {
@@ -25,8 +24,6 @@ window.MicroAppLoader = {
   RouterType,
 };
 setRouterType(routerType);
-
-checkChooseOrg();
 
 initFetch(isFrom3rdParty);
 

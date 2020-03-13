@@ -38,10 +38,10 @@ module.exports = {
       // <script src="https://gw.alipayobjects.com/os/lib/core-js-bundle/3.1.4/minified.js" crossorigin="anonymous"></script>
       // <script src="https://gw.alipayobjects.com/os/lib/regenerator-runtime/0.13.3/runtime.js" crossorigin="anonymous"></script>
       // `,
-      `
-      <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/system.js" crossorigin="anonymous"></script>
-      <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/extras/named-register.js" crossorigin="anonymous"></script>
-      `,
+      // `
+      // <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/system.js" crossorigin="anonymous"></script>
+      // <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/extras/named-register.js" crossorigin="anonymous"></script>
+      // `,
       // `
       // <script src="https://gw.alipayobjects.com/os/lib/moment/2.24.0/min/moment.min.js" crossorigin="anonymous"></script>
       // <script src="https://gw.alipayobjects.com/os/lib/moment/2.24.0/locale/zh-cn.js" crossorigin="anonymous"></script>
@@ -61,10 +61,10 @@ module.exports = {
       // <script src="https://g.alicdn.com/code/npm/@alife/system-cook-pc/1.0.0/library/umd/cook-pc-min.js" crossorigin="anonymous"></script>
       // <script src="https://g.alicdn.com/code/npm/@alife/system-ant-design-icons/1.0.1/library/umd/ant-design-icons-min.js" crossorigin="anonymous"></script>
       // `,
-      `
-      <script src="https://g.alicdn.com/code/npm/@alife/system-saas-fetch/1.0.0/library/umd/saas-fetch-min.js" crossorigin="anonymous"></script>
-      <script src="https://g.alicdn.com/code/npm/@alife/system-saas-fetch-mtop/1.0.1/library/umd/saas-fetch-mtop-min.js" crossorigin="anonymous"></script>
-      `,
+      // `
+      // <script src="https://g.alicdn.com/code/npm/@alife/system-saas-fetch/1.0.0/library/umd/saas-fetch-min.js" crossorigin="anonymous"></script>
+      // <script src="https://g.alicdn.com/code/npm/@alife/system-saas-fetch-mtop/1.0.1/library/umd/saas-fetch-mtop-min.js" crossorigin="anonymous"></script>
+      // `,
     ],
     bodies: [
       // `

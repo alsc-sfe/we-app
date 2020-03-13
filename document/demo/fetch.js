@@ -24,8 +24,8 @@ export default async function (isFrom3rdParty) {
     };
   }
 
-  const SaasFetch = (await window.System.import('saas-fetch')).default;
-  const SaasFetchMtop = (await window.System.import('saas-fetch-mtop')).default;
+  const SaasFetch = window['saas-fetch'];
+  const SaasFetchMtop = window['saas-fetch-mtop'];
 
   if (gateways[window.env]) {
     SaasFetch.setup({
