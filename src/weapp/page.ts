@@ -48,6 +48,10 @@ export default class Page extends Base {
   constructor(config: PageConfig) {
     super(config);
 
+    if (config.path) {
+      config.route = config.path;
+    }
+
     this.setInited();
   }
 
