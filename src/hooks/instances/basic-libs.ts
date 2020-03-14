@@ -10,7 +10,7 @@ import { Resource, ResourceLoader } from '../../resource-loader';
 import { isAncestorScope } from '../../helpers';
 
 export interface HookBasicLibsOpts extends HookOpts {
-  url?: Resource[];
+  url: Resource[];
   useSystem?: boolean;
   [prop: string]: any;
 }
@@ -69,6 +69,7 @@ const hookBasicLibs: UsingHookOpts<HookBasicLibsOpts> = {
   hookName: 'basicLibs',
   hookDesc: hookBasicLibsDesc,
   config: {
+    url: [],
     useSystem: false,
   },
 };
