@@ -81,7 +81,7 @@ export function makeSafeScope(scope: HookScope): SafeHookScope {
     safeScope[property] = get(scope, property);
   });
 
-  const safeBaseFunctions = ['getConfig', 'getData', 'setData', 'getResourceLoader', 'getRender', 'getRouterType'];
+  const safeBaseFunctions = ['getConfig', 'getData', 'setData', 'getResourceLoader', 'getRouterType'];
   safeBaseFunctions.forEach((property) => {
     let fn = get(base, property);
     if (fn) {
@@ -90,7 +90,7 @@ export function makeSafeScope(scope: HookScope): SafeHookScope {
     safeScope[property] = fn;
   });
 
-  const safePageFunctions = ['getPageContainer', 'setPageContainer', 'setCustomProps'];
+  const safePageFunctions = ['getPageContainer', 'setPageContainer', 'getRender', 'setCustomProps'];
   safePageFunctions.forEach((property) => {
     let fn = get(page, property);
     if (fn) {

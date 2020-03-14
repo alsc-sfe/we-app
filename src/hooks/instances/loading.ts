@@ -14,18 +14,18 @@ const hookLoadingDesc: HookDesc<HookLoadingOpts> = {
     const render = pageScope?.getRender();
     render?.mount(
       element,
-      /* 默认渲染到当前页面对应的容器内 */
+      null/* 默认渲染到当前页面对应的容器内 */
     );
   },
 
   async onError({ pageScope }: HookDescRunnerParam<HookLoadingOpts>) {
     const render = pageScope?.getRender();
-    render?.unmount();
+    render?.unmount(null);
   },
 
   async beforeMount({ pageScope }: HookDescRunnerParam<HookLoadingOpts>) {
     const render = pageScope?.getRender();
-    render?.unmount();
+    render?.unmount(null);
   },
 };
 

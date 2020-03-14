@@ -144,7 +144,7 @@ export default class Page extends Base {
     if (render) {
       let renderWrapper = render;
       if (this.type === BaseType.page) {
-        const container = this.getPageContainer() as Element;
+        const container = this.getPageContainer();
         renderWrapper = {
           mount: (element, node, customProps) => {
             render.mount(element, node || container, customProps);

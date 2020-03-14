@@ -19,8 +19,8 @@ export interface RenderCustomProps {
   [prop: string]: any;
 }
 export interface Render {
-  mount: (element: any, container?: Element, customProps?: RenderCustomProps) => any;
-  unmount: (container?: Element, customProps?: RenderCustomProps) => any;
+  mount: (element: any, container: Element|null, customProps?: RenderCustomProps) => any;
+  unmount: (container: Element|null, customProps?: RenderCustomProps) => any;
 }
 
 export interface BaseConfig {
