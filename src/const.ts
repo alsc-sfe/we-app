@@ -9,4 +9,5 @@ export const DataName = {
   pageContainer: '__pageContainer',
   render: '__pageRender',
   customProps: '__pageRenderCustomProps',
+  routerType: '__routerType',
 };

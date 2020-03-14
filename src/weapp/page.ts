@@ -17,7 +17,7 @@ import { ajustPathname } from '../routing/util';
 import { matchHomepage } from './homepage';
 import { RouterType } from '../routing/enum';
 import { getContext } from '../context';
-import { DataName } from './const';
+import { DataName } from '../const';
 
 export interface PageConfig extends BaseConfig {
   parent?: App;
@@ -130,7 +130,7 @@ export default class Page extends Base {
         pageScope: makeSafeScope(scope),
 
         basename: this.getBasename(),
-        routerType: this.getConfig('routerType'),
+        routerType: this.getData(DataName.routerType, true),
       },
     );
   }
@@ -168,7 +168,7 @@ export default class Page extends Base {
 
   makeActivityFunction() {
     const config = this.getConfig();
-    const routerType = this.getConfig('routerType') as RouterType;
+    const routerType = this.getData(DataName.routerType, true) as RouterType;
     const { routeIgnore, afterRouteDiscover } = config;
 
     let { route } = config;

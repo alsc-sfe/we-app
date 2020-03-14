@@ -39,7 +39,7 @@ const hook403Desc: HookDesc<Hook403Opts> = {
 
         if (is403 && hookPageScope) {
           // 设置hook 403页面渲染参数
-          hookPageScope.setCustomProps(res);
+          hookPageScope.setCustomProps(res as object);
         }
       }
     }

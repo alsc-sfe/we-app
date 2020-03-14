@@ -8,7 +8,7 @@ import Deferred from '../utils/deferred';
 import { configHooks } from '../hooks/using';
 import { setResourceLoader, setPageContainer, setRender, getGlobalConfig } from './config';
 import { getScopeName } from '../helpers';
-import { ConfigName, DataName } from './const';
+import { ConfigName, DataName } from '../const';
 import { RouterType } from '..';
 
 export interface RenderCustomProps {
@@ -199,11 +199,15 @@ export default class Base {
     configHooks(params, scopes || [this.compoundScope(this)]);
   }
 
-  getResourceLoader() {
+  getResourceLoader(): ResourceLoader {
     // 先从全局设置对应scope中获取配置
     const scope = this.compoundScope(this);
     const scopeName = getScopeName(scope);
-    const config: ResourceLoader = getGlobalConfig(ConfigName.resourceLoader, scopeName);
+    let config: ResourceLoader = getGlobalConfig(ConfigName.resourceLoader, scopeName);
+
+    if (!config && this.type !== BaseType.root) {
+      config = this.parent.getResourceLoader();
+    }
 
     return config;
   }
@@ -212,16 +216,23 @@ export default class Base {
     setResourceLoader(resourceLoader, resourceLoader?.scopes || scopes || [this.compoundScope(this)]);
   }
 
-  getPageContainer() {
+  getPageContainer(): Element {
     let config: Element;
+
     // 先从全局设置对应scope中获取配置
     const scope = this.compoundScope(this);
     const scopeName = getScopeName(scope);
     config = getGlobalConfig(ConfigName.pageContainer, scopeName);
+
     // 再从缓存数据中获取
     if (config === undefined) {
       config = this.getData(DataName.pageContainer) as Element;
     }
+
+    if (!config && this.type !== BaseType.root) {
+      config = this.parent.getPageContainer();
+    }
+
     return config;
   }
 
@@ -229,11 +240,15 @@ export default class Base {
     setPageContainer(pageContainer, scopes || [this.compoundScope(this)]);
   }
 
-  getRender() {
+  getRender(): Render {
     // 先从全局设置对应scope中获取配置
     const scope = this.compoundScope(this);
     const scopeName = getScopeName(scope);
-    const config: Render = getGlobalConfig(ConfigName.render, scopeName);
+    let config: Render = getGlobalConfig(ConfigName.render, scopeName);
+
+    if (!config && this.type !== BaseType.root) {
+      config = this.parent.getRender();
+    }
 
     return config;
   }

@@ -28,7 +28,7 @@ export function Page500(props) {
   return (
     <div>
       <h1>This is 500 page</h1>
-      <div>{props.error.message}</div>
+      <div>{props.error?.message}</div>
     </div>
   );
 }

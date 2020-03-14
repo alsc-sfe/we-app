@@ -45,6 +45,8 @@ class RootProduct extends Product {
     if (scope.hookName) {
       const buildinProduct = this.getProduct(BuildinProductName);
       const hookApp = buildinProduct.getApp(HookAppName);
+      scope.product = buildinProduct;
+      scope.app = hookApp;
       scope.page = hookApp.getPage(scope.hookName);
     } else if (scope.pageName) {
       if (!scope.productName) {

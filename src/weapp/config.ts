@@ -2,7 +2,7 @@ import { ResourceLoader } from '../resource-loader';
 import { Render } from './base';
 import { ScopeNameDivider, getScopeName } from '../helpers';
 import { UsingScope } from '../hooks/type';
-import { ConfigName } from './const';
+import { ConfigName } from '../const';
 
 interface Config {
   pageContainer: {

@@ -82,13 +82,13 @@ class Product extends Base {
   }
 
   private async parseAppConfigs(url: string|AppConfig[]|any, parser?: AppListParser) {
-    const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
     let appConfigs: AppConfig[] = url;
     if (typeof parser === 'function') {
+      const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
       appConfigs = await parser(url, {
         context: getContext(),
         resourceLoader: (configs: any, opts: ResourceLoaderOpts) => {
-          return resourceLoader.mount(
+          return resourceLoader?.mount(
             configs,
             this.compoundScope(this),
             {
@@ -103,19 +103,19 @@ class Product extends Base {
   }
 
   private async parseAppConfig(config: AppConfig, parser: AppConfigParser = transformAppConfig) {
-    const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
-
     let appConfig = config;
 
     if (config?.url) {
-      appConfig = await resourceLoader.mount(
+      const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
+      appConfig = await resourceLoader?.mount(
         config.url,
         this.compoundScope(this),
         resourceLoaderOpts
       );
+      appConfig = appConfig.default || appConfig;
     }
 
-    appConfig = await parser(appConfig.default || appConfig, {
+    appConfig = await parser(appConfig, {
       context: getContext(),
     });
 

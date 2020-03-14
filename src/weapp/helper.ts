@@ -42,6 +42,10 @@ function transformRoute(route: string|string[]|boolean|Route|Route[]): TRoute {
 }
 
 export async function transformAppConfig(appConfig: MicroAppConfig): Promise<AppConfig> {
+  if (!(appConfig.microAppName && appConfig.modules)) {
+    return appConfig;
+  }
+
   return {
     name: appConfig.microAppName,
     pages: appConfig.modules.map((module): PageConfig => {
