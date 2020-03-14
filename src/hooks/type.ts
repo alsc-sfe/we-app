@@ -110,7 +110,7 @@ export interface SafeHookScope {
   hookName?: string;
 
   getConfig?: (pathname?: string) => any;
-  getData?: (pathname?: string) => any;
+  getData?: (pathname?: string, traced?: boolean) => any;
   getResourceLoader?: () => ResourceLoader;
   getRender?: () => Render;
   getPageContainer?: () => Element;
