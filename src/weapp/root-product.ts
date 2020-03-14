@@ -6,6 +6,7 @@ import { DefaultResourceLoader } from '../resource-loader';
 import { RouterType } from '../routing/enum';
 import { HookScope } from '../hooks/type';
 import { getPageConfigs } from '../hooks';
+import { DataName } from '../const';
 
 class RootProduct extends Product {
   type: BaseType = BaseType.root;
@@ -153,6 +154,9 @@ export const getData = rootProduct.getData.bind(rootProduct) as RootProduct['get
 export const setResourceLoader = rootProduct.setResourceLoader.bind(rootProduct) as RootProduct['setResourceLoader'];
 export const setPageContainer = rootProduct.setPageContainer.bind(rootProduct) as RootProduct['setPageContainer'];
 export const setRender = rootProduct.setRender.bind(rootProduct) as RootProduct['setRender'];
+export const setRouterType = (routerType: RouterType) => {
+  setData(DataName.routerType, routerType);
+};
 
 export {
   getActivePageScopes,

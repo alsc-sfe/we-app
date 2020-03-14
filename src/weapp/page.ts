@@ -134,7 +134,7 @@ export default class Page extends Base {
         pageScope: makeSafeScope(scope),
 
         basename: this.getBasename(),
-        routerType: this.getData(DataName.routerType, true),
+        routerType: this.getRouterType(),
       },
     );
   }
@@ -172,7 +172,7 @@ export default class Page extends Base {
 
   makeActivityFunction() {
     const config = this.getConfig();
-    const routerType = this.getData(DataName.routerType, true) as RouterType;
+    const routerType = this.getRouterType();
     const { routeIgnore, afterRouteDiscover } = config;
 
     let { route } = config;

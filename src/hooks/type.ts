@@ -3,6 +3,7 @@ import App from '../weapp/app';
 import Page, { PageConfig } from '../weapp/page';
 import { Render } from '../weapp/base';
 import { ResourceLoader } from '../resource-loader';
+import { RouterType } from '..';
 
 export enum LifecycleHookEnum {
   page = 'page',
@@ -114,6 +115,7 @@ export interface SafeHookScope {
   getResourceLoader?: () => ResourceLoader;
   getRender?: () => Render;
   getPageContainer?: () => Element;
+  getRouterType?: () => RouterType;
 
   setData?: (pathname: string|object, value?: any) => void;
   setPageContainer?: (pageContainer: Element) => void;

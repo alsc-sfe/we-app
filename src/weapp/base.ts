@@ -257,6 +257,10 @@ export default class Base {
     setRender(render, scopes || [this.compoundScope(this)]);
   }
 
+  getRouterType() {
+    return this.getData(DataName.routerType, true) as RouterType;
+  }
+
   protected async registerChildren(cfgs: BaseConfig[], Child: typeof Base) {
     const pChildren = cfgs.map((config) => this.registerChild(config, Child));
     const children = await Promise.all(pChildren);
