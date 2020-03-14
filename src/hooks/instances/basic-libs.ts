@@ -18,7 +18,7 @@ export interface HookBasicLibsOpts extends HookOpts {
 function getBasicLibsConfig(param: HookDescRunnerParam<HookBasicLibsOpts>) {
   const { hookScope, opts } = param;
 
-  const { desc: resourceLoader, config: resourceLoaderOpts } = hookScope.getConfig('resourceLoader') as ResourceLoader;
+  const { desc: resourceLoader, config: resourceLoaderOpts } = hookScope.getResourceLoader();
   const basicLibs = opts.url;
   const { useSystem } = opts;
 

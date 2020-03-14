@@ -17,7 +17,7 @@ import { ajustPathname } from '../routing/util';
 import { matchHomepage } from './homepage';
 import { RouterType } from '../routing/enum';
 import { getContext } from '../context';
-
+import { DataName } from './const';
 
 export interface PageConfig extends BaseConfig {
   parent?: App;
@@ -57,13 +57,9 @@ export default class Page extends Base {
     registerApplication(
       getScopeName(scope),
       async () => {
-        await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope], {
-          getRender: () => {
-            return this.getRender();
-          },
-        });
+        await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope]);
 
-        const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
+        const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
         let url = this.getConfig('url') as Resource[] || [];
         if (!Array.isArray(url)) {
           url = [url];
@@ -85,24 +81,16 @@ export default class Page extends Base {
           mount: [
             // beforeMount
             async (customProps: object) => {
-              const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeMount, [scope], {
-                getRender: () => {
-                  return this.getRender();
-                },
-              });
+              const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeMount, [scope]);
               if (!isContinue) {
-                await runLifecycleHook(LifecycleHookEnum.onMountPrevented, [scope], {
-                  getRender: () => {
-                    return this.getRender();
-                  },
-                });
+                await runLifecycleHook(LifecycleHookEnum.onMountPrevented, [scope]);
                 return;
               }
 
               const container = this.getPageContainer();
               const render = this.getRender();
               render?.mount(component, container, {
-                ...this.getConfig('customProps'),
+                ...this.getData(DataName.customProps),
                 ...customProps,
                 context: getContext(),
               });
@@ -114,11 +102,7 @@ export default class Page extends Base {
           unmount: [
             // beforeUnmount
             async (customProps) => {
-              const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope], {
-                getRender: () => {
-                  return this.getRender();
-                },
-              });
+              const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope]);
               if (!isContinue) {
                 return;
               }
@@ -126,7 +110,7 @@ export default class Page extends Base {
               const container = this.getPageContainer();
               const render = this.getRender();
               render?.unmount(container, {
-                ...this.getConfig('customProps'),
+                ...this.getData(DataName.customProps),
                 ...customProps,
                 context: getContext(),
               });
@@ -152,7 +136,7 @@ export default class Page extends Base {
   }
 
   getRender() {
-    const render = this.getConfig('render') as Render;
+    const render = super.getRender();
     if (render) {
       let renderWrapper = render;
       if (this.type === BaseType.page) {
@@ -235,17 +219,11 @@ export default class Page extends Base {
     return activityFunction;
   }
 
-  getPageContainer() {
-    return this.getConfig('pageContainer') as Element;
-  }
-
   setPageContainer(pageContainer: Element) {
-    this.setConfig('pageContainer', pageContainer);
+    this.setData(DataName.pageContainer, pageContainer);
   }
 
   setCustomProps(customProps: any) {
-    this.setConfig({
-      customProps,
-    });
+    this.setData(DataName.customProps, customProps);
   }
 }

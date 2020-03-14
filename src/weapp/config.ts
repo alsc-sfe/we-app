@@ -2,6 +2,7 @@ import { ResourceLoader } from '../resource-loader';
 import { Render } from './base';
 import { ScopeNameDivider, getScopeName } from '../helpers';
 import { UsingScope } from '../hooks/type';
+import { ConfigName } from './const';
 
 interface Config {
   pageContainer: {
@@ -31,15 +32,15 @@ function setGlobalConfig(pathname: string, value: any, scopes: UsingScope[]) {
 }
 
 export function setPageContainer(value: Element, scopes: UsingScope[]) {
-  setGlobalConfig('pageContainer', value, scopes);
+  setGlobalConfig(ConfigName.pageContainer, value, scopes);
 }
 
 export function setResourceLoader(value: ResourceLoader, scopes: UsingScope[]) {
-  setGlobalConfig('resourceLoader', value, scopes);
+  setGlobalConfig(ConfigName.resourceLoader, value, scopes);
 }
 
 export function setRender(value: Render, scopes: UsingScope[]) {
-  setGlobalConfig('render', value, scopes);
+  setGlobalConfig(ConfigName.render, value, scopes);
 }
 
 export function getGlobalConfig(pathname: string, scopeName: string) {
@@ -57,7 +58,7 @@ export function getGlobalConfig(pathname: string, scopeName: string) {
     return value;
   }
 
-  if (pathname === 'resourceLoader') {
+  if (pathname === ConfigName.resourceLoader) {
     // 没有找到资源加载器描述，向上级查找
     if (!(value as ResourceLoader)?.desc) {
       const names = scopeName.split(ScopeNameDivider);

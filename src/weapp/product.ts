@@ -82,7 +82,7 @@ class Product extends Base {
   }
 
   private async parseAppConfigs(url: string|AppConfig[]|any, parser?: AppListParser) {
-    const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
+    const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
     let appConfigs: AppConfig[] = url;
     if (typeof parser === 'function') {
       appConfigs = await parser(url, {
@@ -103,7 +103,7 @@ class Product extends Base {
   }
 
   private async parseAppConfig(config: AppConfig, parser: AppConfigParser = transformAppConfig) {
-    const { desc: resourceLoader, config: resourceLoaderOpts } = this.getConfig('resourceLoader') as ResourceLoader;
+    const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
 
     let appConfig = config;
 

@@ -1,17 +1,26 @@
 import get from 'lodash-es/get';
-import { HookScope, UsingHooksConfigs, UsingScope } from '../hooks/type';
+import { HookScope, UsingHooksConfigs, UsingScope, SafeHookScope } from '../hooks/type';
 import { usingHooks } from '../hooks';
 
 import { ResourceLoader, Resource } from '../resource-loader';
 import Product from './product';
 import Deferred from '../utils/deferred';
 import { configHooks } from '../hooks/using';
-import { getGlobalConfig, setResourceLoader, setPageContainer, setRender } from './config';
+import { setResourceLoader, setPageContainer, setRender, getGlobalConfig } from './config';
 import { getScopeName } from '../helpers';
+import { ConfigName, DataName } from './const';
+import { RouterType } from '..';
 
+export interface RenderCustomProps {
+  basename?: string;
+  routerType?: RouterType;
+  pageScope?: SafeHookScope;
+  context?: any;
+  [prop: string]: any;
+}
 export interface Render {
-  mount: (element: any, container?: Element, customProps?: any) => any;
-  unmount: (container?: Element, customProps?: any) => any;
+  mount: (element: any, container?: Element, customProps?: RenderCustomProps) => any;
+  unmount: (container?: Element, customProps?: RenderCustomProps) => any;
 }
 
 export interface BaseConfig {
@@ -132,20 +141,15 @@ export default class Base {
   }
 
   getConfig(pathname?: string): any {
-    let { config } = this;
-    // 先从全局设置对应scope中获取配置
-    if (pathname) {
-      const scope = this.compoundScope(this);
-      const scopeName = getScopeName(scope);
-      config = getGlobalConfig(pathname, scopeName);
+    let config = { ...this.config };
 
-      if (config === undefined) {
-        config = get(this.config, pathname);
+    // 先从本级获取
+    if (pathname) {
+      config = get(this.config, pathname);
+      // 再向上级查找
+      if (config === undefined && this.type !== BaseType.root) {
+        config = this.parent.getConfig(pathname);
       }
-    }
-    // 再向上级查找
-    if (config === undefined && this.type !== BaseType.root) {
-      config = this.parent.getConfig(pathname);
     }
 
     return config;
@@ -195,12 +199,43 @@ export default class Base {
     configHooks(params, scopes || [this.compoundScope(this)]);
   }
 
+  getResourceLoader() {
+    // 先从全局设置对应scope中获取配置
+    const scope = this.compoundScope(this);
+    const scopeName = getScopeName(scope);
+    const config: ResourceLoader = getGlobalConfig(ConfigName.resourceLoader, scopeName);
+
+    return config;
+  }
+
   setResourceLoader(resourceLoader: ResourceLoader, scopes?: UsingScope[]) {
     setResourceLoader(resourceLoader, resourceLoader?.scopes || scopes || [this.compoundScope(this)]);
   }
 
+  getPageContainer() {
+    let config: Element;
+    // 先从全局设置对应scope中获取配置
+    const scope = this.compoundScope(this);
+    const scopeName = getScopeName(scope);
+    config = getGlobalConfig(ConfigName.pageContainer, scopeName);
+    // 再从缓存数据中获取
+    if (config === undefined) {
+      config = this.getData(DataName.pageContainer) as Element;
+    }
+    return config;
+  }
+
   setPageContainer(pageContainer: Element, scopes?: UsingScope[]) {
     setPageContainer(pageContainer, scopes || [this.compoundScope(this)]);
+  }
+
+  getRender() {
+    // 先从全局设置对应scope中获取配置
+    const scope = this.compoundScope(this);
+    const scopeName = getScopeName(scope);
+    const config: Render = getGlobalConfig(ConfigName.render, scopeName);
+
+    return config;
   }
 
   setRender(render: Render, scopes?: UsingScope[]) {

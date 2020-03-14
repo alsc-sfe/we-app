@@ -1,5 +1,5 @@
 import get from 'lodash-es/get';
-import { HookScope, UsingScope } from './hooks/type';
+import { HookScope, UsingScope, SafeHookScope } from './hooks/type';
 import { BaseType } from './weapp/base';
 
 const BuildinProductName = '__buildin';
@@ -66,7 +66,7 @@ export function isAncestorScope(ancestor: HookScope, descendant: HookScope) {
   return false;
 }
 
-export function makeSafeScope(scope: HookScope) {
+export function makeSafeScope(scope: HookScope): SafeHookScope {
   if (!scope || !scope.product) {
     return;
   }
@@ -76,12 +76,12 @@ export function makeSafeScope(scope: HookScope) {
 
   const safeScope: HookScope = {};
 
-  const safeProperties = ['productName', 'appName', 'pageName', 'hookName'];
+  const safeProperties = ['productName', 'appName', 'pageName', 'hookName', 'scopeName'];
   safeProperties.forEach((property) => {
     safeScope[property] = get(scope, property);
   });
 
-  const safeBaseFunctions = ['getConfig', 'getData', 'setData'];
+  const safeBaseFunctions = ['getConfig', 'getData', 'setData', 'getResourceLoader', 'getRender'];
   safeBaseFunctions.forEach((property) => {
     let fn = get(base, property);
     if (fn) {

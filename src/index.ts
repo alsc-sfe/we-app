@@ -8,7 +8,8 @@ import { startRouting } from './routing/routing';
 
 import { registerApps, requireChildrenInited,
   startRootProduct, usingHooks, configHooks, setHomepage, registerHookPages,
-  setResourceLoader, setPageContainer, setRender, setConfig } from './weapp';
+  setResourceLoader, setPageContainer, setRender,
+  setData } from './weapp';
 import { buildinHooks } from './hooks';
 import { setContext } from './context';
 import { DefaultResourceLoader, getSystem } from './resource-loader';
@@ -66,7 +67,7 @@ export {
 };
 
 export const setRouterType = (routerType: RouterType) => {
-  setConfig({
+  setData({
     routerType,
   });
 };

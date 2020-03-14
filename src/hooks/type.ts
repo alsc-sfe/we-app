@@ -2,6 +2,7 @@ import Product from '../weapp/product';
 import App from '../weapp/app';
 import Page, { PageConfig } from '../weapp/page';
 import { Render } from '../weapp/base';
+import { ResourceLoader } from '../resource-loader';
 
 export enum LifecycleHookEnum {
   page = 'page',
@@ -18,23 +19,20 @@ export enum LifecycleHookEnum {
 
 export interface HookDescRunnerParam<HookOpts> {
   // 当前页面对应范围
-  pageScope: HookScope;
+  pageScope: SafeHookScope;
   // 当前匹配扩展对应工作范文
-  hookScope: HookScope;
+  hookScope: SafeHookScope;
   // 当前匹配扩展的页面对应范围
-  hookPageScope?: HookScope;
+  hookPageScope?: SafeHookScope;
   opts?: HookOpts;
   matched?: boolean;
 
   hookPages?: string[];
-  activePageScopes?: HookScope[];
 
   nextHookDescRunnerParam?: HookDescRunnerParam<HookOpts>;
 
-  getRender?: () => Render;
   errorHandler?: (error: Event) => Promise<any>;
 
-  root?: Window;
   context?: any;
 
   // 错误信息
@@ -95,17 +93,31 @@ export interface HookScope {
   app?: App;
   page?: Page;
 
-  hookPages?: string[];
-  activeScopes?: HookScope[];
-  enabledScope?: HookScope;
-
-  errorHandler?: (error: Event) => Promise<any[]>;
-
   root?: Window;
-
-  context?: any;
 
   [prop: string]: any;
 }
 
 export type UsingHooksConfigs = (UsingHookOpts<any>|string)[]|null;
+
+export interface SafeHookScope {
+  scopeName?: string;
+
+  productName?: string;
+  appName?: string;
+  pageName?: string;
+
+  hookName?: string;
+
+  getConfig?: (pathname?: string) => any;
+  getData?: (pathname?: string) => any;
+  getResourceLoader?: () => ResourceLoader;
+  getRender?: () => Render;
+  getPageContainer?: () => Element;
+
+  setData?: (pathname: string|object, value?: any) => void;
+  setPageContainer?: (pageContainer: Element) => void;
+  setCustomProps?: (customProps: object) => void;
+
+  [prop: string]: any;
+}

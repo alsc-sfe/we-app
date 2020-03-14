@@ -61,11 +61,11 @@
     "typescript": "3"
   },
   "peerDependencies": {
+    "antd": ">=3.0.0",
     "classnames": ">=2.0.0",
     "prop-types": ">=15.0.0",
     "react": ">=16.0.0",
-    "react-dom": ">=16.0.0",
-    "antd": ">=3.0.0"
+    "react-dom": ">=16.0.0"
   },
   "scripts": {
     "lint": "npm run tslint && npm run stylelint",
