@@ -11,6 +11,8 @@ interface Route {
 }
 
 interface Module {
+  module: string;
+  moduleReal: string;
   moduleName: string;
   route: string|string[]|boolean|Route|Route[];
   routeIgnore: Route[];
@@ -51,7 +53,7 @@ export async function transformAppConfig(appConfig: MicroAppConfig): Promise<App
     pages: appConfig.modules.map((module): PageConfig => {
       return {
         ...module,
-        name: module.moduleName,
+        name: module.moduleName || module.module,
         url: [module.getComponent],
         route: transformRoute(module.route),
         routeIgnore: transformRoute(module.routeIgnore),
