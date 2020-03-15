@@ -90,7 +90,10 @@ export function makeSafeScope(scope: HookScope): SafeHookScope {
     safeScope[property] = fn;
   });
 
-  const safePageFunctions = ['getPageContainer', 'setPageContainer', 'getRender', 'setCustomProps'];
+  const safePageFunctions = [
+    'getPageContainer', 'setPageContainer',
+    'getRender', 'setCustomProps', 'getBasename',
+  ];
   safePageFunctions.forEach((property) => {
     let fn = get(page, property);
     if (fn) {

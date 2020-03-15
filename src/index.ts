@@ -14,7 +14,6 @@ import { buildinHooks } from './hooks';
 import { setContext } from './context';
 import { DefaultResourceLoader, getSystem } from './resource-loader';
 import { RouterType } from './routing/enum';
-import { DataName } from './const';
 
 let startPromise: Promise<any>;
 
