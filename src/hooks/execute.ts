@@ -31,6 +31,10 @@ function matchHookDescRunnerParam(sourceHookScope: HookScope, forMatchedHookScop
     const hookScope = typeof hooksScope === 'string' ? getScope(hooksScope) : hooksScope;
     return hookScope;
   }).filter((hookScope) => {
+    if (!hookScope) {
+      return false;
+    }
+
     const matched = activeScopeNames.indexOf(hookScope.scopeName) > -1;
     if (matched) {
       return true;

@@ -61,6 +61,7 @@ export default [
     scopes: [
       'bcommon/navbar',
       'bcommon/menu',
+      'boh-layout/navbar',
     ],
   },
   {

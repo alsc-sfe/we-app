@@ -41,7 +41,9 @@ class RootProduct extends Product {
 
   getScope(scopeName: string) {
     const scope = this.parseScopeName(scopeName);
-    scope.scopeName = scopeName;
+    if (!scope) {
+      return;
+    }
 
     if (scope.hookName) {
       const buildinProduct = this.getProduct(BuildinProductName);
@@ -85,7 +87,10 @@ class RootProduct extends Product {
   }
 
   private parseScopeName(scopeName: string) {
-    const scope: HookScope = {};
+    const scope: HookScope = {
+      scopeName,
+    };
+
     const paths = scopeName.split(ScopeNameDivider);
     const pathsLen = paths.length;
     if (pathsLen === 3) {
@@ -99,29 +104,35 @@ class RootProduct extends Product {
     } else if (pathsLen === 2) {
       // 可能是产品、微应用，也可能是微应用、页面
       const name = paths[0];
-      const product = this.getProduct(name);
-      if (product) {
-        scope.productName = name;
-        scope.product = product;
-        scope.appName = paths[1];
-      } else {
-        scope.appName = paths[0];
-        scope.pageName = paths[1];
+      const child = this.getChild(name);
+      if (child) {
+        if (child.type === BaseType.product) {
+          scope.productName = name;
+          scope.product = child as Product;
+          scope.appName = paths[1];
+        } else {
+          scope.appName = paths[0];
+          scope.app = child as App;
+          scope.pageName = paths[1];
+        }
       }
     } else if (pathsLen === 1) {
       // 可能是产品，可能是微应用
       const name = paths[0];
-      const product = this.getProduct(name);
-      if (product) {
-        scope.productName = name;
-        scope.product = product;
-      } else {
-        const app = this.getApp(name);
-        if (app) {
+      const child = this.getChild(name);
+      if (child) {
+        if (child.type === BaseType.product) {
+          scope.productName = name;
+          scope.product = child as Product;
+        } else {
           scope.appName = name;
-          scope.app = app;
+          scope.app = child as App;
         }
       }
+    }
+
+    if (Object.keys(scope).length === 1) {
+      return;
     }
 
     return scope;
