@@ -224,11 +224,6 @@ export default class Base {
     const scopeName = getScopeName(scope);
     config = getGlobalConfig(ConfigName.pageContainer, scopeName);
 
-    // 再从缓存数据中获取
-    if (config === undefined) {
-      config = this.getData(DataName.pageContainer) as Element;
-    }
-
     if (!config && this.type !== BaseType.root) {
       config = this.parent.getPageContainer();
     }

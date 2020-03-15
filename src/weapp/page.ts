@@ -223,10 +223,6 @@ export default class Page extends Base {
     return activityFunction;
   }
 
-  setPageContainer(pageContainer: Element) {
-    this.setData(DataName.pageContainer, pageContainer);
-  }
-
   setCustomProps(customProps: any) {
     this.setData(DataName.customProps, customProps);
   }
