@@ -253,7 +253,7 @@ export default class Base {
   }
 
   getRouterType() {
-    return this.getData(DataName.routerType, true) as RouterType;
+    return this.getData(DataName.routerType, true) as RouterType || RouterType.browser;
   }
 
   protected async registerChildren(cfgs: BaseConfig[], Child: typeof Base) {
