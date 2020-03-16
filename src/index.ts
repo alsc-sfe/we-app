@@ -8,7 +8,7 @@ import { startRouting } from './routing/routing';
 
 import { registerApps, requireChildrenInited,
   startRootProduct, usingHooks, configHooks, setHomepage, registerHookPages,
-  setResourceLoader, setPageContainer, setRender, setRouterType,
+  setResourceLoader, setPageContainer, setRender, setRouterType, setBasename,
 } from './weapp';
 import { buildinHooks } from './hooks';
 import { setContext } from './context';
@@ -65,4 +65,5 @@ export {
 
   RouterType,
   setRouterType,
+  setBasename,
 };

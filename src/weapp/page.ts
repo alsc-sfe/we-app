@@ -162,12 +162,14 @@ export default class Page extends Base {
     const scope = this.compoundScope(this);
     const { productName = '', appName = '', app } = scope;
 
+    const productBasename = this.getData(DataName.basename, true) as string || '';
+
     const basename = app.getConfig('basename') as string;
     if (basename) {
-      return ajustPathname(basename);
+      return ajustPathname(`/${productBasename}/${basename}`);
     }
 
-    return ajustPathname(`/${productName}/${appName}`);
+    return ajustPathname(`/${productBasename}/${productName}/${appName}`);
   }
 
   makeActivityFunction() {

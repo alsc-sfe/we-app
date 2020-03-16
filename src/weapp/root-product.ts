@@ -168,6 +168,9 @@ export const setRender = rootProduct.setRender.bind(rootProduct) as RootProduct[
 export const setRouterType = (routerType: RouterType) => {
   setData(DataName.routerType, routerType);
 };
+export const setBasename = (basename: string) => {
+  setData(DataName.basename, basename);
+};
 
 export {
   getActivePageScopes,

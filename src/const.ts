@@ -10,4 +10,5 @@ export const DataName = {
   render: '__pageRender',
   customProps: '__pageRenderCustomProps',
   routerType: '__routerType',
+  basename: '__basename',
 };
