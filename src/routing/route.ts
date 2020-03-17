@@ -228,7 +228,11 @@ export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
       } else {
         // 自行组装正则匹配
         // exact: 完全匹配, strict: 结尾无/
-        regexp = new RegExp(`^${tmpRoute.path}${tmpExact ? '' : '(?:/.*)?'}${tmpStrict ? '' : '(?:/)?'}$`);
+        if (tmpRoute.path !== '/') {
+          regexp = new RegExp(`^${tmpRoute.path}${tmpExact ? '' : '(?:/.*)?'}${tmpStrict ? '' : '(?:/)?'}$`);
+        } else {
+          regexp = new RegExp(`^${tmpRoute.path}${tmpExact ? '' : '(?:.*)?'}${tmpStrict ? '' : '(?:/)?'}$`);
+        }
         match = regexp.test(tmpPath);
       }
 
