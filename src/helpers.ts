@@ -43,7 +43,7 @@ export function getScopeName(scope: UsingScope) {
 }
 
 export function isAncestorScope(ancestor: HookScope, descendant: HookScope) {
-  if (ancestor.product.type === BaseType.root) {
+  if (ancestor.product?.type === BaseType.root || ancestor.productType === BaseType.root) {
     return true;
   }
 
@@ -74,7 +74,9 @@ export function makeSafeScope(scope: HookScope): SafeHookScope {
   const { page, app, product } = scope;
   const base = page || app || product;
 
-  const safeScope: HookScope = {};
+  const safeScope: SafeHookScope = {};
+
+  safeScope.productType = get(product, 'type');
 
   const safeProperties = ['productName', 'appName', 'pageName', 'hookName'];
   safeProperties.forEach((property) => {

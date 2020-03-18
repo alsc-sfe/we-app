@@ -1,7 +1,7 @@
 import Product from '../weapp/product';
 import App from '../weapp/app';
 import Page, { PageConfig } from '../weapp/page';
-import { Render } from '../weapp/base';
+import { Render, BaseType } from '../weapp/base';
 import { ResourceLoader } from '../resource-loader';
 import { RouterType } from '..';
 
@@ -109,6 +109,8 @@ export interface SafeHookScope {
   pageName?: string;
 
   hookName?: string;
+
+  productType?: BaseType;
 
   getConfig?: (pathname?: string) => any;
   getData?: (pathname?: string, traced?: boolean) => any;
