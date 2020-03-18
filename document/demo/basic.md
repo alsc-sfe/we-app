@@ -9,7 +9,7 @@ title: 微应用框架
 import './style.less';
 import { 
   setResourceLoader, setPageContainer, setRender,
-  registerApps, start, setBasename,
+  registerApps, start, setBasename, DefaultResourceLoader,
   setHomepage, setContext, setRouterType, RouterType,
   usingHooks, configHooks } from "@saasfe/we-app";
 import render from './render';
@@ -54,6 +54,13 @@ configHooks(hookConfigs);
 // setPageContainer(document.querySelector('#bcommon__menu'), ['bcommon/menu']);
 
 // setBasename('/test');
+
+setResourceLoader({
+  ...DefaultResourceLoader,
+  config: {
+    useSystem: false,
+  },
+});
 
 registerApps(window[Symbol.for('microAppsInfo')], getMicroApps);
 

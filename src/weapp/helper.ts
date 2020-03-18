@@ -38,12 +38,21 @@ function transformRoute(route: string|string[]|boolean|Route|Route[]): TRoute {
     const rt = r as Route;
     return {
       ...rt,
-      path: rt.absolute ? `~${rt.pathname}` : rt.pathname,
+      // 此处忽略 absolute，之前都是通过 pathname: '/', absolute: true来指定首页
+      path: rt.pathname,
     };
   });
 }
 
-export async function transformAppConfig(appConfig: MicroAppConfig): Promise<AppConfig> {
+export async function transformAppConfig(appConfig: MicroAppConfig, { resourceLoader }): Promise<AppConfig> {
+  if (appConfig?.url) {
+    appConfig = await resourceLoader(
+      appConfig.url,
+      { useSystem: true }
+    );
+    appConfig = appConfig.default || appConfig;
+  }
+
   if (!(appConfig.microAppName && appConfig.modules)) {
     return appConfig;
   }

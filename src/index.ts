@@ -55,6 +55,8 @@ export {
   setPageContainer,
   setRender,
 
+  DefaultResourceLoader,
+
   usingHooks,
   configHooks,
 

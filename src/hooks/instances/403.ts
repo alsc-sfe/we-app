@@ -20,7 +20,7 @@ const hook403Desc: HookDesc<Hook403Opts> = {
     const { opts: { excludePages = [] }, hookPages = [], pageScope, hookPageScope } = param;
     const pageName = getScopeName(pageScope);
     // 从当前路由解析出当前激活的页面
-    if (hookPages.concat(excludePages).indexOf(pageName) === -1) {
+    if (pageName && hookPages.concat(excludePages).indexOf(pageName) === -1) {
       // 获取当前页面对应的权限码
       if (pageScope) {
         const { opts: { check403 } } = param;
