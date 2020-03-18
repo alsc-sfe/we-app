@@ -20,7 +20,7 @@ export function parseUri(str: string) {
 
   const o = parseOptions;
   const m = o.parser[o.strictMode ? 'strict' : 'loose'].exec(str);
-  const uri = {};
+  const uri: { [prop: string]: any } = {};
   let i = 14;
 
   while (i--) uri[o.key[i]] = m[i] || '';
@@ -29,6 +29,12 @@ export function parseUri(str: string) {
   uri[o.key[12]].replace(o.q.parser, ($0, $1, $2) => {
     if ($1) uri[o.q.name][$1] = $2;
   });
+
+  // hash
+  uri.hash = '';
+  if (uri.relative.indexOf('#') > -1) {
+    uri.hash = uri.relative.replace(uri.pathname, '');
+  }
 
   return uri as Location;
 }

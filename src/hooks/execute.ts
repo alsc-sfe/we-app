@@ -155,7 +155,6 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
   }
 
   const { enabledHookDescRunnerParams,
-    newEnabledHookDescRunnerParams,
     disabledHookDescRunnerParams } = matchHookDescRunnerParams(activePageScopes, lifecycleHook);
 
   const scopeHooksRunners: [LifecycleHookRunner<any>, HookDescRunnerParam<any>][] = [];
@@ -199,7 +198,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
 
   // 新启用hook，如果有页面，则先卸载页面，更新配置
   if (lifecycleHook === LifecycleHookEnum.beforeRouting) {
-    newEnabledHookDescRunnerParams.forEach(({ hookScope }) => {
+    enabledHookDescRunnerParams.forEach(({ hookScope }) => {
       const scopeHooks = getScopeHooks(hookScope.scopeName);
       scopeHooks.forEach(({ hookDescEntity, opts }) => {
         const hookPageConfig = hookDescEntity(LifecycleHookEnum.page) as PageConfig;
