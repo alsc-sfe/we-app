@@ -58,7 +58,7 @@ configHooks(hookConfigs);
 setResourceLoader({
   ...DefaultResourceLoader,
   config: {
-    useSystem: false,
+    useSystem: true,
   },
 });
 

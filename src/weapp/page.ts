@@ -7,10 +7,10 @@
  */
 import { registerApplication } from 'single-spa';
 import { getScopeName, makeSafeScope } from '../helpers';
-import Base, { BaseConfig, BaseType, Render } from './base';
+import Base, { BaseConfig, BaseType } from './base';
 import { HookScope, LifecycleHookEnum } from '../hooks/type';
 import App from './app';
-import { Resource, ResourceLoader } from '../resource-loader';
+import { Resource } from '../resource-loader';
 import { runLifecycleHook } from '../hooks';
 import { DEFAULTRouteMatch as routeMatchFn, Route } from '../routing';
 import { ajustPathname } from '../routing/util';
@@ -40,6 +40,13 @@ export interface PageConfig extends BaseConfig {
 
 export type ActivityFunction = (location?: Location) => boolean;
 
+export interface LifecycleParams {
+  customProps?: object;
+  scope?: HookScope;
+  component?: any;
+  [prop: string]: any;
+}
+
 export default class Page extends Base {
   type: BaseType = BaseType.page;
 
@@ -60,74 +67,15 @@ export default class Page extends Base {
 
     registerApplication(
       getScopeName(scope),
-      async () => {
-        await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope]);
-
-        const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
-        let url = this.getConfig('url') as Resource[] || [];
-        if (!Array.isArray(url)) {
-          url = [url];
-        }
-
-        const mountedUrl = url.map((r) => {
-          return resourceLoader.mount(r, scope, resourceLoaderOpts);
-        });
-        // 获取第一个不为空的返回值
-        const component = await Promise.all(mountedUrl).then((resources) => {
-          const resource = resources.find((r) => r);
-          return resource;
-        }).then((resource: any) => resource?.default || resource);
-
-        await runLifecycleHook(LifecycleHookEnum.afterLoad, [scope]);
-
-        return {
-          bootstrap: [async () => component],
-          mount: [
-            // beforeMount
-            async (customProps: object) => {
-              const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeMount, [scope]);
-              if (!isContinue) {
-                await runLifecycleHook(LifecycleHookEnum.onMountPrevented, [scope]);
-                return;
-              }
-
-              const container = this.getPageContainer();
-              const render = this.getRender();
-              render?.mount(component, container, {
-                ...this.getData(DataName.customProps),
-                ...customProps,
-                context: getContext(),
-              });
-
-              // afterMount
-              await runLifecycleHook(LifecycleHookEnum.afterMount, [scope]);
-            },
-          ],
-          unmount: [
-            // beforeUnmount
-            async (customProps) => {
-              const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope]);
-              if (!isContinue) {
-                return;
-              }
-
-              const container = this.getPageContainer();
-              const render = this.getRender();
-              render?.unmount(container, {
-                ...this.getData(DataName.customProps),
-                ...customProps,
-                context: getContext(),
-              });
-
-              url.map((r) => {
-                return resourceLoader.unmount(r, scope, resourceLoaderOpts);
-              });
-
-              // afterUnmount
-              await runLifecycleHook(LifecycleHookEnum.afterUnmount, [scope]);
-            },
-          ],
-        };
+      {
+        bootstrap: async () => {},
+        mount: async (customProps: object) => {
+          const component = await this.load({ customProps, scope });
+          await this.mount({ customProps, scope, component });
+        },
+        unmount: async (customProps) => {
+          await this.unmount({ customProps, scope });
+        },
       },
       this.makeActivityFunction(),
       {
@@ -227,5 +175,75 @@ export default class Page extends Base {
 
   setCustomProps(customProps: any) {
     this.setData(DataName.customProps, customProps);
+  }
+
+  private async load({ scope }: LifecycleParams) {
+    await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope]);
+
+    const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
+    let url = this.getConfig('url') as Resource[] || [];
+    if (!Array.isArray(url)) {
+      url = [url];
+    }
+
+    const mountedUrl = url.map((r) => {
+      return resourceLoader.mount(r, scope, resourceLoaderOpts);
+    });
+    // 获取第一个不为空的返回值
+    const component = await Promise.all(mountedUrl).then((resources) => {
+      const resource = resources.find((r) => r);
+      return resource;
+    }).then((resource: any) => resource?.default || resource);
+
+    await runLifecycleHook(LifecycleHookEnum.afterLoad, [scope]);
+
+    return component;
+  }
+
+  private async mount({ customProps, scope, component }: LifecycleParams) {
+    const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeMount, [scope]);
+    if (!isContinue) {
+      await runLifecycleHook(LifecycleHookEnum.onMountPrevented, [scope]);
+      return;
+    }
+
+    const container = this.getPageContainer();
+    const render = this.getRender();
+    render?.mount(component, container, {
+      ...this.getData(DataName.customProps),
+      ...customProps,
+      context: getContext(),
+    });
+
+    // afterMount
+    await runLifecycleHook(LifecycleHookEnum.afterMount, [scope]);
+  }
+
+  private async unmount({ customProps, scope }: LifecycleParams) {
+    const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope]);
+    if (!isContinue) {
+      return;
+    }
+
+    const container = this.getPageContainer();
+    const render = this.getRender();
+    render?.unmount(container, {
+      ...this.getData(DataName.customProps),
+      ...customProps,
+      context: getContext(),
+    });
+
+    const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
+    let url = this.getConfig('url') as Resource[] || [];
+    if (!Array.isArray(url)) {
+      url = [url];
+    }
+
+    url.map((r) => {
+      return resourceLoader.unmount(r, scope, resourceLoaderOpts);
+    });
+
+    // afterUnmount
+    await runLifecycleHook(LifecycleHookEnum.afterUnmount, [scope]);
   }
 }
