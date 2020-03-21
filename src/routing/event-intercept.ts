@@ -44,12 +44,13 @@ export function setRoutingWithHook(fn: RoutingWithHook) {
 
 let href = '';
 async function routingEventHandler(event: Event) {
-  if (location.href === href) {
-    return;
-  }
+  const isSame = location.href === href;
   href = location.href;
 
-  const isContinue: boolean|undefined = await routingWithHook(location);
+  let isContinue: boolean|undefined;
+  if (!isSame) {
+    isContinue = await routingWithHook(location);
+  }
   if (isContinue !== false) {
     callCapturedEventListeners([event]);
   }
