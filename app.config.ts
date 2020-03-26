@@ -85,7 +85,7 @@ module.exports = {
       window.env = 'daily';
       window[Symbol.for('microAppsInfo')] = {
         // "alsc-saas/web-data-analysis":"0.3.3",
-        "alsc-saas/web-boh-common":"1.3.4",
+        // "alsc-saas/web-boh-common":"1.3.4",
         // "alsc-saas/web-boh-setting":"1.1.3",
         // "alsc-saas/web-crm-personal":"1.2.0",
         // "alsc-saas/web-boh-org":"1.0.6",
@@ -104,7 +104,7 @@ module.exports = {
         // "alsc-saas/web-crm-member":"2.1.0",
         // "alsc-saas/web-crm-rights":"2.0.2",
         // "alsc-saas/web-crm-rules":"3.0.4",
-        // "local": "http://local.koubei.test:8001/app-config.js",
+        "local": "http://local.koubei.test:8001/app-config.js",
       };
       </script>
       `,

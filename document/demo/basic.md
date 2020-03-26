@@ -47,7 +47,7 @@ configHooks(hookConfigs);
 //   },
 // ]);
 
-// setHomepage('bcommon/account-settings');
+setHomepage('dashboard/index');
 
 // setPageContainer(document.querySelector('#__microfe-root-content'));
 // setPageContainer(document.querySelector('#bcommon__navbar'), ['bcommon/navbar']);
