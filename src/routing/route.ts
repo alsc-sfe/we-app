@@ -170,19 +170,16 @@ export interface RouteMatchParams {
 
 export type RouteMatch = (params: RouteMatchParams) => boolean;
 
-export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
-  route, routeIgnore, exact, strict,
+function matchRoute({
+  route, exact, strict,
   locate = window.location,
   basename = '',
   routerType = RouterType.browser,
-}) {
-  const needIgnore = route === true || !route;
-  const currentRoutes = needIgnore ? routeIgnore : route;
-
+}: RouteMatchParams): boolean {
   let match = false;
 
   const routes = parseRoute({
-    route: currentRoutes,
+    route,
     basename,
   });
 
@@ -240,6 +237,40 @@ export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
         break;
       }
     }
+  }
+
+  return match;
+}
+
+export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
+  route, routeIgnore, exact, strict,
+  locate = window.location,
+  basename = '',
+  routerType = RouterType.browser,
+}) {
+  // 需要先判断route是否匹配，再判断routeIgnore是否匹配
+  // 因为会出现在route匹配的情况下，要剔除某些路由，
+  // 如辰森供应链会先匹配/，再剔除掉开放平台的路由/stock/xxx
+  const needIgnore = !!routeIgnore;
+
+  let match = route === true ? true : matchRoute({
+    route,
+    exact,
+    strict,
+    locate,
+    basename,
+    routerType,
+  });
+
+  if (needIgnore) {
+    match = matchRoute({
+      route: routeIgnore,
+      exact,
+      strict,
+      locate,
+      basename,
+      routerType,
+    });
   }
 
   return needIgnore ? !match : match;

@@ -158,6 +158,7 @@ export default class Page extends Base {
         if (!match) {
           match = routeMatchFn({
             ...config,
+            route,
             basename: this.getBasename(),
             locate: location,
             routerType,
