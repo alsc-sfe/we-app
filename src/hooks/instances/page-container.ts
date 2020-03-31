@@ -18,9 +18,11 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
   }
 
   const { hookScope } = param;
-  const elSkeleton: Element = hookScope.getData('skeletonContainer', true) || document.body;
+  const { skeletonSelector } = param.opts;
+  const elSkeleton: Element = hookScope.getData('skeletonContainer', true) ||
+    (skeletonSelector && document.querySelector(skeletonSelector)) || document.body;
   if (elSkeleton) {
-    const { specialSelectors = {} } = param.opts;
+    const { specialSelectors = {}, contentSelector } = param.opts;
     const { productName = '', appName = '', pageName = '' } = param.pageScope;
 
     const pageContainerId = [productName, appName, pageName].filter(n => n).join('__');
@@ -28,7 +30,8 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
     let elPageContainer = selector && elSkeleton.querySelector(selector);
 
     if (!elPageContainer) {
-      const elContent = hookScope.getData('contentContainer', true) || document.body;
+      const elContent = hookScope.getData('contentContainer', true) ||
+        (contentSelector && elSkeleton.querySelector(contentSelector)) || document.body;
       if (elContent) {
         elPageContainer = document.createElement('div');
         elPageContainer.id = pageContainerId;
