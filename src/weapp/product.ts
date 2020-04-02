@@ -103,7 +103,7 @@ class Product extends Base {
 
     // 预加载 app config
     appConfigs.forEach(({ url: resource }) => {
-      resourcePreloader(resource);
+      resourcePreloader(resource, 'preload');
     });
 
     return appConfigs;

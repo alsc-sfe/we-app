@@ -44,13 +44,13 @@ function transformRoute(route: string|string[]|boolean|Route|Route[]): TRoute {
   });
 }
 
-export function resourcePreloader(url: string) {
+export function resourcePreloader(url: string, type = 'prefetch') {
   if (typeof url !== 'string' || !url) {
     return;
   }
 
   const link = document.createElement('link');
-  link.rel = 'preload';
+  link.rel = type;
   link.crossOrigin = 'anonymous';
   link.href = url;
   if (url.indexOf('.js') > -1) {
