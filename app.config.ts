@@ -105,6 +105,7 @@ module.exports = {
         // "alsc-saas/web-crm-rights":"2.0.2",
         // "alsc-saas/web-crm-rules":"3.0.4",
         // "local": "http://local.koubei.test:8001/app-config.js",
+        "child": "http://cdn.dev.choicesaas.cn/web/dist/cdn-child/project/1.0.0/app-config.js",
       };
       </script>
       `,

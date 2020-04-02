@@ -44,7 +44,27 @@ function transformRoute(route: string|string[]|boolean|Route|Route[]): TRoute {
   });
 }
 
-export async function transformAppConfig(appConfig: MicroAppConfig, { resourceLoader }): Promise<AppConfig> {
+export function resourcePreloader(url: string) {
+  if (typeof url !== 'string' || !url) {
+    return;
+  }
+
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.crossOrigin = 'anonymous';
+  link.href = url;
+  if (url.indexOf('.js') > -1) {
+    link.as = 'script';
+  } else if (url.indexOf('.css') > -1) {
+    link.as = 'style';
+  } else {
+    return;
+  }
+  document.querySelector('head').appendChild(link);
+}
+
+export async function transformAppConfig(microAppConfig: MicroAppConfig, { resourceLoader }): Promise<AppConfig> {
+  let appConfig = microAppConfig;
   if (appConfig?.url) {
     appConfig = await resourceLoader(
       appConfig.url,
@@ -53,21 +73,28 @@ export async function transformAppConfig(appConfig: MicroAppConfig, { resourceLo
     appConfig = appConfig.default || appConfig;
   }
 
-  if (!(appConfig.microAppName && appConfig.modules)) {
-    return appConfig;
+  if (appConfig.microAppName && appConfig.modules) {
+    appConfig = {
+      name: appConfig.microAppName,
+      pages: appConfig.modules.map((module): PageConfig => {
+        return {
+          ...module,
+          name: module.moduleName || module.module,
+          url: [module.getComponent],
+          route: transformRoute(module.route),
+          routeIgnore: transformRoute(module.routeIgnore),
+        };
+      }),
+      ...appConfig,
+    };
   }
 
-  return {
-    name: appConfig.microAppName,
-    pages: appConfig.modules.map((module): PageConfig => {
-      return {
-        ...module,
-        name: module.moduleName || module.module,
-        url: [module.getComponent],
-        route: transformRoute(module.route),
-        routeIgnore: transformRoute(module.routeIgnore),
-      };
-    }),
-    ...appConfig,
-  };
+  // preload
+  appConfig?.pages?.forEach(({ url }) => {
+    (url as string[])?.forEach((resource) => {
+      resourcePreloader(resource);
+    });
+  });
+
+  return appConfig;
 }

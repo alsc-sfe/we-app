@@ -8,8 +8,8 @@
  */
 import App, { AppConfig } from './app';
 import Base, { BaseConfig, BaseType } from './base';
-import { ResourceLoader, ResourceLoaderOpts } from '../resource-loader';
-import { transformAppConfig } from './helper';
+import { ResourceLoaderOpts } from '../resource-loader';
+import { transformAppConfig, resourcePreloader } from './helper';
 import { getContext } from '../context';
 
 export interface ProductConfig extends BaseConfig {
@@ -83,6 +83,7 @@ class Product extends Base {
 
   private async parseAppConfigs(url: string|AppConfig[]|any, parser?: AppListParser) {
     let appConfigs: AppConfig[] = url;
+
     if (typeof parser === 'function') {
       const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
       appConfigs = await parser(url, {
@@ -99,6 +100,12 @@ class Product extends Base {
         },
       });
     }
+
+    // 预加载 app config
+    appConfigs.forEach(({ url: resource }) => {
+      resourcePreloader(resource);
+    });
+
     return appConfigs;
   }
 
