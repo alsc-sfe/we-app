@@ -101,6 +101,8 @@ export interface HookScope {
 
 export type UsingHooksConfigs = (UsingHookOpts<any>|string)[]|null;
 
+export type TPageContainer = Element|null;
+
 export interface SafeHookScope {
   scopeName?: string;
 
@@ -116,11 +118,11 @@ export interface SafeHookScope {
   getData?: (pathname?: string, traced?: boolean) => any;
   getResourceLoader?: () => ResourceLoader;
   getRender?: () => Render;
-  getPageContainer?: () => Element;
+  getPageContainer?: () => TPageContainer;
   getRouterType?: () => RouterType;
 
   setData?: (pathname: string|object, value?: any) => void;
-  setPageContainer?: (pageContainer: Element) => void;
+  setPageContainer?: (pageContainer: TPageContainer) => void;
   setCustomProps?: (customProps: object) => void;
 
   [prop: string]: any;

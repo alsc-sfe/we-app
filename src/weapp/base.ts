@@ -1,5 +1,5 @@
 import get from 'lodash-es/get';
-import { HookScope, UsingHooksConfigs, UsingScope, SafeHookScope } from '../hooks/type';
+import { HookScope, UsingHooksConfigs, UsingScope, SafeHookScope, TPageContainer } from '../hooks/type';
 import { usingHooks } from '../hooks';
 
 import { ResourceLoader, Resource } from '../resource-loader';
@@ -231,7 +231,7 @@ export default class Base {
     return config;
   }
 
-  setPageContainer(pageContainer: Element, scopes?: UsingScope[]) {
+  setPageContainer(pageContainer: TPageContainer, scopes?: UsingScope[]) {
     setPageContainer(pageContainer, scopes || [this.compoundScope(this)]);
   }
 

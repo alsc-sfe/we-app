@@ -1,7 +1,7 @@
 import { ResourceLoader } from '../resource-loader';
 import { Render } from './base';
 import { ScopeNameDivider, getScopeName } from '../helpers';
-import { UsingScope } from '../hooks/type';
+import { UsingScope, TPageContainer } from '../hooks/type';
 import { ConfigName } from '../const';
 
 interface Config {
@@ -31,7 +31,7 @@ function setGlobalConfig(pathname: string, value: any, scopes: UsingScope[]) {
   });
 }
 
-export function setPageContainer(value: Element, scopes: UsingScope[]) {
+export function setPageContainer(value: TPageContainer, scopes: UsingScope[]) {
   setGlobalConfig(ConfigName.pageContainer, value, scopes);
 }
 

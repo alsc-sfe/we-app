@@ -2,10 +2,10 @@
  * 骨架必须在路由切换前确定是显示还是隐藏
  * 页面容器在路由切换前显示，在卸载后隐藏
  */
-import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
+import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts, TPageContainer } from '../type';
 
 export interface HookPageContainerOpts extends HookOpts {
-  createPageContainer: (param: HookDescRunnerParam<HookPageContainerOpts>) => Element;
+  createPageContainer: (param: HookDescRunnerParam<HookPageContainerOpts>) => TPageContainer;
   skeletonSelector?: string;
   contentSelector?: string;
   specialSelectors?: { [scopeName: string]: string };
