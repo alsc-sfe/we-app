@@ -22,6 +22,7 @@ function loadScript(url: string) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = url;
+    script.crossOrigin = 'anonymous';
     script.onload = resolve;
     script.onerror = reject;
 
