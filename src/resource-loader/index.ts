@@ -91,6 +91,7 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
         return new Promise((resolve, reject) => {
           const script = document.createElement('script');
           script.src = resource;
+          script.crossOrigin = 'anonymous';
           script.onload = resolve;
           script.onerror = reject;
 
