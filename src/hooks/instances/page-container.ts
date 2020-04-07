@@ -44,8 +44,6 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
 }
 
 const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
-  hookName: 'pageContainer',
-
   async beforeLoad(param: HookDescRunnerParam<HookPageContainerOpts>) {
     // 生成页面容器，容器存储到scope中
     const { opts: { createPageContainer }, pageScope } = param;

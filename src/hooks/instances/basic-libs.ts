@@ -6,7 +6,7 @@
  * 写入则只能写在当前JS沙箱里
  */
 import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
-import { Resource, ResourceLoader } from '../../resource-loader';
+import { Resource } from '../../resource-loader';
 import { isAncestorScope } from '../../helpers';
 
 export interface HookBasicLibsOpts extends HookOpts {
@@ -34,7 +34,6 @@ function getBasicLibsConfig(param: HookDescRunnerParam<HookBasicLibsOpts>) {
 }
 
 const hookBasicLibsDesc: HookDesc<HookBasicLibsOpts> = {
-  hookName: 'basicLibs',
   beforeRouting: {
     exec: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
       // 加载当前scope的基础库

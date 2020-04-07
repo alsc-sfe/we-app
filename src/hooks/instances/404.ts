@@ -12,7 +12,6 @@ export interface Hook404Opts extends HookOpts {
 let is404 = false;
 
 const hook404Desc: HookDesc<Hook404Opts> = {
-  hookName: '404',
   page: {
     hooks: ['pageContainer', '500'],
     activityFunction: () => is404,

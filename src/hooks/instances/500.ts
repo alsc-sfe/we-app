@@ -7,7 +7,6 @@ export interface Hook500Opts extends HookOpts {
 let is500 = false;
 
 const hook500Desc: HookDesc<Hook500Opts> = {
-  hookName: '500',
   page: {
     hooks: ['pageContainer', '500'],
     activityFunction: () => is500,

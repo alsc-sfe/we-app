@@ -10,7 +10,6 @@ export interface Hook403Opts extends HookOpts {
 let is403 = false;
 
 const hook403Desc: HookDesc<Hook403Opts> = {
-  hookName: '403',
   page: {
     hooks: ['pageContainer', '500'],
     activityFunction: () => is403,

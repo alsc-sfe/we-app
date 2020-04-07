@@ -12,7 +12,6 @@ export interface HookSkeletonOpts extends HookOpts {
 }
 
 const hookSkeletonDesc: HookDesc<HookSkeletonOpts> = {
-  hookName: 'skeleton',
   beforeRouting: {
     exec: async (param: HookDescRunnerParam<HookSkeletonOpts>) => {
       const { hookScope } = param;

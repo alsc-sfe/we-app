@@ -2,6 +2,7 @@ import { ResourceFunction } from '../resource-loader';
 import { Route as TRoute } from '../routing';
 import { AppConfig } from './app';
 import { PageConfig } from './page';
+import { resourcePreloader } from '../helpers';
 
 interface Route {
   pathname: string;
@@ -42,25 +43,6 @@ function transformRoute(route: string|string[]|boolean|Route|Route[]): TRoute {
       path: rt.pathname,
     };
   });
-}
-
-export function resourcePreloader(url: string, type = 'prefetch') {
-  if (typeof url !== 'string' || !url) {
-    return;
-  }
-
-  const link = document.createElement('link');
-  link.rel = type;
-  link.crossOrigin = 'anonymous';
-  link.href = url;
-  if (url.indexOf('.js') > -1) {
-    link.as = 'script';
-  } else if (url.indexOf('.css') > -1) {
-    link.as = 'style';
-  } else {
-    return;
-  }
-  document.querySelector('head').appendChild(link);
 }
 
 export async function transformAppConfig(microAppConfig: MicroAppConfig, { resourceLoader }): Promise<AppConfig> {

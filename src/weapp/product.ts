@@ -9,8 +9,9 @@
 import App, { AppConfig } from './app';
 import Base, { BaseConfig, BaseType } from './base';
 import { ResourceLoaderOpts } from '../resource-loader';
-import { transformAppConfig, resourcePreloader } from './helper';
+import { transformAppConfig } from './helper';
 import { getContext } from '../context';
+import { resourcePreloader } from '../helpers';
 
 export interface ProductConfig extends BaseConfig {
   parent?: Product;

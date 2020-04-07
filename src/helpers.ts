@@ -106,3 +106,22 @@ export function makeSafeScope(scope: HookScope): SafeHookScope {
 
   return safeScope;
 }
+
+export function resourcePreloader(url: string, type = 'prefetch') {
+  if (typeof url !== 'string' || !url) {
+    return;
+  }
+
+  const link = document.createElement('link');
+  link.rel = type;
+  link.crossOrigin = 'anonymous';
+  link.href = url;
+  if (url.indexOf('.js') > -1) {
+    link.as = 'script';
+  } else if (url.indexOf('.css') > -1) {
+    link.as = 'style';
+  } else {
+    return;
+  }
+  document.querySelector('head').appendChild(link);
+}

@@ -5,7 +5,6 @@ export interface HookLoadingOpts extends HookOpts {
 }
 
 const hookLoadingDesc: HookDesc<HookLoadingOpts> = {
-  hookName: 'loading',
   async beforeLoad({ pageScope, opts: { element } }: HookDescRunnerParam<HookLoadingOpts>) {
     if (!element) {
       return;
