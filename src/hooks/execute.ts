@@ -6,7 +6,7 @@ import { getPageConfigs } from './register';
 import { errorHandler } from '../error';
 import { getScope, compoundScope } from '../weapp';
 import { PageConfig } from '../weapp/page';
-import { getAppStatus, unloadApplication, UNLOADING, NOT_LOADED } from 'single-spa';
+import { getAppStatus, unloadApplication } from 'single-spa';
 import { getContext } from '../context';
 
 const MatchedPageScope: { [pageName: string]: HookDescRunnerParam<any> } = {};
@@ -169,12 +169,13 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
       // 所以需要在新启用的hookScope中找到与当前禁用hookScope相匹配的项，供扩展进行判断
       const nextHookDescRunnerParam = matchHookDescRunnerParam(hookScope, enabledHookScopes);
       const scopeHooks = getScopeHooks(hookScope.scopeName);
-      scopeHooks.forEach(({ hookDescEntity, opts }) => {
+      scopeHooks.forEach(({ hookDescEntity, opts, hookName }) => {
         // 生命周期钩子函数获取
         const hookDescRunner = hookDescEntity(lifecycleHook);
         if (hookDescRunner && 'clear' in hookDescRunner) {
           scopeHooksRunners.push([hookDescRunner.clear, {
             ...props,
+            hookName,
             pageScope: makeSafeScope(pageScope),
             hookScope: makeSafeScope(hookScope),
             opts,
@@ -211,7 +212,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
           }
           // 卸载页面
           const hookPageStatus = getAppStatus(hookPageName);
-          if (hookPageStatus && [NOT_LOADED, UNLOADING].indexOf(hookPageStatus) === -1) {
+          if (hookPageStatus && ['NOT_LOADED', 'UNLOADING'].indexOf(hookPageStatus) === -1) {
             unloadApplication(hookPageName);
           }
         }
@@ -222,7 +223,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
   // 启用hook，调用exec
   enabledHookDescRunnerParams.forEach(({ pageScope, hookScope }) => {
     const scopeHooks = getScopeHooks(hookScope.scopeName);
-    scopeHooks.forEach(({ hookDescEntity, opts }) => {
+    scopeHooks.forEach(({ hookDescEntity, opts, hookName }) => {
       const hookDescRunner = hookDescEntity(lifecycleHook);
       if (hookDescRunner && 'exec' in hookDescRunner) {
         const hookPageConfig = hookDescEntity(LifecycleHookEnum.page) as PageConfig;
@@ -234,6 +235,7 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
 
         scopeHooksRunners.push([hookDescRunner.exec, {
           ...props,
+          hookName,
           pageScope: makeSafeScope(pageScope),
           hookScope: makeSafeScope(hookScope),
           hookPageScope: makeSafeScope(hookPageScope),
@@ -250,11 +252,18 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
     });
   });
 
-  const pRunners = scopeHooksRunners.map(([runner, opts]) => {
-    return runner(opts);
-  });
+  const continues: boolean[] = [];
+  await scopeHooksRunners.reduce<Promise<any>>((p, scopeHooksRunner) => {
+    const [runner, opts] = scopeHooksRunner;
+    return p.then(() => {
+      console.log('hook runner before', lifecycleHook, opts);
+      return runner(opts);
+    }).then((isContinue) => {
+      continues.push(isContinue);
+      console.log('hooke runner after', lifecycleHook, isContinue, opts);
+    });
+  }, Promise.resolve());
 
-  const continues = await Promise.all(pRunners);
   if (continues.find((i) => i === false) === false) {
     return false;
   }

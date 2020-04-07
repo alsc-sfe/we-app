@@ -89,15 +89,7 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
           return System.import(resource);
         }
 
-        return new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = resource;
-          script.crossOrigin = 'anonymous';
-          script.onload = resolve;
-          script.onerror = reject;
-
-          document.querySelector('head').appendChild(script);
-        });
+        return loadScript(resource);
       }
 
       if (resource.indexOf('.css') > -1) {

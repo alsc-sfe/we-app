@@ -1,6 +1,7 @@
 import get from 'lodash-es/get';
 import { HookScope, UsingScope, SafeHookScope } from './hooks/type';
 import { BaseType } from './weapp/base';
+import { Resource } from './resource-loader';
 
 const BuildinProductName = '__buildin';
 const HookAppName = 'hook';
@@ -107,7 +108,12 @@ export function makeSafeScope(scope: HookScope): SafeHookScope {
   return safeScope;
 }
 
-export function resourcePreloader(url: string, type = 'prefetch') {
+export enum ResourcePreloader {
+  prefetch = 'prefetch',
+  preload = 'preload'
+}
+
+export function resourcePreloader(url: Resource, type = ResourcePreloader.prefetch) {
   if (typeof url !== 'string' || !url) {
     return;
   }

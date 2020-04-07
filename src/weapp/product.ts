@@ -11,7 +11,7 @@ import Base, { BaseConfig, BaseType } from './base';
 import { ResourceLoaderOpts } from '../resource-loader';
 import { transformAppConfig } from './helper';
 import { getContext } from '../context';
-import { resourcePreloader } from '../helpers';
+import { resourcePreloader, ResourcePreloader } from '../helpers';
 
 export interface ProductConfig extends BaseConfig {
   parent?: Product;
@@ -104,7 +104,7 @@ class Product extends Base {
 
     // 预加载 app config
     appConfigs.forEach(({ url: resource }) => {
-      resourcePreloader(resource, 'preload');
+      resourcePreloader(resource, ResourcePreloader.preload);
     });
 
     return appConfigs;

@@ -7,7 +7,7 @@
  */
 import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
 import { Resource } from '../../resource-loader';
-import { isAncestorScope } from '../../helpers';
+import { isAncestorScope, resourcePreloader, ResourcePreloader } from '../../helpers';
 
 export interface HookBasicLibsOpts extends HookOpts {
   url: Resource[];
@@ -41,10 +41,17 @@ const hookBasicLibsDesc: HookDesc<HookBasicLibsOpts> = {
 
       if (!hookScope.getData('basicLibsLoaded')) {
         hookScope.setData('basicLibsLoaded', true);
-
-        await basicLibs.reduce(async (p, r) => {
-          await p;
-          return resourceLoader.mount(r, param.pageScope, resourceLoaderOpts);
+        // 资源预加载
+        basicLibs.forEach((resource, i) => {
+          resourcePreloader(resource, ResourcePreloader.preload);
+        });
+        // 加载静态资源
+        await basicLibs.reduce<Promise<any>>((p, r) => {
+          return p.then(() => {
+            console.log('basicLibs before', r);
+            resourceLoader.mount(r, param.pageScope, resourceLoaderOpts);
+            console.log('basicLibs after', r);
+          });
         }, Promise.resolve());
       }
     },
