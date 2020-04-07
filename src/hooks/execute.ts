@@ -256,11 +256,11 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
   await scopeHooksRunners.reduce<Promise<any>>((p, scopeHooksRunner) => {
     const [runner, opts] = scopeHooksRunner;
     return p.then(() => {
-      console.log('hook runner before', lifecycleHook, opts);
+      // console.log('hook runner before', lifecycleHook, opts);
       return runner(opts);
     }).then((isContinue) => {
       continues.push(isContinue);
-      console.log('hooke runner after', lifecycleHook, isContinue, opts);
+      // console.log('hooke runner after', lifecycleHook, isContinue, opts);
     });
   }, Promise.resolve());
 

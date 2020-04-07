@@ -10,8 +10,12 @@ import { Resource } from '../../resource-loader';
 import { isAncestorScope, resourcePreloader, ResourcePreloader } from '../../helpers';
 
 export interface HookBasicLibsOpts extends HookOpts {
+  // 需要加载的资源列表
   url: Resource[];
+  // 是否使用systemjs加载
   useSystem?: boolean;
+  // 资源加载后的处理
+  afterLoad?: () => Promise<any>;
   [prop: string]: any;
 }
 
@@ -30,6 +34,7 @@ function getBasicLibsConfig(param: HookDescRunnerParam<HookBasicLibsOpts>) {
       ...resourceLoaderOpts,
       useSystem,
     },
+    opts,
   };
 }
 
@@ -37,7 +42,7 @@ const hookBasicLibsDesc: HookDesc<HookBasicLibsOpts> = {
   beforeRouting: {
     exec: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
       // 加载当前scope的基础库
-      const { hookScope, resourceLoaderOpts, basicLibs, resourceLoader } = getBasicLibsConfig(param);
+      const { hookScope, resourceLoaderOpts, basicLibs, resourceLoader, opts } = getBasicLibsConfig(param);
 
       if (!hookScope.getData('basicLibsLoaded')) {
         hookScope.setData('basicLibsLoaded', true);
@@ -48,11 +53,13 @@ const hookBasicLibsDesc: HookDesc<HookBasicLibsOpts> = {
         // 加载静态资源
         await basicLibs.reduce<Promise<any>>((p, r) => {
           return p.then(() => {
-            console.log('basicLibs before', r);
+            // console.log('basicLibs before', r);
             resourceLoader.mount(r, param.pageScope, resourceLoaderOpts);
-            console.log('basicLibs after', r);
+            // console.log('basicLibs after', r);
           });
         }, Promise.resolve());
+        // 资源加载后的处理
+        await opts?.afterLoad?.();
       }
     },
     clear: async (param: HookDescRunnerParam<HookBasicLibsOpts>) => {
