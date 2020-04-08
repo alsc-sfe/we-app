@@ -5,7 +5,7 @@
  * 所以，需要先缓存配置，再统一执行singleSpa注册，
  * 在首次访问时，通过调用page的makeActivityFunction，手动获取activeScopes
  */
-import { registerApplication } from 'single-spa';
+import { registerApplication, unloadApplication } from 'single-spa';
 import { getScopeName, makeSafeScope } from '../helpers';
 import Base, { BaseConfig, BaseType } from './base';
 import { HookScope, LifecycleHookEnum } from '../hooks/type';
@@ -209,15 +209,23 @@ export default class Page extends Base {
     }
 
     const container = this.getPageContainer();
-    const render = this.getRender();
-    render?.mount(component, container, {
-      ...this.getData(DataName.customProps),
-      ...customProps,
-      context: getContext(),
-    });
+    if (container) {
+      const render = this.getRender();
+      render?.mount?.(component, container, {
+        ...this.getData(DataName.customProps),
+        ...customProps,
+        context: getContext(),
+      });
+    }
 
     // afterMount
     await runLifecycleHook(LifecycleHookEnum.afterMount, [scope]);
+
+    if (!container) {
+      // 没有渲染容器，但是singleSpa仍然做了渲染
+      // 需要调整当前app的状态，以便singleSpa下次再渲染
+      unloadApplication(getScopeName(scope));
+    }
   }
 
   private async unmount({ customProps, scope }: LifecycleParams) {
@@ -227,12 +235,15 @@ export default class Page extends Base {
     }
 
     const container = this.getPageContainer();
-    const render = this.getRender();
-    render?.unmount(container, {
-      ...this.getData(DataName.customProps),
-      ...customProps,
-      context: getContext(),
-    });
+
+    if (container) {
+      const render = this.getRender();
+      render?.unmount?.(container, {
+        ...this.getData(DataName.customProps),
+        ...customProps,
+        context: getContext(),
+      });
+    }
 
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
     let url = this.getConfig('url') as Resource[] || [];
