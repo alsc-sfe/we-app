@@ -80,7 +80,7 @@ export default class Page extends Base {
       this.makeActivityFunction(),
       {
         pageScope: makeSafeScope(scope),
-
+        appBasename: this.getAppBasename(),
         basename: this.getBasename(),
         routerType: this.getRouterType(),
       },
@@ -104,6 +104,11 @@ export default class Page extends Base {
       }
       return renderWrapper;
     }
+  }
+
+  getAppBasename() {
+    const productBasename = this.getData(DataName.basename, true) as string || '';
+    return ajustPathname(`/${productBasename}`);
   }
 
   getBasename() {
