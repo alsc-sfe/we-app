@@ -30,6 +30,18 @@ function loadScript(url: string) {
   });
 }
 
+function loadCss(url: string) {
+  return new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = url;
+    link.onload = resolve;
+    link.onerror = reject;
+
+    document.querySelector('head').appendChild(link);
+  });
+}
+
 let pLoadSystem;
 export async function getSystem() {
   if (!(window.System && window.System.import) && !pLoadSystem) {
@@ -93,13 +105,7 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
       }
 
       if (resource.indexOf('.css') > -1) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = resource;
-
-        document.querySelector('head').appendChild(link);
-
-        return;
+        return loadCss(resource);
       }
     }
 
