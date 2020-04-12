@@ -7,7 +7,7 @@
  */
 import { registerApplication, unloadApplication } from 'single-spa';
 import { getScopeName, makeSafeScope } from '../helpers';
-import Base, { BaseConfig, BaseType } from './base';
+import Base, { BaseConfig, BaseType, ApplicationCustomProps } from './base';
 import { HookScope, LifecycleHookEnum } from '../hooks/type';
 import App from './app';
 import { Resource } from '../resource-loader';
@@ -65,15 +65,15 @@ export default class Page extends Base {
   start() {
     const scope: HookScope = this.compoundScope(this);
 
-    registerApplication(
+    registerApplication<ApplicationCustomProps>(
       getScopeName(scope),
       {
         bootstrap: async () => {},
-        mount: async (customProps: object) => {
+        mount: async (customProps: ApplicationCustomProps) => {
           const component = await this.load({ customProps, scope });
           await this.mount({ customProps, scope, component });
         },
-        unmount: async (customProps) => {
+        unmount: async (customProps: ApplicationCustomProps) => {
           await this.unmount({ customProps, scope });
         },
       },

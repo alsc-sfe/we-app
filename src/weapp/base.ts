@@ -9,12 +9,15 @@ import { configHooks } from '../hooks/using';
 import { setResourceLoader, setPageContainer, setRender, getGlobalConfig } from './config';
 import { getScopeName } from '../helpers';
 import { ConfigName, DataName } from '../const';
-import { RouterType } from '..';
+import { RouterType } from '../routing/enum';
 
-export interface RenderCustomProps {
+export interface ApplicationCustomProps {
+  pageScope?: SafeHookScope;
+  appBasename?: string;
   basename?: string;
   routerType?: RouterType;
-  pageScope?: SafeHookScope;
+}
+export interface RenderCustomProps extends ApplicationCustomProps {
   context?: any;
   [prop: string]: any;
 }
