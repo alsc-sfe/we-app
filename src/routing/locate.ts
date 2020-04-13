@@ -200,8 +200,8 @@ export function getGotoPathname({
 
 export interface GetGotoHrefParams {
   to: Route;
-  routerType: RouterType;
-  basename: string;
+  routerType?: RouterType;
+  basename?: string;
 }
 // 返回带routerType的href
 export function getGotoHref({

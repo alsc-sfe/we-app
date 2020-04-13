@@ -163,7 +163,7 @@ export interface RouteMatchParams {
   locate?: Locate;
   exact?: boolean;
   strict?: boolean;
-  basename: string;
+  basename?: string;
   routerType?: RouterType;
   [prop: string]: any;
 }

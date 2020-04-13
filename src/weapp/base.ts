@@ -18,6 +18,7 @@ export interface ApplicationCustomProps {
   routerType?: RouterType;
 }
 export interface RenderCustomProps extends ApplicationCustomProps {
+  // 通过setContext传入的上下文
   context?: any;
   [prop: string]: any;
 }
