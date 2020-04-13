@@ -14,6 +14,7 @@ declare global {
     System: {
       import: (id: string) => Promise<any>;
       delete: (id: string) => boolean;
+      [prop: string]: any;
     };
   }
 }
