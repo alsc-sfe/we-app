@@ -5,7 +5,11 @@ import { ParseLocationParams, parseLocate, getPathnamePrefix, Locate } from './l
 import { RouterType } from './enum';
 
 export interface RouteObj {
-  path: string;
+  path?: string;
+  // 兼容老的版本
+  pathname?: string;
+  absolute?: boolean;
+
   query?: object;
   exact?: boolean;
   strict?: boolean;
@@ -49,10 +53,16 @@ export function parseRoute({
         }),
       });
     } else if (isObj(r)) {
+      const rt = r as RouteObj;
+      let path = rt.path || rt.pathname;
+      if (rt.absolute) {
+        path = `~${path}`;
+      }
+
       newRoutes.push({
-        ...(r as RouteObj),
+        ...rt,
         path: getRoutePathname({
-          path: (r as RouteObj).path,
+          path,
           basename,
         }),
       });
