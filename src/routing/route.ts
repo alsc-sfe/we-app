@@ -25,7 +25,8 @@ export type Route = SimpleRoute | SimpleRoute[];
 
 export interface ParseRoute {
   route: Route;
-  basename: string;
+  basename?: string;
+  appBasename?: string;
 }
 
 // 所有的路由规则统一处理成添加了basename的形式，简化后续的处理方式
@@ -33,6 +34,7 @@ export interface ParseRoute {
 export function parseRoute({
   route,
   basename = '',
+  appBasename = '',
 }: ParseRoute) {
   if (!route) {
     return [];
@@ -50,6 +52,7 @@ export function parseRoute({
         path: getRoutePathname({
           path: r as string,
           basename,
+          appBasename,
         }),
       });
     } else if (isObj(r)) {
@@ -64,6 +67,7 @@ export function parseRoute({
         path: getRoutePathname({
           path,
           basename,
+          appBasename,
         }),
       });
     }
@@ -75,6 +79,7 @@ export function parseRoute({
 interface GetRoutePathnameParams {
   path: string;
   basename?: string;
+  appBasename?: string;
 }
 
 export function isAbsolutePathname(pathname: string) {
@@ -88,6 +93,7 @@ export function isAbsolutePathname(pathname: string) {
 function getRoutePathname({
   path,
   basename = '',
+  appBasename = '',
 }: GetRoutePathnameParams) {
   if (!isString(path)) {
     return path;
@@ -98,6 +104,7 @@ function getRoutePathname({
   const absolute = isAbsolutePathname(path);
   const pathnamePrefix = getPathnamePrefix({
     basename,
+    appBasename,
     absolute,
   });
 
@@ -120,17 +127,20 @@ export function parseRouteParams({
   locate = window.location,
   routerType = RouterType.browser,
   basename = '',
+  appBasename = '',
 }: ParseRouteParams) {
   const loc = parseLocate({
     locate,
     routerType,
     basename,
+    appBasename,
   });
   const { pathname } = loc;
 
   const routes = parseRoute({
     route,
     basename,
+    appBasename,
   });
 
   let params = {};
@@ -156,12 +166,22 @@ export function parseRouteParams({
   return params;
 }
 
+export function navigate(to: string) {
+  if (window.history.pushState) {
+    window.history.pushState(null, null, to);
+  } else if (to?.indexOf('#') > -1) {
+    window.location.hash = to;
+  } else {
+    window.location.href = to;
+  }
+}
+
 export function getRouteSwitchConfig(gotoHref: string, routerType: RouterType) {
   const isBrowserHistory = routerType === RouterType.browser;
   const config = isBrowserHistory ? {
     onClick: (e) => {
       e.preventDefault();
-      history.pushState(null, null, gotoHref);
+      navigate(gotoHref);
     },
   } : {};
   return config;
@@ -174,6 +194,7 @@ export interface RouteMatchParams {
   exact?: boolean;
   strict?: boolean;
   basename?: string;
+  appBasename?: string;
   routerType?: RouterType;
   [prop: string]: any;
 }
@@ -183,7 +204,7 @@ export type RouteMatch = (params: RouteMatchParams) => boolean;
 function matchRoute({
   route, exact, strict,
   locate = window.location,
-  basename = '',
+  basename = '', appBasename = '',
   routerType = RouterType.browser,
 }: RouteMatchParams): boolean {
   let match = false;
@@ -191,12 +212,14 @@ function matchRoute({
   const routes = parseRoute({
     route,
     basename,
+    appBasename,
   });
 
   const loc = parseLocate({
     locate,
     routerType,
     basename,
+    appBasename,
   });
 
   const { pathname } = loc;
@@ -256,6 +279,7 @@ export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
   route, routeIgnore, exact, strict,
   locate = window.location,
   basename = '',
+  appBasename = '',
   routerType = RouterType.browser,
 }) {
   // 需要先判断route是否匹配，再判断routeIgnore是否匹配
@@ -269,6 +293,7 @@ export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
     strict,
     locate,
     basename,
+    appBasename,
     routerType,
   });
 
@@ -279,6 +304,7 @@ export const DEFAULTRouteMatch: RouteMatch = function DEFAULTRouteMatch({
       strict,
       locate,
       basename,
+      appBasename,
       routerType,
     });
   }

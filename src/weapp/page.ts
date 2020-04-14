@@ -165,6 +165,7 @@ export default class Page extends Base {
             ...config,
             route,
             basename: this.getBasename(),
+            appBasename: this.getAppBasename(),
             locate: location,
             routerType,
           });

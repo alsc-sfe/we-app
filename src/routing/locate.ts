@@ -4,21 +4,23 @@ import { parseRouteParams, Route, RouteObj, isAbsolutePathname } from './route';
 import { isObj, isString, ajustPathname } from './util';
 
 // 路径由basename+微应用名称+页面路径，三部分构成
-export function getPathnamePrefix({ basename = '', absolute = false }) {
+export function getPathnamePrefix({ basename = '', absolute = false, appBasename = '' }) {
   if (absolute) {
-    return '/';
+    return ajustPathname(`/${appBasename}`);
   }
   return ajustPathname(`/${basename}`);
 }
 
 export type Locate = string | Location | AppLocation;
 
-export class AppLocation {
+class AppLocation {
   routerType: RouterType;
 
   pathname: string;
 
   basename: string;
+
+  appBasename: string;
 
   search: string;
 
@@ -46,6 +48,7 @@ export function parseLocate({
   locate = window.location,
   routerType = RouterType.browser,
   basename = '',
+  appBasename = '',
   route,
 }: ParseLocationParams) {
   if (locate instanceof AppLocation) {
@@ -62,6 +65,7 @@ export function parseLocate({
       loc = new AppLocation({
         routerType,
         basename,
+        appBasename,
         pathname: (locate as Location).pathname,
         search: locate.search as string,
         query: {},
@@ -72,6 +76,7 @@ export function parseLocate({
         locate: loc,
         routerType,
         basename,
+        appBasename,
       });
 
       if (route) {
@@ -79,6 +84,7 @@ export function parseLocate({
           route,
           locate,
           basename,
+          appBasename,
           routerType,
         });
       }
@@ -97,6 +103,7 @@ export function parseLocate({
   loc = new AppLocation({
     routerType,
     basename,
+    appBasename,
     pathname: defaultPathname,
     search: '',
     query: {},
@@ -110,6 +117,7 @@ export function parseLocate({
     loc = new AppLocation({
       routerType,
       basename,
+      appBasename,
       pathname: match[1],
       search: match[2] || '',
       query: {},
@@ -121,6 +129,7 @@ export function parseLocate({
     locate: loc,
     routerType,
     basename,
+    appBasename,
   });
 
   if (route) {
@@ -128,6 +137,7 @@ export function parseLocate({
       route,
       locate,
       basename,
+      appBasename,
       routerType,
     });
   }
@@ -135,15 +145,17 @@ export function parseLocate({
   return loc;
 }
 
-export function parseQuery({
+function parseQuery({
   locate = window.location,
   routerType = RouterType.browser,
   basename = '',
+  appBasename = '',
 }: ParseLocationParams) {
   const { search } = parseLocate({
     locate,
     routerType,
     basename,
+    appBasename,
   });
 
   const query = {};
@@ -157,14 +169,16 @@ export function parseQuery({
   return query;
 }
 
-export interface GetGotoPathnameParams {
+interface GetGotoPathnameParams {
   to: Route;
-  basename: string;
+  basename?: string;
+  appBasename?: string;
 }
 
-export function getGotoPathname({
+function getGotoPathname({
   to,
   basename = '',
+  appBasename = '',
 }: GetGotoPathnameParams) {
   let link = to.toString();
 
@@ -192,7 +206,7 @@ export function getGotoPathname({
   // 应用内路径指定为/时，自动去除，以便于路径匹配，
   // href /org 可以匹配 pathname /org/
   // href /org/ 无法匹配 pathname /org
-  const pathnamePrefix = getPathnamePrefix({ basename, absolute });
+  const pathnamePrefix = getPathnamePrefix({ basename, absolute, appBasename });
   gotoPathname = ajustPathname(`${pathnamePrefix}${link === '/' ? '' : link}`);
 
   return gotoPathname;
@@ -202,16 +216,19 @@ export interface GetGotoHrefParams {
   to: Route;
   routerType?: RouterType;
   basename?: string;
+  appBasename?: string;
 }
 // 返回带routerType的href
 export function getGotoHref({
   to,
   routerType = RouterType.browser,
   basename = '',
+  appBasename = '',
 }: GetGotoHrefParams) {
   const gotoPathname = getGotoPathname({
     to,
     basename,
+    appBasename,
   });
   const gotoHref = ajustPathname(`${routerType}${gotoPathname}`);
 
