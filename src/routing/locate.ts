@@ -13,7 +13,7 @@ export function getPathnamePrefix({ basename = '', absolute = false, appBasename
 
 export type Locate = string | Location | AppLocation;
 
-class AppLocation {
+export class AppLocation {
   routerType: RouterType;
 
   pathname: string;
