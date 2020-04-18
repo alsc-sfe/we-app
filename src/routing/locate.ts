@@ -111,7 +111,7 @@ export function parseLocate({
   });
 
   // 修正部分场景路由写成 #xxx 而不是 #/xxx
-  locStr = (`/${locStr.replace('#', '')}`).replace(/\/{2}/g, '/');
+  locStr = (`/${locStr.replace('#', '')}`).replace(/\/{2,}/g, '/');
   const match = /^([^?]*)(\?[^?]*)?/g.exec(locStr);
   if (match) {
     loc = new AppLocation({
