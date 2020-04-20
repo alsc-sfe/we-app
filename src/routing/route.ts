@@ -20,7 +20,7 @@ export interface RouteObj {
 // /home/:id, 匹配 /home/123
 // /home/:id, 当前微应用内路由
 // ~/user/home/:id, 当前产品内路由，在basename为空的情况下，微应用名称为user
-export type SimpleRoute = boolean | string | RouteObj;
+export type SimpleRoute = true | string | RouteObj;
 export type Route = SimpleRoute | SimpleRoute[];
 
 export interface ParseRoute {
