@@ -15,7 +15,7 @@ interface Module {
   module: string;
   moduleReal: string;
   moduleName: string;
-  route: string|string[]|boolean|Route|Route[];
+  route: string|string[]|true|Route|Route[];
   routeIgnore: Route[];
   getComponent: ResourceFunction;
   [prop: string]: any;
@@ -26,9 +26,9 @@ export interface MicroAppConfig extends AppConfig {
   modules?: Module[];
 }
 
-function transformRoute(route: string|string[]|boolean|Route|Route[]): TRoute {
+function transformRoute(route: string|string[]|true|Route|Route[]): TRoute {
   if (['string', 'boolean', 'undefined'].indexOf(typeof route) > -1) {
-    return route as string|boolean;
+    return route as string|true;
   }
   const routes = Array.isArray(route) ? route : [route];
   return routes.map((r) => {
