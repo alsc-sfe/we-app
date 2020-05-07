@@ -55,7 +55,6 @@ export interface HookDescRunner<HookOpts> {
 
 export interface HookOpts {
   page?: PageConfig;
-  [prop: string]: any;
 }
 
 type LifecycleHookName = Exclude<keyof typeof LifecycleHookEnum, 'page' | 'beforeRouting'>;
@@ -101,7 +100,7 @@ export interface HookScope {
 
 export type UsingHooksConfigs = (UsingHookOpts<any>|string)[]|null;
 
-export type TPageContainer = Element|null;
+export type TPageContainer = HTMLElement|null;
 
 export interface SafeHookScope {
   scopeName?: string;
