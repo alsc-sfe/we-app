@@ -18,7 +18,7 @@ addErrorHandler((error: any) => {
 
   errorHandler(error, [activeScope])
     .then(() => {
-      if (getAppStatus(pageName)) {
+      if (getAppStatus(pageName) === 'SKIP_BECAUSE_BROKEN') {
         unloadApplication(pageName);
       }
     });
