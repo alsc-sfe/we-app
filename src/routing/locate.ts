@@ -183,8 +183,8 @@ function getGotoPathname({
   let link = to.toString();
 
   if (isObj(to)) {
-    const { path, query } = to as RouteObj;
-    link = path;
+    const { path, pathname, query } = to as RouteObj;
+    link = path || pathname;
 
     let search: string | object = query;
     if (isObj(query)) {
@@ -192,7 +192,7 @@ function getGotoPathname({
       search = params.join('&');
     }
     if (search) {
-      link = `${path}?${search}`.replace('??', '?');
+      link = `${link}?${search}`.replace('??', '?');
     }
   }
 
