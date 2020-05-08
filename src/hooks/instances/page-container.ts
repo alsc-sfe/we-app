@@ -4,12 +4,20 @@
  */
 import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts, TPageContainer } from '../type';
 
+export type ContainerSelector = string | HTMLElement;
+
 export interface HookPageContainerOpts extends HookOpts {
   createPageContainer: (param: HookDescRunnerParam<HookPageContainerOpts>) => TPageContainer;
-  skeletonSelector?: string;
-  contentSelector?: string;
+  skeletonContainer?: ContainerSelector;
+  contentContainer?: ContainerSelector;
   specialSelectors?: { [scopeName: string]: string };
-  [prop: string]: any;
+}
+
+function getElement(selector: ContainerSelector, container: HTMLElement = document.body) {
+  if (typeof selector === 'string') {
+    return container.querySelector(selector);
+  }
+  return selector as HTMLElement;
 }
 
 function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainerOpts>) {
@@ -18,20 +26,20 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
   }
 
   const { hookScope } = param;
-  const { skeletonSelector } = param.opts;
-  const elSkeleton: Element = hookScope.getData('skeletonContainer', true) ||
-    (skeletonSelector && document.querySelector(skeletonSelector)) || document.body;
+  const { skeletonContainer } = param.opts;
+  const elSkeleton: HTMLElement = hookScope.getData('skeletonContainer', true) ||
+    getElement(skeletonContainer);
   if (elSkeleton) {
-    const { specialSelectors = {}, contentSelector } = param.opts;
+    const { specialSelectors = {}, contentContainer } = param.opts;
     const { productName = '', appName = '', pageName = '' } = param.pageScope;
 
     const pageContainerId = [productName, appName, pageName].filter(n => n).join('__');
     const selector = specialSelectors[pageContainerId];
-    let elPageContainer = selector && elSkeleton.querySelector(selector);
+    let elPageContainer: HTMLElement = selector && elSkeleton.querySelector(selector);
 
     if (!elPageContainer) {
       const elContent = hookScope.getData('contentContainer', true) ||
-        (contentSelector && elSkeleton.querySelector(contentSelector)) || document.body;
+        getElement(contentContainer, elSkeleton);
       if (elContent) {
         elPageContainer = document.createElement('div');
         elPageContainer.id = pageContainerId;
