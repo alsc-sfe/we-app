@@ -135,13 +135,13 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
         }
 
         const script = head.querySelector(`[src="${resource}"]`);
-        head.removeChild(script);
+        script && head.removeChild(script);
         return;
       }
 
       if (resource.indexOf('.css') > -1) {
         const link = head.querySelector(`[rel="stylesheet"][href="${resource}"]`);
-        head.removeChild(link);
+        link && head.removeChild(link);
       }
     }
   },
