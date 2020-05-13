@@ -24,7 +24,7 @@ function loadScript(url: string) {
     const script = document.createElement('script');
     script.src = url;
     script.crossOrigin = 'anonymous';
-    script.onload = resolve;
+    script.onload = () => resolve();
     script.onerror = reject;
 
     document.querySelector('head').appendChild(script);
