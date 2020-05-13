@@ -23,8 +23,8 @@ export interface RenderCustomProps extends ApplicationCustomProps {
   [prop: string]: any;
 }
 export interface Render {
-  mount: (element: any, container: Element|null, customProps?: RenderCustomProps) => any;
-  unmount: (container: Element|null, customProps?: RenderCustomProps) => any;
+  mount: (element: any, container: TPageContainer, customProps?: RenderCustomProps) => any;
+  unmount: (container: TPageContainer, customProps?: RenderCustomProps) => any;
 }
 
 export interface BaseConfig {
@@ -220,8 +220,8 @@ export default class Base {
     setResourceLoader(resourceLoader, resourceLoader?.scopes || scopes || [this.compoundScope(this)]);
   }
 
-  getPageContainer(): Element {
-    let config: Element;
+  getPageContainer(): TPageContainer {
+    let config: TPageContainer;
 
     // 先从全局设置对应scope中获取配置
     const scope = this.compoundScope(this);

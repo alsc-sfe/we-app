@@ -6,7 +6,7 @@ import { ConfigName } from '../const';
 
 interface Config {
   pageContainer: {
-    [scopeName: string]: Element;
+    [scopeName: string]: TPageContainer;
   };
   resourceLoader: {
     [scopeName: string]: ResourceLoader;
