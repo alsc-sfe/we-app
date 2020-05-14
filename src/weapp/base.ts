@@ -223,11 +223,14 @@ export default class Base {
   getPageContainer(): TPageContainer {
     let config: TPageContainer;
 
-    // 先从全局设置对应scope中获取配置
+    // 从全局设置对应scope中获取配置
     const scope = this.compoundScope(this);
     const scopeName = getScopeName(scope);
     config = getGlobalConfig(ConfigName.pageContainer, scopeName);
 
+    // 由于可以通过 setPageContainer 设置页面容器
+    // 可能会设置到全站或应用级别
+    // 所以需要向上遍历页面容器
     if (!config && this.type !== BaseType.root) {
       config = this.parent.getPageContainer();
     }
