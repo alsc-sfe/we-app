@@ -152,12 +152,17 @@ export default class Page extends Base {
       };
     } else {
       activityFunction = (location: Location) => {
+        const productBasename = this.getAppBasename();
         let { pathname } = location;
         if (routerType === RouterType.hash) {
-          pathname = location.hash.replace('#', '') || '/';
+          const matchPath = location.hash.match(/^#([^?]*)/);
+          if (matchPath) {
+            pathname = matchPath[1];
+          }
+          pathname = pathname || '/';
         }
         // 匹配首页
-        let match = pathname === '/' &&
+        let match = [productBasename, `${productBasename}/`].indexOf(pathname) > -1 &&
           matchHomepage(this.compoundScope(this));
         // 匹配页面路由
         if (!match) {
