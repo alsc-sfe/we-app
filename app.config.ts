@@ -37,10 +37,10 @@ module.exports = {
       // <script src="https://gw.alipayobjects.com/os/lib/core-js-bundle/3.1.4/minified.js" crossorigin="anonymous"></script>
       // <script src="https://gw.alipayobjects.com/os/lib/regenerator-runtime/0.13.3/runtime.js" crossorigin="anonymous"></script>
       // `,
-      // `
-      // <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/system.js" crossorigin="anonymous"></script>
-      // <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/extras/named-register.js" crossorigin="anonymous"></script>
-      // `,
+      `
+      <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/system.js" crossorigin="anonymous"></script>
+      <script src="https://gw.alipayobjects.com/os/lib/systemjs/4.1.1/dist/extras/named-register.js" crossorigin="anonymous"></script>
+      `,
       // `
       // <script src="https://gw.alipayobjects.com/os/lib/moment/2.24.0/min/moment.min.js" crossorigin="anonymous"></script>
       // <script src="https://gw.alipayobjects.com/os/lib/moment/2.24.0/locale/zh-cn.js" crossorigin="anonymous"></script>
@@ -90,7 +90,7 @@ module.exports = {
         // "alsc-saas/web-crm-personal":"1.2.0",
         "alsc-saas/web-boh-org":"1.0.6",
         // "alsc-saas/web-crm-member-mall":"2.0.4",
-        // "alsc-saas/web-crm-dashboard":"1.2.7",
+        "alsc-saas/web-crm-dashboard":"1.2.7",
         // "alsc-saas/web-boh-pay-account":"1.0.3",
         // "alsc-saas/web-boh-print":"1.0.2",
         // "alsc-saas/web-crm-contract":"1.0.2",
@@ -105,7 +105,7 @@ module.exports = {
         // "alsc-saas/web-crm-rights":"2.0.2",
         // "alsc-saas/web-crm-rules":"3.0.4",
         // "local": "http://local.koubei.test:8001/app-config.js",
-        "child": "http://cdn.dev.choicesaas.cn/web/dist/cdn-child/project/1.0.0/app-config.js",
+        // "child": "http://cdn.dev.choicesaas.cn/web/dist/cdn-child/project/1.0.0/app-config.js",
       };
       </script>
       `,
