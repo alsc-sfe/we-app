@@ -220,23 +220,23 @@ export default class Page extends Base {
     }
 
     const container = this.getPageContainer();
-    if (container) {
-      const render = this.getRender();
-      render?.mount?.(component, container, {
-        ...this.getData(DataName.customProps),
-        ...customProps,
-        context: getContext(),
-      });
-    }
-
-    // afterMount
-    await runLifecycleHook(LifecycleHookEnum.afterMount, [scope]);
 
     if (!container) {
       // 没有渲染容器，但是singleSpa仍然做了渲染
       // 需要调整当前app的状态，以便singleSpa下次再渲染
       unloadApplication(getScopeName(scope));
+      return;
     }
+
+    const render = this.getRender();
+    render?.mount?.(component, container, {
+      ...this.getData(DataName.customProps),
+      ...customProps,
+      context: getContext(),
+    });
+
+    // 页面未渲染则认为没有mount
+    await runLifecycleHook(LifecycleHookEnum.afterMount, [scope]);
   }
 
   private async unmount({ customProps, scope }: LifecycleParams) {
