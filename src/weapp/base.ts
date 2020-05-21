@@ -24,7 +24,7 @@ export interface RenderCustomProps extends ApplicationCustomProps {
 }
 export interface Render {
   mount: (element: any, container: TPageContainer, customProps?: RenderCustomProps) => any;
-  unmount: (container: TPageContainer, customProps?: RenderCustomProps) => any;
+  unmount: (container: TPageContainer, customProps?: RenderCustomProps, element?: any) => any;
 }
 
 export interface BaseConfig {

@@ -52,6 +52,8 @@ export default class Page extends Base {
 
   parent: App;
 
+  private component: any;
+
   constructor(config: PageConfig) {
     super(config);
 
@@ -70,11 +72,11 @@ export default class Page extends Base {
       {
         bootstrap: async () => {},
         mount: async (customProps: ApplicationCustomProps) => {
-          const component = await this.load({ customProps, scope });
-          await this.mount({ customProps, scope, component });
+          this.component = await this.load({ customProps, scope });
+          await this.mount({ customProps, scope, component: this.component });
         },
         unmount: async (customProps: ApplicationCustomProps) => {
-          await this.unmount({ customProps, scope });
+          await this.unmount({ customProps, scope, component: this.component });
         },
       },
       this.makeActivityFunction(),
@@ -239,7 +241,7 @@ export default class Page extends Base {
     await runLifecycleHook(LifecycleHookEnum.afterMount, [scope]);
   }
 
-  private async unmount({ customProps, scope }: LifecycleParams) {
+  private async unmount({ customProps, scope, component }: LifecycleParams) {
     const isContinue = await runLifecycleHook(LifecycleHookEnum.beforeUnmount, [scope]);
     if (!isContinue) {
       return;
@@ -253,7 +255,7 @@ export default class Page extends Base {
         ...this.getData(DataName.customProps),
         ...customProps,
         context: getContext(),
-      });
+      }, component);
     }
 
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
