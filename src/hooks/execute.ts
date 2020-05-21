@@ -261,6 +261,8 @@ export async function runLifecycleHook(lifecycleHook: LifecycleHookEnum, activeP
     }).then((isContinue) => {
       continues.push(isContinue);
       // console.log('hooke runner after', lifecycleHook, isContinue, opts);
+    }).catch((error) => {
+      console.warn(error);
     });
   }, Promise.resolve());
 
