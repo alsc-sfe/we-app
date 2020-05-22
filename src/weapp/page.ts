@@ -99,8 +99,8 @@ export default class Page extends Base {
           mount: (element, node, customProps) => {
             render.mount(element, node || container, customProps);
           },
-          unmount: (node, customProps) => {
-            render.unmount(node || container, customProps);
+          unmount: (node, customProps, element) => {
+            render.unmount(node || container, customProps, element);
           },
         };
       }
