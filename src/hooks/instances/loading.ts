@@ -17,14 +17,14 @@ const hookLoadingDesc: HookDesc<HookLoadingOpts> = {
     );
   },
 
-  async onError({ pageScope }: HookDescRunnerParam<HookLoadingOpts>) {
+  async onError({ pageScope, opts: { element } }: HookDescRunnerParam<HookLoadingOpts>) {
     const render = pageScope?.getRender();
-    render?.unmount(null);
+    render?.unmount(null, element);
   },
 
-  async beforeMount({ pageScope }: HookDescRunnerParam<HookLoadingOpts>) {
+  async beforeMount({ pageScope, opts: { element } }: HookDescRunnerParam<HookLoadingOpts>) {
     const render = pageScope?.getRender();
-    render?.unmount(null);
+    render?.unmount(null, element);
   },
 };
 

@@ -99,8 +99,8 @@ export default class Page extends Base {
           mount: (element, node, customProps) => {
             render.mount(element, node || container, customProps);
           },
-          unmount: (node, customProps, element) => {
-            render.unmount(node || container, customProps, element);
+          unmount: (node, element, customProps) => {
+            render.unmount(node || container, element, customProps);
           },
         };
       }
@@ -251,11 +251,11 @@ export default class Page extends Base {
 
     if (container) {
       const render = this.getRender();
-      render?.unmount?.(container, {
+      render?.unmount?.(container, component, {
         ...this.getData(DataName.customProps),
         ...customProps,
         context: getContext(),
-      }, component);
+      });
     }
 
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
