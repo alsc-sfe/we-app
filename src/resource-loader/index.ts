@@ -88,7 +88,11 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
           return mod;
         }
 
-        return loadScript(resource as string).then(() => getEntry(null, resource, activeScope));
+        const mod = loadScript(resource as string);
+        if (isFunction(getEntry)) {
+          return mod.then((module: any) => getEntry(null, resource, activeScope));
+        }
+        return mod;
       }
 
       if ((resource as string).indexOf('.css') > -1) {
