@@ -8,6 +8,8 @@
  * 2. 默认resourceLoader内置systemjs依赖，可能造成全局污染
  */
 import { HookScope, UsingScope } from '../hooks/type';
+import { loadScript, loadCSS, removeScript, removeCSS, checkWhile } from './helper';
+import { isObj, isFunction, isString } from '../util';
 
 declare global {
   interface Window {
@@ -19,31 +21,7 @@ declare global {
   }
 }
 
-function loadScript(url: string) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = url;
-    script.crossOrigin = 'anonymous';
-    script.onload = () => resolve();
-    script.onerror = reject;
-
-    document.querySelector('head').appendChild(script);
-  });
-}
-
-function loadCss(url: string) {
-  return new Promise((resolve, reject) => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = url;
-    link.onload = resolve;
-    link.onerror = reject;
-
-    document.querySelector('head').appendChild(link);
-  });
-}
-
-let pLoadSystem;
+let pLoadSystem: Promise<any>;
 export async function getSystem() {
   if (!(window.System && window.System.import) && !pLoadSystem) {
     pLoadSystem = loadScript('https://gw.alipayobjects.com/os/lib/systemjs/6.2.5/dist/system.min.js');
@@ -59,6 +37,10 @@ export type Resource = string | Promise<any> | ResourceFunction;
 
 export interface ResourceLoaderOpts {
   useSystem?: boolean;
+  /**
+   * 获取js文件导出入口，例如umd的全局变量
+   */
+  getEntry?: (module: any, resourec: Resource, activeScope: HookScope) => any;
 }
 
 export interface ResourceLoaderDesc {
@@ -88,10 +70,10 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
     opts: ResourceLoaderOpts = { useSystem: true }
   ) {
     const { root = window } = activeScope;
-    const { useSystem } = opts;
+    const { useSystem, getEntry } = opts;
 
-    if (typeof resource === 'string') {
-      if (resource.indexOf('.js') > -1) {
+    if (isString(resource)) {
+      if ((resource as string).indexOf('.js') > -1) {
         if (useSystem) {
           let System;
           if (root.System && root.System.import) {
@@ -99,19 +81,23 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
           } else {
             System = await getSystem();
           }
-          return System.import(resource);
+          const mod = System.import(resource);
+          if (isFunction(getEntry)) {
+            return mod.then((module: any) => getEntry(module, resource, activeScope));
+          }
+          return mod;
         }
 
-        return loadScript(resource);
+        return loadScript(resource as string).then(() => getEntry(null, resource, activeScope));
       }
 
-      if (resource.indexOf('.css') > -1) {
-        return loadCss(resource);
+      if ((resource as string).indexOf('.css') > -1) {
+        return loadCSS(resource as string);
       }
     }
 
-    if (typeof resource === 'function') {
-      return resource();
+    if (isFunction(resource)) {
+      return (resource as Function)();
     }
 
     return resource;
@@ -125,23 +111,19 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
     const { root = window } = activeScope;
     const { useSystem } = opts;
 
-    if (typeof resource === 'string') {
-      const head = document.querySelector('head');
-
-      if (resource.indexOf('.js') > -1) {
+    if (isString(resource)) {
+      if ((resource as string).indexOf('.js') > -1) {
         if (useSystem) {
-          root.System && root.System.delete(resource);
+          root.System && root.System.delete(resource as string);
           return;
         }
 
-        const script = head.querySelector(`[src="${resource}"]`);
-        script && head.removeChild(script);
+        removeScript(resource as string);
         return;
       }
 
-      if (resource.indexOf('.css') > -1) {
-        const link = head.querySelector(`[rel="stylesheet"][href="${resource}"]`);
-        link && head.removeChild(link);
+      if ((resource as string).indexOf('.css') > -1) {
+        removeCSS(resource as string);
       }
     }
   },
@@ -149,4 +131,28 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
 
 export const DefaultResourceLoader: ResourceLoader = {
   desc: DefaultResourceLoaderDesc,
+  config: {
+    useSystem: true,
+    getEntry(module: any, _resource: Resource, activeScope: HookScope) {
+      // 为 System Module，则返回模块内容
+      if (isObj(module, '[object Module]')) {
+        return module.default || module;
+      }
+      // 其他已经有值的情况
+      if (module) {
+        return module;
+      }
+      // 取全局变量
+      const { appName, pageName } = activeScope;
+      if (appName && pageName) {
+        const argName = `__weapp__${appName.replace(/-/g, '_')}__${pageName.replace(/-/g, '_')}`;
+        return checkWhile(() => window[argName]).then(() => {
+          const mod = window[argName];
+          if (mod) {
+            return mod;
+          }
+        });
+      }
+    },
+  },
 };

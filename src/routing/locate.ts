@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { RouterType } from './enum';
 import { parseRouteParams, Route, RouteObj, isAbsolutePathname } from './route';
-import { isObj, isString, ajustPathname } from './util';
+import { isObj, isString, ajustPathname } from '../util';
 
 // 路径由basename+微应用名称+页面路径，三部分构成
 export function getPathnamePrefix({ basename = '', absolute = false, appBasename = '' }) {

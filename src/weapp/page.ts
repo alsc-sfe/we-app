@@ -13,7 +13,7 @@ import App from './app';
 import { Resource } from '../resource-loader';
 import { runLifecycleHook } from '../hooks';
 import { DEFAULTRouteMatch as routeMatchFn, Route } from '../routing';
-import { ajustPathname } from '../routing/util';
+import { ajustPathname } from '../util';
 import { matchHomepage } from './homepage';
 import { RouterType } from '../routing/enum';
 import { getContext } from '../context';
