@@ -66,6 +66,8 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
       if (elPageContainer) {
         pageScope?.setPageContainer(elPageContainer);
       }
+    } else {
+      (elPageContainer as HTMLElement).style.display = '';
     }
   },
 
