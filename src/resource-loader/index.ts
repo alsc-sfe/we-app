@@ -142,8 +142,8 @@ export const DefaultResourceLoader: ResourceLoader = {
       if (isObj(module, '[object Module]')) {
         return module.default || module;
       }
-      // 其他已经有值的情况
-      if (module) {
+      // 有值但不是事件
+      if (module && !(module instanceof Event)) {
         return module;
       }
       // 取全局变量
