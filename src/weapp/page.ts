@@ -109,22 +109,23 @@ export default class Page extends Base {
   }
 
   getAppBasename() {
-    const productBasename = this.getData(DataName.basename, true) as string || '';
-    return ajustPathname(`/${productBasename}`);
+    // 整个站点的路由前缀，如代运营场景中 /xxx/xxx/xxx/saas-crm
+    const appBasename = this.getData(DataName.basename, true) as string || '';
+    return ajustPathname(`/${appBasename}`);
   }
 
   getBasename() {
     const scope = this.compoundScope(this);
     const { productName = '', appName = '', app } = scope;
 
-    const productBasename = this.getData(DataName.basename, true) as string || '';
+    const appBasename = this.getData(DataName.basename, true) as string || '';
 
     const basename = app.getConfig('basename') as string;
     if (basename) {
-      return ajustPathname(`/${productBasename}/${basename}`);
+      return ajustPathname(`/${appBasename}/${basename}`);
     }
 
-    return ajustPathname(`/${productBasename}/${productName}/${appName}`);
+    return ajustPathname(`/${appBasename}/${productName}/${appName}`);
   }
 
   makeActivityFunction() {
