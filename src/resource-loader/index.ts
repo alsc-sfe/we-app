@@ -85,7 +85,7 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
       }
 
       if ((resource as string).indexOf('.css') > -1) {
-        return loadCSS(resource as string);
+        return loadCSS(resource as string).then(() => undefined);
       }
     }
 
