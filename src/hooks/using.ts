@@ -1,5 +1,5 @@
 import { UsingHooksConfigs, UsingHookOpts, UsingScope, HookDesc, HookOpts } from './type';
-import { getScopeName, ScopeNameDivider } from '../helpers';
+import { getScopeName, ScopeNameDivider } from '../utils/helpers';
 import { getHookEntity, hasHookName, registerHooks } from './register';
 
 const HooksScopes: UsingScope[] = [];

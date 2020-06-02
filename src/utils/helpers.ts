@@ -1,7 +1,7 @@
 import get from 'lodash-es/get';
-import { HookScope, UsingScope, SafeHookScope } from './hooks/type';
-import { BaseType } from './weapp/base';
-import { Resource } from './resource-loader';
+import { HookScope, UsingScope, SafeHookScope } from '../hooks/type';
+import { BaseType } from '../weapp/base';
+import { Resource } from '../resource-loader';
 
 const BuildinProductName = '__buildin';
 const HookAppName = 'hook';

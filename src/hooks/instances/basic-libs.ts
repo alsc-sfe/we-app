@@ -7,7 +7,7 @@
  */
 import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
 import { Resource } from '../../resource-loader';
-import { isAncestorScope, resourcePreloader, ResourcePreloader } from '../../helpers';
+import { isAncestorScope, resourcePreloader, ResourcePreloader } from '../../utils/helpers';
 
 export interface HookBasicLibsOpts extends HookOpts {
   // 需要加载的资源列表

@@ -5,6 +5,7 @@ import './routing/event-intercept';
 import { start as startSingleSpa } from 'single-spa';
 // 路由方法拦截
 import { startRouting } from './routing/routing';
+/* 以上顺序不可动，否则无法做路由事件拦截 */
 
 import { registerApps, requireChildrenInited,
   startRootProduct, usingHooks, configHooks, setHomepage, registerHookPages,
@@ -14,6 +15,9 @@ import { buildinHooks } from './hooks';
 import { setContext } from './context';
 import { DefaultResourceLoader } from './resource-loader';
 import { RouterType } from './routing/enum';
+import { navigate, getRouteSwitchConfig, Route, RouteObj, DEFAULTRouteMatch, RouteMatch, RouteMatchParams } from './routing/route';
+import { AppLocation, getGotoHref, GetGotoHrefParams, parseLocate, Locate } from './routing/locate';
+import { RenderCustomProps } from './weapp/base';
 
 let startPromise: Promise<any>;
 
@@ -67,3 +71,27 @@ export {
   setRouterType,
   setBasename,
 };
+
+// 导出类型
+export {
+  RenderCustomProps,
+  Route,
+  GetGotoHrefParams,
+  RouteObj,
+  Locate,
+  RouteMatch,
+  RouteMatchParams,
+};
+
+// 导出路由相关，供we-app-react使用
+const routing = {
+  RouterType,
+  navigate,
+  AppLocation,
+  getGotoHref,
+  getRouteSwitchConfig,
+  parseLocate,
+  DEFAULTRouteMatch,
+};
+
+export { routing };

@@ -7,7 +7,7 @@ import Product from './product';
 import Deferred from '../utils/deferred';
 import { configHooks } from '../hooks/using';
 import { setResourceLoader, setPageContainer, setRender, getGlobalConfig } from './config';
-import { getScopeName } from '../helpers';
+import { getScopeName } from '../utils/helpers';
 import { ConfigName, DataName } from '../const';
 import { RouterType } from '../routing/enum';
 

@@ -1,5 +1,5 @@
 import Product, { ProductConfig } from './product';
-import { BuildinProductName, HookAppName, ScopeNameDivider } from '../helpers';
+import { BuildinProductName, HookAppName, ScopeNameDivider } from '../utils/helpers';
 import App, { getActivePageScopes } from './app';
 import Base, { BaseType } from './base';
 import { DefaultResourceLoader } from '../resource-loader';

@@ -1,6 +1,6 @@
 import { HookDescRunnerParam, HookScope, LifecycleHookEnum, LifecycleHookRunner } from './type';
 import { getHooksScopes, getScopeHooks, getScopeHookNames } from './using';
-import { getScopeName, makeSafeScope } from '../helpers';
+import { getScopeName, makeSafeScope } from '../utils/helpers';
 import { BaseType } from '../weapp/base';
 import { getPageConfigs } from './register';
 import { errorHandler } from '../error';

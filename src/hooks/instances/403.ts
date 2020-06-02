@@ -1,4 +1,4 @@
-import { getScopeName } from '../../helpers';
+import { getScopeName } from '../../utils/helpers';
 import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
 
 export interface Hook403Opts extends HookOpts {

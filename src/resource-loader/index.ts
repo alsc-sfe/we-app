@@ -9,7 +9,7 @@
  */
 import { HookScope, UsingScope } from '../hooks/type';
 import { loadScript, loadCSS, removeScript, removeCSS, checkWhile } from './helper';
-import { isObj, isFunction, isString } from '../util';
+import { isObj, isFunction, isString } from '../utils/util';
 
 declare global {
   interface Window {

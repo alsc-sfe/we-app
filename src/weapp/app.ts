@@ -1,7 +1,7 @@
 import Page, { PageConfig } from './page';
 import Product from './product';
 import Base, { BaseConfig, BaseType } from './base';
-import { getScopeName } from '../helpers';
+import { getScopeName } from '../utils/helpers';
 import { HookScope } from '../hooks/type';
 
 export interface AppConfig extends BaseConfig {

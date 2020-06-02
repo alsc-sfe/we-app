@@ -6,14 +6,14 @@
  * 在首次访问时，通过调用page的makeActivityFunction，手动获取activeScopes
  */
 import { registerApplication, unloadApplication } from 'single-spa';
-import { getScopeName, makeSafeScope } from '../helpers';
+import { getScopeName, makeSafeScope } from '../utils/helpers';
 import Base, { BaseConfig, BaseType, ApplicationCustomProps } from './base';
 import { HookScope, LifecycleHookEnum } from '../hooks/type';
 import App from './app';
 import { Resource } from '../resource-loader';
 import { runLifecycleHook } from '../hooks';
 import { DEFAULTRouteMatch as routeMatchFn, Route } from '../routing';
-import { ajustPathname } from '../util';
+import { ajustPathname } from '../utils/util';
 import { matchHomepage } from './homepage';
 import { RouterType } from '../routing/enum';
 import { getContext } from '../context';

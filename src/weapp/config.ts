@@ -1,6 +1,6 @@
 import { ResourceLoader } from '../resource-loader';
 import { Render } from './base';
-import { ScopeNameDivider, getScopeName } from '../helpers';
+import { ScopeNameDivider, getScopeName } from '../utils/helpers';
 import { UsingScope, TPageContainer } from '../hooks/type';
 import { ConfigName } from '../const';
 

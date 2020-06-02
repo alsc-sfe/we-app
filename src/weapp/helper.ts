@@ -2,7 +2,7 @@ import { ResourceFunction } from '../resource-loader';
 import { Route as TRoute } from '../routing';
 import { AppConfig } from './app';
 import { PageConfig } from './page';
-import { resourcePreloader } from '../helpers';
+import { resourcePreloader } from '../utils/helpers';
 
 interface Route {
   pathname: string;

@@ -11,7 +11,7 @@ import Base, { BaseConfig, BaseType } from './base';
 import { ResourceLoaderOpts } from '../resource-loader';
 import { transformAppConfig } from './helper';
 import { getContext } from '../context';
-import { resourcePreloader, ResourcePreloader } from '../helpers';
+import { resourcePreloader, ResourcePreloader } from '../utils/helpers';
 
 export interface ProductConfig extends BaseConfig {
   parent?: Product;

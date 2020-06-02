@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import pathToRegexp from 'path-to-regexp';
-import { isString, isBoolean, isObj, ajustPathname } from '../util';
+import { isString, isBoolean, isObj, ajustPathname } from '../utils/util';
 import { ParseLocationParams, parseLocate, getPathnamePrefix, Locate } from './locate';
 import { RouterType } from './enum';
 
