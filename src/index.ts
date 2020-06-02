@@ -12,12 +12,10 @@ import { registerApps, requireChildrenInited,
 } from './weapp';
 import { buildinHooks } from './hooks';
 import { setContext } from './context';
-import { DefaultResourceLoader, getSystem } from './resource-loader';
+import { DefaultResourceLoader } from './resource-loader';
 import { RouterType } from './routing/enum';
 
 let startPromise: Promise<any>;
-
-getSystem();
 
 // 设置resourceLoader
 setResourceLoader(DefaultResourceLoader);

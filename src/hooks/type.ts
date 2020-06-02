@@ -93,7 +93,7 @@ export interface HookScope {
   app?: App;
   page?: Page;
 
-  root?: Window;
+  global?: Window;
 
   [prop: string]: any;
 }

@@ -21,17 +21,6 @@ declare global {
   }
 }
 
-let pLoadSystem: Promise<any>;
-export async function getSystem() {
-  if (!(window.System && window.System.import) && !pLoadSystem) {
-    pLoadSystem = loadScript('https://gw.alipayobjects.com/os/lib/systemjs/6.2.5/dist/system.min.js');
-  }
-
-  await pLoadSystem;
-
-  return window.System;
-}
-
 export type ResourceFunction = () => Promise<any>;
 export type Resource = string | Promise<any> | ResourceFunction;
 
@@ -69,17 +58,17 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
     activeScope: HookScope,
     opts: ResourceLoaderOpts = { useSystem: true }
   ) {
-    const { root = window } = activeScope;
+    const { global = window } = activeScope;
     const { useSystem, getEntry } = opts;
 
     if (isString(resource)) {
       if ((resource as string).indexOf('.js') > -1) {
         if (useSystem) {
           let System;
-          if (root.System && root.System.import) {
-            System = root.System;
+          if (global.System && global.System.import) {
+            System = global.System;
           } else {
-            System = await getSystem();
+            throw new Error('[we app](Error from resourceLoader)请先引入systemjs');
           }
           const mod = System.import(resource);
           if (isFunction(getEntry)) {
@@ -112,13 +101,13 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
     activeScope: HookScope,
     opts: ResourceLoaderOpts = { useSystem: true }
   ) {
-    const { root = window } = activeScope;
+    const { global = window } = activeScope;
     const { useSystem } = opts;
 
     if (isString(resource)) {
       if ((resource as string).indexOf('.js') > -1) {
         if (useSystem) {
-          root.System && root.System.delete(resource as string);
+          global.System && global.System.delete(resource as string);
           return;
         }
 
