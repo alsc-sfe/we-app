@@ -84,7 +84,8 @@ export function makeSafeScope(scope: HookScope): SafeHookScope {
     safeScope[property] = get(scope, property);
   });
 
-  const safeBaseFunctions = ['getConfig', 'getData', 'setData', 'getResourceLoader', 'getRouterType'];
+  const safeBaseFunctions = ['getConfig', 'getData', 'setData',
+    'getResourceLoader', 'setResourceLoader', 'getRouterType'];
   safeBaseFunctions.forEach((property) => {
     let fn = get(base, property);
     if (fn) {

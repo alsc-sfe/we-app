@@ -75,3 +75,5 @@ export { AppLocation, getGotoHref, GetGotoHrefParams,
   parseLocate, Locate } from './routing/locate';
 export { RenderCustomProps } from './weapp/base';
 export { isFunction } from './utils/util';
+export { ResourceLoader, ResourceLoaderDesc, Resource, ResourceFunction,
+  ResourceLoaderOpts as DefaultResourceLoaderOpts } from './resource-loader';

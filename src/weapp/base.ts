@@ -16,6 +16,7 @@ export interface ApplicationCustomProps {
   appBasename?: string;
   basename?: string;
   routerType?: RouterType;
+  global?: Window;
 }
 export interface RenderCustomProps extends ApplicationCustomProps {
   // 通过setContext传入的上下文
@@ -203,11 +204,11 @@ export default class Base {
     configHooks(params, scopes || [this.compoundScope(this)]);
   }
 
-  getResourceLoader(): ResourceLoader {
+  getResourceLoader(): ResourceLoader<any> {
     // 先从全局设置对应scope中获取配置
     const scope = this.compoundScope(this);
     const scopeName = getScopeName(scope);
-    let config: ResourceLoader = getGlobalConfig(ConfigName.resourceLoader, scopeName);
+    let config: ResourceLoader<any> = getGlobalConfig(ConfigName.resourceLoader, scopeName);
 
     if (!config && this.type !== BaseType.root) {
       config = this.parent.getResourceLoader();
@@ -216,7 +217,7 @@ export default class Base {
     return config;
   }
 
-  setResourceLoader(resourceLoader: ResourceLoader, scopes?: UsingScope[]) {
+  setResourceLoader(resourceLoader: ResourceLoader<any>, scopes?: UsingScope[]) {
     setResourceLoader(resourceLoader, resourceLoader?.scopes || scopes || [this.compoundScope(this)]);
   }
 

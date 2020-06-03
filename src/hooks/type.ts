@@ -94,6 +94,7 @@ export interface HookScope {
   page?: Page;
 
   global?: Window;
+  sandbox?: any;
 
   [prop: string]: any;
 }
@@ -115,7 +116,7 @@ export interface SafeHookScope {
 
   getConfig?: (pathname?: string) => any;
   getData?: (pathname?: string, traced?: boolean) => any;
-  getResourceLoader?: () => ResourceLoader;
+  getResourceLoader?: () => ResourceLoader<any>;
   getRender?: () => Render;
   getPageContainer?: () => TPageContainer;
   getRouterType?: () => RouterType;

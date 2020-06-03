@@ -85,6 +85,7 @@ export default class Page extends Base {
         appBasename: this.getAppBasename(),
         basename: this.getBasename(),
         routerType: this.getRouterType(),
+        global: window, // sandbox global
       },
     );
   }
@@ -201,14 +202,7 @@ export default class Page extends Base {
       url = [url];
     }
 
-    const mountedUrl = url.map((r) => {
-      return resourceLoader.mount(r, scope, resourceLoaderOpts);
-    });
-    // 获取第一个不为空的返回值
-    const component = await Promise.all(mountedUrl).then((resources) => {
-      const resource = resources.find((r) => r);
-      return resource;
-    }).then((resource: any) => resource?.default || resource);
+    const component = resourceLoader.mount(url, makeSafeScope(scope), resourceLoaderOpts);
 
     await runLifecycleHook(LifecycleHookEnum.afterLoad, [scope]);
 
@@ -265,9 +259,7 @@ export default class Page extends Base {
       url = [url];
     }
 
-    url.map((r) => {
-      return resourceLoader.unmount(r, scope, resourceLoaderOpts);
-    });
+    resourceLoader.unmount(url, makeSafeScope(scope), resourceLoaderOpts);
 
     // afterUnmount
     await runLifecycleHook(LifecycleHookEnum.afterUnmount, [scope]);

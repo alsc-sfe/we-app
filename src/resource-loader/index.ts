@@ -24,6 +24,26 @@ declare global {
 export type ResourceFunction = () => Promise<any>;
 export type Resource = string | Promise<any> | ResourceFunction;
 
+export interface ResourceLoaderDesc<ResourceLoaderDescOpts> {
+  mount: (
+    resource: Resource|Resource[],
+    // 沙箱从scope上获取，由Base创建
+    activeScope: HookScope,
+    opts?: ResourceLoaderDescOpts
+  ) => Promise<any>;
+  unmount: (
+    resource: Resource|Resource[],
+    activeScope: HookScope,
+    opts?: ResourceLoaderDescOpts
+  ) => Promise<any>;
+}
+
+export interface ResourceLoader<ResourceLoaderDescOpts> {
+  desc?: ResourceLoaderDesc<ResourceLoaderDescOpts>;
+  config?: ResourceLoaderDescOpts;
+  scopes?: UsingScope[];
+}
+
 export interface ResourceLoaderOpts {
   useSystem?: boolean;
   /**
@@ -32,27 +52,7 @@ export interface ResourceLoaderOpts {
   getEntry?: (module: any, resourec: Resource, activeScope: HookScope) => any;
 }
 
-export interface ResourceLoaderDesc {
-  mount: (
-    resource: Resource,
-    // 沙箱从scope上获取，由Base创建
-    activeScope: HookScope,
-    opts?: ResourceLoaderOpts
-  ) => Promise<any>;
-  unmount: (
-    resource: Resource,
-    activeScope: HookScope,
-    opts?: ResourceLoaderOpts
-  ) => Promise<any>;
-}
-
-export interface ResourceLoader {
-  desc?: ResourceLoaderDesc;
-  config?: ResourceLoaderOpts;
-  scopes?: UsingScope[];
-}
-
-const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
+const resourceLoader: ResourceLoaderDesc<ResourceLoaderOpts> = {
   async mount(
     resource: Resource,
     activeScope: HookScope,
@@ -79,7 +79,7 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
 
         const mod = loadScript(resource as string);
         if (isFunction(getEntry)) {
-          return mod.then((module: any) => getEntry(null, resource, activeScope));
+          return mod.then(() => getEntry(null, resource, activeScope));
         }
         return mod;
       }
@@ -122,7 +122,36 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc = {
   },
 };
 
-export const DefaultResourceLoader: ResourceLoader = {
+const DefaultResourceLoaderDesc: ResourceLoaderDesc<ResourceLoaderOpts> = {
+  async mount(
+    resource: Resource[],
+    activeScope: HookScope,
+    opts: ResourceLoaderOpts = { useSystem: true }
+  ) {
+    const mountedUrl = resource.map((r) => {
+      return resourceLoader.mount(r, activeScope, opts);
+    });
+    // 获取第一个不为空的返回值
+    const component = await Promise.all(mountedUrl).then((coms) => {
+      const com = coms.find((r) => r);
+      return com;
+    }).then((com: any) => com?.default || com);
+
+    return component;
+  },
+
+  async unmount(
+    resource: Resource[],
+    activeScope: HookScope,
+    opts: ResourceLoaderOpts = { useSystem: true }
+  ) {
+    return resource.map((r) => {
+      return resourceLoader.unmount(r, activeScope, opts);
+    });
+  },
+};
+
+export const DefaultResourceLoader: ResourceLoader<ResourceLoaderOpts> = {
   desc: DefaultResourceLoaderDesc,
   config: {
     useSystem: true,
