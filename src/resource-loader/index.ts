@@ -128,7 +128,11 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc<ResourceLoaderOpts> = {
     activeScope: HookScope,
     opts: ResourceLoaderOpts = { useSystem: true }
   ) {
-    const mountedUrl = resource.map((r) => {
+    let url = resource;
+    if (!Array.isArray(resource)) {
+      url = [resource];
+    }
+    const mountedUrl = url.map((r) => {
       return resourceLoader.mount(r, activeScope, opts);
     });
     // 获取第一个不为空的返回值
@@ -145,7 +149,11 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc<ResourceLoaderOpts> = {
     activeScope: HookScope,
     opts: ResourceLoaderOpts = { useSystem: true }
   ) {
-    return resource.map((r) => {
+    let url = resource;
+    if (!Array.isArray(resource)) {
+      url = [resource];
+    }
+    return url.map((r) => {
       return resourceLoader.unmount(r, activeScope, opts);
     });
   },

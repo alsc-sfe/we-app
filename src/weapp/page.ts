@@ -197,10 +197,7 @@ export default class Page extends Base {
     await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope]);
 
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
-    let url = this.getConfig('url') as Resource[] || [];
-    if (!Array.isArray(url)) {
-      url = [url];
-    }
+    const url = this.getConfig('url') as Resource[] || [];
 
     const component = resourceLoader.mount(url, makeSafeScope(scope), resourceLoaderOpts);
 
@@ -254,10 +251,7 @@ export default class Page extends Base {
     }
 
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
-    let url = this.getConfig('url') as Resource[] || [];
-    if (!Array.isArray(url)) {
-      url = [url];
-    }
+    const url = this.getConfig('url') as Resource[] || [];
 
     resourceLoader.unmount(url, makeSafeScope(scope), resourceLoaderOpts);
 
