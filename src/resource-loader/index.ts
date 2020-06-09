@@ -22,7 +22,8 @@ declare global {
 }
 
 export type ResourceFunction = () => Promise<any>;
-export type Resource = string | Promise<any> | ResourceFunction;
+// 参照tc39 proposal-import-attributes
+export type Resource = string | Promise<any> | ResourceFunction | [string, { with: { type: string } }];
 
 export interface ResourceLoaderDesc<ResourceLoaderDescOpts> {
   mount: (
