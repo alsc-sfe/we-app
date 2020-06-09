@@ -76,4 +76,5 @@ export { AppLocation, getGotoHref, GetGotoHrefParams,
 export { RenderCustomProps } from './weapp/base';
 export { isFunction } from './utils/util';
 export { ResourceLoader, ResourceLoaderDesc, Resource, ResourceFunction,
-  ResourceLoaderOpts as DefaultResourceLoaderOpts } from './resource-loader';
+  ResourceLoaderOpts as DefaultResourceLoaderOpts, ResourceWithType, ResourceType } from './resource-loader';
+export { HookScope, SafeHookScope } from './hooks/type';

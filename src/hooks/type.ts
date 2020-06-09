@@ -93,7 +93,7 @@ export interface HookScope {
   app?: App;
   page?: Page;
 
-  global?: Window;
+  root?: Window;
   sandbox?: any;
 
   [prop: string]: any;
@@ -124,6 +124,9 @@ export interface SafeHookScope {
   setData?: (pathname: string|object, value?: any) => void;
   setPageContainer?: (pageContainer: TPageContainer) => void;
   setCustomProps?: (customProps: object) => void;
+
+  root?: Window;
+  sandbox?: any;
 
   [prop: string]: any;
 }

@@ -6,7 +6,7 @@ import { ResourceLoader, Resource } from '../resource-loader';
 import Product from './product';
 import Deferred from '../utils/deferred';
 import { configHooks } from '../hooks/using';
-import { setResourceLoader, setPageContainer, setRender, getGlobalConfig } from './config';
+import { setResourceLoader, setPageContainer, setRender, getGlobalConfig, setSandbox } from './config';
 import { getScopeName } from '../utils/helpers';
 import { ConfigName, DataName } from '../const';
 import { RouterType } from '../routing/enum';
@@ -16,7 +16,6 @@ export interface ApplicationCustomProps {
   appBasename?: string;
   basename?: string;
   routerType?: RouterType;
-  global?: Window;
 }
 export interface RenderCustomProps extends ApplicationCustomProps {
   // 通过setContext传入的上下文
@@ -105,6 +104,12 @@ export default class Base {
         scope.productName = base.name;
       }
       return scope;
+    }
+
+    if (!scope.root) {
+      const sandbox = this.getSandbox();
+      scope.root = sandbox?.getContext?.() || window;
+      scope.sandbox = sandbox;
     }
 
     scope[`${base.type}Name`] = base.name;
@@ -258,6 +263,22 @@ export default class Base {
 
   setRender(render: Render, scopes?: UsingScope[]) {
     setRender(render, scopes || [this.compoundScope(this)]);
+  }
+
+  setSandbox(sandbox: any, scopes?: UsingScope[]) {
+    setSandbox(sandbox, scopes || [this.compoundScope(this)]);
+  }
+
+  getSandbox() {
+    const scope = this.compoundScope(this);
+    const scopeName = getScopeName(scope);
+    let config = getGlobalConfig(ConfigName.sandbox, scopeName);
+
+    if (!config && this.type !== BaseType.root) {
+      config = this.parent.getSandbox();
+    }
+
+    return config;
   }
 
   getRouterType() {

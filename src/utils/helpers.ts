@@ -79,7 +79,8 @@ export function makeSafeScope(scope: HookScope): SafeHookScope {
 
   safeScope.productType = get(product, 'type');
 
-  const safeProperties = ['productName', 'appName', 'pageName', 'hookName'];
+  const safeProperties = ['productName', 'appName', 'pageName',
+    'hookName', 'root', 'sandbox'];
   safeProperties.forEach((property) => {
     safeScope[property] = get(scope, property);
   });

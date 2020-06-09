@@ -85,7 +85,6 @@ export default class Page extends Base {
         appBasename: this.getAppBasename(),
         basename: this.getBasename(),
         routerType: this.getRouterType(),
-        global: window, // sandbox global
       },
     );
   }

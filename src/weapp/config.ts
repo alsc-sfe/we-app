@@ -14,12 +14,16 @@ interface Config {
   render: {
     [scopeName: string]: Render;
   };
+  sandbox: {
+    [scopeName: string]: any;
+  };
 }
 
 const config: Config = {
   pageContainer: {},
   resourceLoader: {},
   render: {},
+  sandbox: {},
 };
 
 const configKeys = Object.keys(config);
@@ -41,6 +45,10 @@ export function setResourceLoader(value: ResourceLoader<any>, scopes: UsingScope
 
 export function setRender(value: Render, scopes: UsingScope[]) {
   setGlobalConfig(ConfigName.render, value, scopes);
+}
+
+export function setSandbox(value: Render, scopes: UsingScope[]) {
+  setGlobalConfig(ConfigName.sandbox, value, scopes);
 }
 
 export function getGlobalConfig(pathname: string, scopeName: string) {

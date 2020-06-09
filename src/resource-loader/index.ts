@@ -7,7 +7,7 @@
  * 1. 全局手动引入，部署多一步
  * 2. 默认resourceLoader内置systemjs依赖，可能造成全局污染
  */
-import { HookScope, UsingScope } from '../hooks/type';
+import { SafeHookScope, UsingScope } from '../hooks/type';
 import { loadScript, loadCSS, removeScript, removeCSS, checkWhile } from './helper';
 import { isObj, isFunction, isString } from '../utils/util';
 
@@ -23,18 +23,27 @@ declare global {
 
 export type ResourceFunction = () => Promise<any>;
 // 参照tc39 proposal-import-attributes
-export type Resource = string | Promise<any> | ResourceFunction | [string, { with: { type: string } }];
+export enum ResourceType {
+  'jsfile' = 'jsfile',
+  'jstext' = 'jstext',
+  'cssfile' = 'cssfile',
+  'csstext' = 'csstext',
+  'html' = 'html',
+  'htmltext' = 'htmltext'
+}
+export type ResourceWithType = [string, { with: { type: ResourceType } }];
+export type Resource = string | Promise<any> | ResourceFunction | ResourceWithType;
 
 export interface ResourceLoaderDesc<ResourceLoaderDescOpts> {
   mount: (
     resource: Resource|Resource[],
     // 沙箱从scope上获取，由Base创建
-    activeScope: HookScope,
+    activeScope: SafeHookScope,
     opts?: ResourceLoaderDescOpts
   ) => Promise<any>;
   unmount: (
     resource: Resource|Resource[],
-    activeScope: HookScope,
+    activeScope: SafeHookScope,
     opts?: ResourceLoaderDescOpts
   ) => Promise<any>;
 }
@@ -50,24 +59,24 @@ export interface ResourceLoaderOpts {
   /**
    * 获取js文件导出入口，例如umd的全局变量
    */
-  getEntry?: (module: any, resourec: Resource, activeScope: HookScope) => any;
+  getEntry?: (module: any, resourec: Resource, activeScope: SafeHookScope) => any;
 }
 
 const resourceLoader: ResourceLoaderDesc<ResourceLoaderOpts> = {
   async mount(
     resource: Resource,
-    activeScope: HookScope,
+    activeScope: SafeHookScope,
     opts: ResourceLoaderOpts = { useSystem: true }
   ) {
-    const { global = window } = activeScope;
+    const { root = window } = activeScope;
     const { useSystem, getEntry } = opts;
 
     if (isString(resource)) {
       if ((resource as string).indexOf('.js') > -1) {
         if (useSystem) {
           let System;
-          if (global.System && global.System.import) {
-            System = global.System;
+          if (root.System && root.System.import) {
+            System = root.System;
           } else {
             throw new Error('[we app](Error from resourceLoader)请先引入systemjs');
           }
@@ -99,16 +108,16 @@ const resourceLoader: ResourceLoaderDesc<ResourceLoaderOpts> = {
 
   async unmount(
     resource: Resource,
-    activeScope: HookScope,
+    activeScope: SafeHookScope,
     opts: ResourceLoaderOpts = { useSystem: true }
   ) {
-    const { global = window } = activeScope;
+    const { root = window } = activeScope;
     const { useSystem } = opts;
 
     if (isString(resource)) {
       if ((resource as string).indexOf('.js') > -1) {
         if (useSystem) {
-          global.System && global.System.delete(resource as string);
+          root.System && root.System.delete(resource as string);
           return;
         }
 
@@ -126,7 +135,7 @@ const resourceLoader: ResourceLoaderDesc<ResourceLoaderOpts> = {
 const DefaultResourceLoaderDesc: ResourceLoaderDesc<ResourceLoaderOpts> = {
   async mount(
     resource: Resource[],
-    activeScope: HookScope,
+    activeScope: SafeHookScope,
     opts: ResourceLoaderOpts = { useSystem: true }
   ) {
     let url = resource;
@@ -147,7 +156,7 @@ const DefaultResourceLoaderDesc: ResourceLoaderDesc<ResourceLoaderOpts> = {
 
   async unmount(
     resource: Resource[],
-    activeScope: HookScope,
+    activeScope: SafeHookScope,
     opts: ResourceLoaderOpts = { useSystem: true }
   ) {
     let url = resource;
@@ -164,7 +173,7 @@ export const DefaultResourceLoader: ResourceLoader<ResourceLoaderOpts> = {
   desc: DefaultResourceLoaderDesc,
   config: {
     useSystem: true,
-    getEntry(module: any, _resource: Resource, activeScope: HookScope) {
+    getEntry(module: any, _resource: Resource, activeScope: SafeHookScope) {
       // 为 System Module，则返回模块内容
       if (isObj(module, '[object Module]')) {
         return module.default || module;

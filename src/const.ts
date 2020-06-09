@@ -2,6 +2,7 @@ export const ConfigName = {
   resourceLoader: 'resourceLoader',
   pageContainer: 'pageContainer',
   render: 'render',
+  sandbox: 'sandbox',
 };
 
 export const DataName = {
