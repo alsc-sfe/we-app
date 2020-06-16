@@ -59,8 +59,6 @@ export default class Base {
 
   private config: BaseConfig;
 
-  private sandbox?: Window;
-
   private data: object = {};
 
   private isStarted: boolean = false;
