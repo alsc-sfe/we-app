@@ -6,7 +6,7 @@
  * 在首次访问时，通过调用page的makeActivityFunction，手动获取activeScopes
  */
 import { registerApplication, unloadApplication } from 'single-spa';
-import { getScopeName, makeSafeScope, ajustPathname } from '@saasfe/we-app-utils';
+import { getScopeName, makeSafeScope, ajustPathname, isValidElement } from '@saasfe/we-app-utils';
 import { BaseType, ApplicationCustomProps,
   HookScope, LifecycleHookEnum, Resource, LifecycleParams,
   DataName, RouterType, PageConfig, PageInstance, AppInstance,
@@ -185,7 +185,7 @@ export default class Page extends Base implements PageInstance {
 
     const container = this.getPageContainer();
 
-    if (!container) {
+    if (!isValidElement(container)) {
       // 没有渲染容器，但是singleSpa仍然做了渲染
       // 需要调整当前app的状态，以便singleSpa下次再渲染
       unloadApplication(getScopeName(scope));
