@@ -169,6 +169,9 @@ export const setRouterType = (routerType: RouterType) => {
 export const setBasename = (basename: string) => {
   setData(DataName.basename, basename);
 };
+export const setSkeletonContainer = (container: HTMLElement) => {
+  setData('skeletonContainer', container);
+};
 
 export {
   getActivePageScopes,

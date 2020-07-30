@@ -10,6 +10,7 @@ import { startRouting } from './routing/routing';
 import { registerApps, requireChildrenInited,
   startRootProduct, usingHooks, configHooks, setHomepage, registerHookPages,
   setResourceLoader, setPageContainer, setRender, setRouterType, setBasename,
+  setSkeletonContainer,
 } from './weapp';
 import { buildinHooks } from './hooks';
 import { setContext } from './context';
@@ -53,6 +54,7 @@ export {
   setResourceLoader,
   setPageContainer,
   setRender,
+  setSkeletonContainer,
 
   DefaultResourceLoader,
 
