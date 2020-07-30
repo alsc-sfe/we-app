@@ -67,13 +67,14 @@ export default class Base implements BaseInstance {
         scope.product = base as ProductInstance;
         scope.productName = base.name;
       }
-      return scope;
-    }
 
-    if (!scope.root) {
-      const sandbox = this.getSandbox();
-      scope.root = sandbox?.getContext?.() || window;
-      scope.sandbox = sandbox;
+      if (!scope.root) {
+        const sandbox = this.getSandbox(scope);
+        scope.root = sandbox?.getContext?.() || window;
+        scope.sandbox = sandbox;
+      }
+
+      return scope;
     }
 
     scope[`${base.type}Name`] = base.name;
@@ -233,8 +234,8 @@ export default class Base implements BaseInstance {
     setSandbox(sandbox, scopes || [this.compoundScope(this)]);
   }
 
-  getSandbox() {
-    const scope = this.compoundScope(this);
+  getSandbox(pageScope?: HookScope) {
+    const scope = pageScope || this.compoundScope(this);
     const scopeName = getScopeName(scope);
     let config = getGlobalConfig(ConfigName.sandbox, scopeName);
 
