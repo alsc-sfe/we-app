@@ -39,7 +39,7 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
 
     if (!elPageContainer) {
       const elContent = hookScope.getData('contentContainer', true) ||
-        getElement(contentContainer, elSkeleton);
+        getElement(contentContainer, elSkeleton) || elSkeleton;
       if (elContent) {
         elPageContainer = document.createElement('div');
         elPageContainer.id = pageContainerId;
