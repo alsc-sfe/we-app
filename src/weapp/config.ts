@@ -1,8 +1,5 @@
-import { ResourceLoader } from '../resource-loader';
-import { Render } from './base';
-import { ScopeNameDivider, getScopeName } from '../utils/helpers';
-import { UsingScope, TPageContainer } from '../hooks/type';
-import { ConfigName } from '../const';
+import { ResourceLoader, Render, UsingScope, TPageContainer, ConfigName } from '@saasfe/we-app-types';
+import { ScopeNameDivider, getScopeName } from '@saasfe/we-app-utils';
 
 interface Config {
   pageContainer: {

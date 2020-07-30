@@ -1,33 +1,8 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import pathToRegexp from 'path-to-regexp';
-import { isString, isBoolean, isObj, ajustPathname } from '../utils/util';
-import { ParseLocationParams, parseLocate, getPathnamePrefix, Locate } from './locate';
-import { RouterType } from './enum';
-
-export interface RouteObj {
-  path?: string;
-  // 兼容老的版本
-  pathname?: string;
-  absolute?: boolean;
-
-  query?: object;
-  exact?: boolean;
-  strict?: boolean;
-  [prop: string]: any;
-}
-
-// true, 始终匹配
-// /home/:id, 匹配 /home/123
-// /home/:id, 当前微应用内路由
-// ~/user/home/:id, 当前产品内路由，在basename为空的情况下，微应用名称为user
-export type SimpleRoute = true | string | RouteObj;
-export type Route = SimpleRoute | SimpleRoute[];
-
-export interface ParseRoute {
-  route: Route;
-  basename?: string;
-  appBasename?: string;
-}
+import { isString, isBoolean, isObj, ajustPathname } from '@saasfe/we-app-utils';
+import { parseLocate, getPathnamePrefix } from './locate';
+import { RouterType, ParseRoute, RouteObj, SimpleRoute, ParseRouteParams, RouteMatch, RouteMatchParams } from '@saasfe/we-app-types';
 
 // 所有的路由规则统一处理成添加了basename的形式，简化后续的处理方式
 // 丢弃bool
@@ -117,10 +92,6 @@ function getRoutePathname({
   return fullPathname;
 }
 
-export interface ParseRouteParams extends ParseLocationParams {
-  route: Route;
-}
-
 // route仅支持字符串，对象，字符串、对象的混合数组
 export function parseRouteParams({
   route = '',
@@ -186,20 +157,6 @@ export function getRouteSwitchConfig(gotoHref: string, routerType: RouterType) {
   } : {};
   return config;
 }
-
-export interface RouteMatchParams {
-  route?: Route;
-  routeIgnore?: Route;
-  locate?: Locate;
-  exact?: boolean;
-  strict?: boolean;
-  basename?: string;
-  appBasename?: string;
-  routerType?: RouterType;
-  [prop: string]: any;
-}
-
-export type RouteMatch = (params: RouteMatchParams) => boolean;
 
 function matchRoute({
   route, exact, strict,

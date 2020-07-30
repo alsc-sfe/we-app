@@ -1,5 +1,4 @@
-import { LifecycleHookEnum, HookDescEntity, HookDesc } from './type';
-import { PageConfig } from '../weapp/page';
+import { LifecycleHookEnum, HookDescEntity, HookDesc, PageConfig } from '@saasfe/we-app-types';
 import { getEnabledHookNames } from './execute';
 
 const HookNames: string[] = [];

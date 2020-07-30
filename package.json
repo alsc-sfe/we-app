@@ -30,6 +30,9 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "dependencies": {
+    "@saasfe/we-app-resource-loader": "beta",
+    "@saasfe/we-app-types": "beta",
+    "@saasfe/we-app-utils": "beta",
     "lodash-es": "^4.17.15",
     "path-to-regexp": "^3.2.0",
     "single-spa": "^4.4.3",

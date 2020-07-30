@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-import { RouterType } from './enum';
-import { parseRouteParams, Route, RouteObj, isAbsolutePathname } from './route';
-import { isObj, isString, ajustPathname } from '../utils/util';
+import { RouterType, Locate, GetGotoHrefParams, Route, RouteObj, AppLocationInstance, ParseLocationParams } from '@saasfe/we-app-types';
+import { parseRouteParams, isAbsolutePathname } from './route';
+import { isObj, isString, ajustPathname } from '@saasfe/we-app-utils';
 
 // 路径由basename+微应用名称+页面路径，三部分构成
 export function getPathnamePrefix({ basename = '', absolute = false, appBasename = '' }) {
@@ -11,9 +10,7 @@ export function getPathnamePrefix({ basename = '', absolute = false, appBasename
   return ajustPathname(`/${basename}`);
 }
 
-export type Locate = string | Location | AppLocation;
-
-export class AppLocation {
+export class AppLocation implements AppLocationInstance {
   routerType: RouterType;
 
   pathname: string;
@@ -35,12 +32,29 @@ export class AppLocation {
   }
 }
 
-export interface ParseLocationParams {
-  locate: Locate;
-  routerType: RouterType;
-  basename: string;
-  route?: Route;
-  [prop: string]: any;
+function parseQuery({
+  locate = window.location,
+  routerType = RouterType.browser,
+  basename = '',
+  appBasename = '',
+}: ParseLocationParams) {
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  const { search } = parseLocate({
+    locate,
+    routerType,
+    basename,
+    appBasename,
+  });
+
+  const query = {};
+  if (search) {
+    search.slice(1).split('&').forEach(q => {
+      const pair = q.split('=');
+      query[pair[0]] = decodeURIComponent(pair[1] || '');
+    });
+  }
+
+  return query;
 }
 
 // 将路径解析为Location对象
@@ -145,30 +159,6 @@ export function parseLocate({
   return loc;
 }
 
-function parseQuery({
-  locate = window.location,
-  routerType = RouterType.browser,
-  basename = '',
-  appBasename = '',
-}: ParseLocationParams) {
-  const { search } = parseLocate({
-    locate,
-    routerType,
-    basename,
-    appBasename,
-  });
-
-  const query = {};
-  if (search) {
-    search.slice(1).split('&').forEach(q => {
-      const pair = q.split('=');
-      query[pair[0]] = decodeURIComponent(pair[1] || '');
-    });
-  }
-
-  return query;
-}
-
 interface GetGotoPathnameParams {
   to: Route;
   basename?: string;
@@ -212,12 +202,6 @@ function getGotoPathname({
   return gotoPathname;
 }
 
-export interface GetGotoHrefParams {
-  to: Route;
-  routerType?: RouterType;
-  basename?: string;
-  appBasename?: string;
-}
 // 返回带routerType的href
 export function getGotoHref({
   to,

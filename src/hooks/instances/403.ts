@@ -1,5 +1,5 @@
-import { getScopeName } from '../../utils/helpers';
-import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
+import { getScopeName } from '@saasfe/we-app-utils';
+import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '@saasfe/we-app-types';
 
 export interface Hook403Opts extends HookOpts {
   excludePages?: string[];

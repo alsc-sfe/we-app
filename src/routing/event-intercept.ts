@@ -1,4 +1,4 @@
-import { HookScope } from '../hooks/type';
+import { HookScope } from '@saasfe/we-app-types';
 
 /**
  * 增强路由

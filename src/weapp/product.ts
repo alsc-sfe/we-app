@@ -6,36 +6,17 @@
  * 4. 生命周期钩子，每个产品可单独定义，各个钩子根据条件(当前激活的产品、微应用、页面)决定是否被调用
  *    hooks被启用的位置，决定了其判断条件
  */
-import App, { AppConfig } from './app';
-import Base, { BaseConfig, BaseType } from './base';
-import { ResourceLoaderOpts } from '../resource-loader';
+import App from './app';
+import Base from './base';
+import { AppConfig, BaseType, ProductInstance, ProductConfig, Parser, AppListParser, AppConfigParser, AppInstance } from '@saasfe/we-app-types';
 import { transformAppConfig } from './helper';
 import { getContext } from '../context';
-import { resourcePreloader, ResourcePreloader } from '../utils/helpers';
+import { resourcePreloader, ResourcePreloader } from '@saasfe/we-app-utils';
 
-export interface ProductConfig extends BaseConfig {
-  parent?: Product;
-  // 微应用列表
-  url?: string; // 支持远程获取
-  apps?: AppConfig[];
-}
+export default class Product extends Base implements ProductInstance {
+  type: BaseType.product|BaseType.root = BaseType.product;
 
-export interface ParserOpts {
-  context?: any;
-  [props: string]: any;
-}
-export type AppListParser = (appList: any, opts?: ParserOpts) => Promise<AppConfig[]>;
-export type AppConfigParser = (appConfig: any, opts?: ParserOpts) => Promise<AppConfig>;
-
-export interface Parser {
-  appListParser: AppListParser;
-  appConfigParser: AppConfigParser;
-}
-
-class Product extends Base {
-  type: BaseType = BaseType.product;
-
-  parent: Product;
+  parent: ProductInstance;
 
   constructor(config: ProductConfig) {
     super(config);
@@ -65,7 +46,7 @@ class Product extends Base {
   }
 
   getApp(appName: string) {
-    const app = this.getChild(appName) as App;
+    const app = this.getChild(appName) as AppInstance;
     if (!app || app.type !== BaseType.app) {
       return;
     }
@@ -77,7 +58,7 @@ class Product extends Base {
 
     childConfig = await this.parseAppConfig(config, parser);
 
-    const child = await this.registerChild(childConfig, App);
+    const child = await this.registerChild(childConfig, App) as AppInstance;
 
     return child;
   }
@@ -89,7 +70,7 @@ class Product extends Base {
       const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
       appConfigs = await parser(url, {
         context: getContext(),
-        resourceLoader: (resource: string, opts: ResourceLoaderOpts): Promise<AppConfig[]> => {
+        resourceLoader: (resource: string, opts: any): Promise<AppConfig[]> => {
           return resourceLoader?.mount(
             resource,
             this.compoundScope(this),
@@ -117,7 +98,7 @@ class Product extends Base {
       const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
       appConfig = await parser(config, {
         context: getContext(),
-        resourceLoader: (url: string, opts?: ResourceLoaderOpts): Promise<AppConfig> => {
+        resourceLoader: (url: string, opts?: any): Promise<AppConfig> => {
           return resourceLoader?.mount(
             url,
             this.compoundScope(this),
@@ -138,5 +119,3 @@ class Product extends Base {
     return appConfig;
   }
 }
-
-export default Product;

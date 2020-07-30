@@ -1,7 +1,7 @@
 import { addErrorHandler, getAppStatus, unloadApplication } from 'single-spa';
 import { runLifecycleHook } from '../hooks';
 import { getScope } from '../weapp';
-import { HookScope, LifecycleHookEnum } from '../hooks/type';
+import { HookScope, LifecycleHookEnum } from '@saasfe/we-app-types';
 
 export const errorHandler = (error: Event, activeScopes: HookScope[]) => {
   // 向外抛出错误

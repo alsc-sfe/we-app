@@ -1,61 +1,27 @@
 import get from 'lodash-es/get';
-import { HookScope, UsingHooksConfigs, UsingScope, SafeHookScope, TPageContainer } from '../hooks/type';
+import { HookScope, UsingHooksConfigs, UsingScope, TPageContainer,
+  ResourceLoader, RouterType,
+  Render,
+  BaseInstance, BaseConfig, BaseType, ConfigName, DataName,
+  ProductInstance,
+  BaseConstructor,
+} from '@saasfe/we-app-types';
+import { Deferred, getScopeName } from '@saasfe/we-app-utils';
 import { usingHooks } from '../hooks';
 
-import { ResourceLoader, Resource } from '../resource-loader';
-import Product from './product';
-import Deferred from '../utils/deferred';
 import { configHooks } from '../hooks/using';
 import { setResourceLoader, setPageContainer, setRender, getGlobalConfig, setSandbox } from './config';
-import { getScopeName } from '../utils/helpers';
-import { ConfigName, DataName } from '../const';
-import { RouterType } from '../routing/enum';
 
-export interface ApplicationCustomProps {
-  pageScope?: SafeHookScope;
-  appBasename?: string;
-  basename?: string;
-  routerType?: RouterType;
-}
-export interface RenderCustomProps extends ApplicationCustomProps {
-  // 通过setContext传入的上下文
-  context?: any;
-  [prop: string]: any;
-}
-export interface Render {
-  mount: (element: any, container: TPageContainer, customProps?: RenderCustomProps) => any;
-  unmount: (container: TPageContainer, element: any, customProps?: RenderCustomProps) => any;
-}
-
-export interface BaseConfig {
-  name?: string;
-  type?: BaseType;
-  parent?: Base;
-
-  url?: Resource|Resource[];
-
-  hooks?: UsingHooksConfigs;
-
-  [prop: string]: any;
-}
-
-export enum BaseType {
-  root = 'root',
-  product = 'product',
-  app = 'app',
-  page = 'page'
-}
-
-export default class Base {
+export default class Base implements BaseInstance {
   type: BaseType;
 
   name: string;
 
-  parent: Base;
+  parent: BaseInstance;
 
   hookName: string;
 
-  private children: Base[] = [];
+  private children: BaseInstance[] = [];
 
   private config: BaseConfig;
 
@@ -63,7 +29,7 @@ export default class Base {
 
   private isStarted: boolean = false;
 
-  private initDeferred: Deferred<Base>;
+  private initDeferred: Deferred<BaseInstance>;
 
   constructor(config?: BaseConfig) {
     this.config = config;
@@ -95,10 +61,10 @@ export default class Base {
     });
   }
 
-  compoundScope(base: Base, scope: HookScope = {}): HookScope {
+  compoundScope(base: BaseInstance, scope: HookScope = {}): HookScope {
     if (base.type === BaseType.root) {
       if (!scope.product) {
-        scope.product = base as Product;
+        scope.product = base as ProductInstance;
         scope.productName = base.name;
       }
       return scope;
@@ -283,13 +249,13 @@ export default class Base {
     return this.getData(DataName.routerType, true) as RouterType || RouterType.browser;
   }
 
-  protected async registerChildren(cfgs: BaseConfig[], Child: typeof Base) {
+  protected async registerChildren(cfgs: BaseConfig[], Child: BaseConstructor) {
     const pChildren = cfgs.map((config) => this.registerChild(config, Child));
     const children = await Promise.all(pChildren);
     return children.filter((child) => child);
   }
 
-  protected async registerChild(config: BaseConfig, Child: typeof Base) {
+  protected async registerChild(config: BaseConfig, Child: BaseConstructor) {
     let child = this.getChild(config.name);
     if (child) {
       return child;
@@ -297,12 +263,12 @@ export default class Base {
 
     child = new Child({
       ...config,
-      parent: this,
+      parent: this as BaseInstance,
     });
 
     this.children.push(child);
 
-    return child as Base;
+    return child as BaseInstance;
   }
 
   protected setInitDeferred() {

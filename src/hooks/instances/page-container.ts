@@ -2,7 +2,7 @@
  * 骨架必须在路由切换前确定是显示还是隐藏
  * 页面容器在路由切换前显示，在卸载后隐藏
  */
-import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts, TPageContainer } from '../type';
+import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts, TPageContainer } from '@saasfe/we-app-types';
 
 export type ContainerSelector = string | HTMLElement;
 

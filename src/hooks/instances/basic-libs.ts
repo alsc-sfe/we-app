@@ -5,9 +5,8 @@
  * JS沙箱是级联式沙箱，当前沙箱没有对象则会向上级查找，需阻止修改对象的值(用proxy拦截)
  * 写入则只能写在当前JS沙箱里
  */
-import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '../type';
-import { Resource } from '../../resource-loader';
-import { isAncestorScope, resourcePreloader, ResourcePreloader } from '../../utils/helpers';
+import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts, Resource } from '@saasfe/we-app-types';
+import { isAncestorScope, resourcePreloader, ResourcePreloader } from '@saasfe/we-app-utils';
 
 export interface HookBasicLibsOpts extends HookOpts {
   // 需要加载的资源列表
