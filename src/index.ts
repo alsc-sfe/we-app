@@ -71,14 +71,11 @@ export {
   setBasename,
 };
 
-export { navigate, getRouteSwitchConfig,
-  DEFAULTRouteMatch } from './routing/route';
-export { AppLocation, getGotoHref,
-  parseLocate } from './routing/locate';
 export { RenderCustomProps, Route, RouteObj, RouteMatch, RouteMatchParams,
   Locate, GetGotoHrefParams, HookScope, SafeHookScope,
   ResourceLoader, ResourceLoaderDesc, Resource, ResourceFunction,
   ResourceWithType, ResourceType,
 } from '@saasfe/we-app-types';
 export { DefaultResourceLoaderOpts } from '@saasfe/we-app-resource-loader';
-export { isFunction } from '@saasfe/we-app-utils';
+export { isFunction, navigate, getRouteSwitchConfig, getGotoHref,
+  DEFAULTRouteMatch, AppLocation, parseLocate } from '@saasfe/we-app-utils';
