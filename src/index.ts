@@ -48,6 +48,7 @@ export async function start() {
       startPromise = _start();
     });
   }
+  return startPromise;
 }
 
 export {
