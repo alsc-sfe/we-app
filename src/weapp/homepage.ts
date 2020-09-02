@@ -1,4 +1,4 @@
-import { UsingScope, HookScope } from '../hooks/type';
+import { UsingScope, HookScope } from '@saasfe/we-app-types';
 import { getScope } from './root-product';
 
 let homepage: UsingScope;

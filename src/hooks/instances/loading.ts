@@ -1,4 +1,4 @@
-import { HookDescRunnerParam, HookDesc, HookOpts, UsingHookOpts } from '../type';
+import { HookDescRunnerParam, HookDesc, HookOpts, UsingHookOpts } from '@saasfe/we-app-types';
 
 export interface HookLoadingOpts extends HookOpts {
   element: any;

@@ -1,36 +1,17 @@
-import Page, { PageConfig } from './page';
-import Product from './product';
-import Base, { BaseConfig, BaseType } from './base';
-import { getScopeName } from '../utils/helpers';
-import { HookScope } from '../hooks/type';
-
-export interface AppConfig extends BaseConfig {
-  parent?: Product;
-
-  url?: string;
-  // 子应用标题
-  // 规范：https://yuque.antfin-inc.com/ele-fe/zgm9ar/lmk4t9
-  title?: string;
-  // 子应用描述
-  description?: string;
-  // 页面路由前缀，默认为/${name}，可以通过basename覆盖
-  basename?: string;
-
-  pages?: PageConfig[];
-
-  filterPages?: (cfgs: PageConfig|PageConfig[]) => PageConfig|PageConfig[]|undefined;
-
-  [prop: string]: any;
-}
+import { PageConfig, HookScope, AppConfig, BaseType,
+  PageInstance, AppInstance, ProductInstance, PageConstructor } from '@saasfe/we-app-types';
+import Base from './base';
+import Page from './page';
+import { getScopeName } from '@saasfe/we-app-utils';
 
 // 已注册页面都记录在这里
 // 主要用于首次访问时获取activeScopes
-let registedPages: Page[] = [];
+let registedPages: PageInstance[] = [];
 
-export default class App extends Base {
-  type: BaseType = BaseType.app;
+export default class App extends Base implements AppInstance {
+  type: BaseType.app = BaseType.app;
 
-  parent: Product;
+  parent: ProductInstance;
 
   constructor(config: AppConfig) {
     super(config);
@@ -43,7 +24,7 @@ export default class App extends Base {
   async registerPages(configs: PageConfig[] = []) {
     const cfgs = this.filterPages(configs) as PageConfig[];
     if (cfgs) {
-      const pages = await this.registerChildren(cfgs, Page) as Page[];
+      const pages = await this.registerChildren(cfgs, Page) as PageInstance[];
       registedPages = registedPages.concat(pages);
       return pages;
     }
@@ -52,7 +33,7 @@ export default class App extends Base {
   async registerPage(cfg: PageConfig) {
     const config = this.filterPages(cfg) as PageConfig;
     if (config) {
-      const page = await this.registerChild(config, Page) as Page;
+      const page = await this.registerChild(config, Page) as PageInstance;
       page && registedPages.push(page);
       return page;
     }
@@ -67,10 +48,10 @@ export default class App extends Base {
   }
 
   getPage(pageName: string) {
-    return this.getChild(pageName) as Page;
+    return this.getChild(pageName) as PageInstance;
   }
 
-  protected async registerChild(config: PageConfig, Child: typeof Page) {
+  protected async registerChild(config: PageConfig, Child: PageConstructor) {
     return super.registerChild({ ...config, type: BaseType.page }, Child);
   }
 }

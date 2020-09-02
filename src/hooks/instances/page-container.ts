@@ -2,22 +2,14 @@
  * 骨架必须在路由切换前确定是显示还是隐藏
  * 页面容器在路由切换前显示，在卸载后隐藏
  */
-import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts, TPageContainer } from '../type';
-
-export type ContainerSelector = string | HTMLElement;
+import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts, TPageContainer, ContainerSelector } from '@saasfe/we-app-types';
+import { getElement, isValidElement } from '@saasfe/we-app-utils';
 
 export interface HookPageContainerOpts extends HookOpts {
   createPageContainer: (param: HookDescRunnerParam<HookPageContainerOpts>) => TPageContainer;
   skeletonContainer?: ContainerSelector;
   contentContainer?: ContainerSelector;
   specialSelectors?: { [scopeName: string]: string };
-}
-
-function getElement(selector: ContainerSelector, container: HTMLElement = document.body) {
-  if (typeof selector === 'string') {
-    return container.querySelector(selector);
-  }
-  return selector as HTMLElement;
 }
 
 function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainerOpts>) {
@@ -29,7 +21,7 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
   const { skeletonContainer } = param.opts;
   const elSkeleton: HTMLElement = hookScope.getData('skeletonContainer', true) ||
     getElement(skeletonContainer);
-  if (elSkeleton) {
+  if (isValidElement(elSkeleton)) {
     const { specialSelectors = {}, contentContainer } = param.opts;
     const { productName = '', appName = '', pageName = '' } = param.pageScope;
 
@@ -37,10 +29,10 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
     const selector = specialSelectors[pageContainerId];
     let elPageContainer: HTMLElement = selector && elSkeleton.querySelector(selector);
 
-    if (!elPageContainer) {
+    if (!isValidElement(elPageContainer)) {
       const elContent = hookScope.getData('contentContainer', true) ||
-        getElement(contentContainer, elSkeleton);
-      if (elContent) {
+        getElement(contentContainer, elSkeleton) || elSkeleton;
+      if (isValidElement(elContent)) {
         elPageContainer = document.createElement('div');
         elPageContainer.id = pageContainerId;
         elContent.appendChild(elPageContainer);
@@ -61,13 +53,15 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
     }
 
     let elPageContainer = pageScope?.getPageContainer();
-    if (!elPageContainer) {
+    if (!isValidElement(elPageContainer)) {
       elPageContainer = createPageContainer(param);
-      if (elPageContainer) {
+      if (isValidElement(elPageContainer)) {
         pageScope?.setPageContainer(elPageContainer);
+      } else {
+        pageScope?.setPageContainer(null);
       }
     } else {
-      (elPageContainer as HTMLElement).style.display = '';
+      pageScope?.setPageContainer(null);
     }
   },
 
@@ -75,8 +69,10 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
     const { pageScope } = param;
 
     const elPageContainer = pageScope?.getPageContainer();
-    if (elPageContainer) {
+    if (isValidElement(elPageContainer)) {
       (elPageContainer as HTMLElement).style.display = '';
+    } else {
+      pageScope?.setPageContainer(null);
     }
   },
 
@@ -85,8 +81,10 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
     const { pageScope } = param;
 
     const elPageContainer = pageScope?.getPageContainer();
-    if (elPageContainer) {
+    if (isValidElement(elPageContainer)) {
       (elPageContainer as HTMLElement).style.display = 'none';
+    } else {
+      pageScope?.setPageContainer(null);
     }
   },
 
@@ -95,8 +93,10 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
     const { pageScope } = param;
 
     const elPageContainer = pageScope?.getPageContainer();
-    if (elPageContainer) {
+    if (isValidElement(elPageContainer)) {
       (elPageContainer as HTMLElement).style.display = 'none';
+    } else {
+      pageScope?.setPageContainer(null);
     }
   },
 
@@ -105,8 +105,10 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
     const { pageScope } = param;
 
     const elPageContainer = pageScope?.getPageContainer();
-    if (elPageContainer) {
+    if (isValidElement(elPageContainer)) {
       (elPageContainer as HTMLElement).style.display = 'none';
+    } else {
+      pageScope?.setPageContainer(null);
     }
   },
 };

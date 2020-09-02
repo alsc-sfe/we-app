@@ -10,11 +10,12 @@ import { startRouting } from './routing/routing';
 import { registerApps, requireChildrenInited,
   startRootProduct, usingHooks, configHooks, setHomepage, registerHookPages,
   setResourceLoader, setPageContainer, setRender, setRouterType, setBasename,
+  setSkeletonContainer,
 } from './weapp';
 import { buildinHooks } from './hooks';
 import { setContext } from './context';
-import { DefaultResourceLoader } from './resource-loader';
-import { RouterType } from './routing/enum';
+import { DefaultResourceLoader } from '@saasfe/we-app-resource-loader';
+import { RouterType } from '@saasfe/we-app-types';
 
 let startPromise: Promise<any>;
 
@@ -47,12 +48,14 @@ export async function start() {
       startPromise = _start();
     });
   }
+  return startPromise;
 }
 
 export {
   setResourceLoader,
   setPageContainer,
   setRender,
+  setSkeletonContainer,
 
   DefaultResourceLoader,
 
@@ -69,9 +72,11 @@ export {
   setBasename,
 };
 
-export { navigate, getRouteSwitchConfig, Route, RouteObj,
-  DEFAULTRouteMatch, RouteMatch, RouteMatchParams } from './routing/route';
-export { AppLocation, getGotoHref, GetGotoHrefParams,
-  parseLocate, Locate } from './routing/locate';
-export { RenderCustomProps } from './weapp/base';
-export { isFunction } from './utils/util';
+export { RenderCustomProps, Route, RouteObj, RouteMatch, RouteMatchParams,
+  Locate, GetGotoHrefParams, HookScope, SafeHookScope,
+  ResourceLoader, ResourceLoaderDesc, Resource, ResourceFunction,
+  ResourceWithType, ResourceType,
+} from '@saasfe/we-app-types';
+export { DefaultResourceLoaderOpts } from '@saasfe/we-app-resource-loader';
+export { isFunction, navigate, getRouteSwitchConfig, getGotoHref,
+  DEFAULTRouteMatch, AppLocation, parseLocate } from '@saasfe/we-app-utils';

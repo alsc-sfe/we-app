@@ -1,7 +1,7 @@
 import { callCapturedEventListeners, runRoutingWithHook, RoutingWithHook, setRoutingWithHook } from './event-intercept';
 import { parseUri } from './helper';
 import { getActivePageScopes, getScope } from '../weapp';
-import { HookScope, LifecycleHookEnum } from '../hooks/type';
+import { HookScope, LifecycleHookEnum } from '@saasfe/we-app-types';
 import { checkActivityFunctions } from 'single-spa';
 import { runLifecycleHook } from '../hooks';
 

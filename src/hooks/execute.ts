@@ -1,11 +1,9 @@
-import { HookDescRunnerParam, HookScope, LifecycleHookEnum, LifecycleHookRunner } from './type';
+import { HookDescRunnerParam, HookScope, LifecycleHookEnum, LifecycleHookRunner, BaseType, PageConfig } from '@saasfe/we-app-types';
 import { getHooksScopes, getScopeHooks, getScopeHookNames } from './using';
-import { getScopeName, makeSafeScope } from '../utils/helpers';
-import { BaseType } from '../weapp/base';
+import { getScopeName, makeSafeScope } from '@saasfe/we-app-utils';
 import { getPageConfigs } from './register';
 import { errorHandler } from '../error';
 import { getScope, compoundScope } from '../weapp';
-import { PageConfig } from '../weapp/page';
 import { getAppStatus, unloadApplication } from 'single-spa';
 import { getContext } from '../context';
 

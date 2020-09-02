@@ -1,7 +1,7 @@
 {
   "name": "@saasfe/we-app",
-  "version": "1.2.18",
-  "description": "微应用业务框架",
+  "version": "2.0.1",
+  "description": "微应用框架",
   "homepage": "https://github.com/alsc-sfe/",
   "repository": {
     "type": "git",
@@ -30,6 +30,9 @@
   "main": "lib/index.js",
   "module": "es/index.js",
   "dependencies": {
+    "@saasfe/we-app-resource-loader": "^1.0.0",
+    "@saasfe/we-app-types": "^1.0.0",
+    "@saasfe/we-app-utils": "^1.0.0",
     "lodash-es": "^4.17.15",
     "path-to-regexp": "^3.2.0",
     "single-spa": "^4.4.3",

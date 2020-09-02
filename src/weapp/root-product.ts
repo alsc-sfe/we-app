@@ -1,17 +1,15 @@
-import Product, { ProductConfig } from './product';
-import { BuildinProductName, HookAppName, ScopeNameDivider } from '../utils/helpers';
+import Product from './product';
+import { BuildinProductName, HookAppName, ScopeNameDivider } from '@saasfe/we-app-utils';
 import App, { getActivePageScopes } from './app';
-import Base, { BaseType } from './base';
-import { DefaultResourceLoader } from '../resource-loader';
-import { RouterType } from '../routing/enum';
-import { HookScope } from '../hooks/type';
+import Base from './base';
+import { DefaultResourceLoader } from '@saasfe/we-app-resource-loader';
+import { RouterType, ProductConfig, BaseType, HookScope, DataName, ProductInstance } from '@saasfe/we-app-types';
 import { getPageConfigs } from '../hooks';
-import { DataName } from '../const';
 
 class RootProduct extends Product {
-  type: BaseType = BaseType.root;
+  type: BaseType.root = BaseType.root;
 
-  parent: Product = this;
+  parent: ProductInstance = this;
 
   registerProducts(cfgs: ProductConfig[] = []) {
     this.setInitDeferred();
@@ -28,11 +26,11 @@ class RootProduct extends Product {
   }
 
   registerProduct(cfg: ProductConfig) {
-    return this.registerChild(cfg, Product) as Promise<Product>;
+    return this.registerChild(cfg, Product) as Promise<ProductInstance>;
   }
 
   getProduct(productName: string) {
-    const product = this.getChild(productName) as Product;
+    const product = this.getChild(productName) as ProductInstance;
     if (!product || product.type !== BaseType.product) {
       return;
     }
@@ -170,6 +168,9 @@ export const setRouterType = (routerType: RouterType) => {
 };
 export const setBasename = (basename: string) => {
   setData(DataName.basename, basename);
+};
+export const setSkeletonContainer = (container: HTMLElement) => {
+  setData('skeletonContainer', container);
 };
 
 export {

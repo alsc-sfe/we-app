@@ -6,51 +6,22 @@
  * 在首次访问时，通过调用page的makeActivityFunction，手动获取activeScopes
  */
 import { registerApplication, unloadApplication } from 'single-spa';
-import { getScopeName, makeSafeScope } from '../utils/helpers';
-import Base, { BaseConfig, BaseType, ApplicationCustomProps } from './base';
-import { HookScope, LifecycleHookEnum } from '../hooks/type';
-import App from './app';
-import { Resource } from '../resource-loader';
+import { getScopeName, makeSafeScope, ajustPathname, isValidElement, DEFAULTRouteMatch as routeMatchFn } from '@saasfe/we-app-utils';
+import { BaseType, ApplicationCustomProps,
+  HookScope, LifecycleHookEnum, Resource, LifecycleParams,
+  DataName, RouterType, PageConfig, PageInstance, AppInstance,
+} from '@saasfe/we-app-types';
 import { runLifecycleHook } from '../hooks';
-import { DEFAULTRouteMatch as routeMatchFn, Route } from '../routing';
-import { ajustPathname } from '../utils/util';
+
+
 import { matchHomepage } from './homepage';
-import { RouterType } from '../routing/enum';
 import { getContext } from '../context';
-import { DataName } from '../const';
+import Base from './base';
 
-export interface PageConfig extends BaseConfig {
-  parent?: App;
+export default class Page extends Base implements PageInstance {
+  type: BaseType.page = BaseType.page;
 
-  activityFunction?: ActivityFunction;
-
-  // 页面标题
-  // 规范：https://yuque.antfin-inc.com/ele-fe/zgm9ar/lmk4t9
-  title?: string;
-  // 路由的定义，始终显示 true, 微应用内相对路径 /page, 绝对路径 ~/product/weapp/page
-  path?: Route;
-  route?: Route;
-  routeIgnore?: Route;
-
-  // 一般为一个js、一个css
-  url?: Resource|Resource[];
-
-  customProps?: object;
-}
-
-export type ActivityFunction = (location?: Location) => boolean;
-
-export interface LifecycleParams {
-  customProps?: object;
-  scope?: HookScope;
-  component?: any;
-  [prop: string]: any;
-}
-
-export default class Page extends Base {
-  type: BaseType = BaseType.page;
-
-  parent: App;
+  parent: AppInstance;
 
   private component: any;
 
@@ -196,19 +167,9 @@ export default class Page extends Base {
     await runLifecycleHook(LifecycleHookEnum.beforeLoad, [scope]);
 
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
-    let url = this.getConfig('url') as Resource[] || [];
-    if (!Array.isArray(url)) {
-      url = [url];
-    }
+    const url = this.getConfig('url') as Resource[] || [];
 
-    const mountedUrl = url.map((r) => {
-      return resourceLoader.mount(r, scope, resourceLoaderOpts);
-    });
-    // 获取第一个不为空的返回值
-    const component = await Promise.all(mountedUrl).then((resources) => {
-      const resource = resources.find((r) => r);
-      return resource;
-    }).then((resource: any) => resource?.default || resource);
+    const component = resourceLoader.mount(url, makeSafeScope(scope), resourceLoaderOpts);
 
     await runLifecycleHook(LifecycleHookEnum.afterLoad, [scope]);
 
@@ -224,7 +185,7 @@ export default class Page extends Base {
 
     const container = this.getPageContainer();
 
-    if (!container) {
+    if (!isValidElement(container)) {
       // 没有渲染容器，但是singleSpa仍然做了渲染
       // 需要调整当前app的状态，以便singleSpa下次再渲染
       unloadApplication(getScopeName(scope));
@@ -260,14 +221,9 @@ export default class Page extends Base {
     }
 
     const { desc: resourceLoader, config: resourceLoaderOpts } = this.getResourceLoader();
-    let url = this.getConfig('url') as Resource[] || [];
-    if (!Array.isArray(url)) {
-      url = [url];
-    }
+    const url = this.getConfig('url') as Resource[] || [];
 
-    url.map((r) => {
-      return resourceLoader.unmount(r, scope, resourceLoaderOpts);
-    });
+    resourceLoader.unmount(url, makeSafeScope(scope), resourceLoaderOpts);
 
     // afterUnmount
     await runLifecycleHook(LifecycleHookEnum.afterUnmount, [scope]);

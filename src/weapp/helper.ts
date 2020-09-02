@@ -1,8 +1,5 @@
-import { ResourceFunction } from '../resource-loader';
-import { Route as TRoute } from '../routing';
-import { AppConfig } from './app';
-import { PageConfig } from './page';
-import { resourcePreloader } from '../utils/helpers';
+import { ResourceFunction, Route as TRoute, AppConfig, PageConfig } from '@saasfe/we-app-types';
+import { resourcePreloader } from '@saasfe/we-app-utils';
 
 interface Route {
   pathname: string;

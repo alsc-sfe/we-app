@@ -1,18 +1,18 @@
-import { ResourceLoader } from '../resource-loader';
-import { Render } from './base';
-import { ScopeNameDivider, getScopeName } from '../utils/helpers';
-import { UsingScope, TPageContainer } from '../hooks/type';
-import { ConfigName } from '../const';
+import { ResourceLoader, Render, UsingScope, TPageContainer, ConfigName } from '@saasfe/we-app-types';
+import { ScopeNameDivider, getScopeName } from '@saasfe/we-app-utils';
 
 interface Config {
   pageContainer: {
     [scopeName: string]: TPageContainer;
   };
   resourceLoader: {
-    [scopeName: string]: ResourceLoader;
+    [scopeName: string]: ResourceLoader<any>;
   };
   render: {
     [scopeName: string]: Render;
+  };
+  sandbox: {
+    [scopeName: string]: any;
   };
 }
 
@@ -20,6 +20,7 @@ const config: Config = {
   pageContainer: {},
   resourceLoader: {},
   render: {},
+  sandbox: {},
 };
 
 const configKeys = Object.keys(config);
@@ -35,12 +36,16 @@ export function setPageContainer(value: TPageContainer, scopes: UsingScope[]) {
   setGlobalConfig(ConfigName.pageContainer, value, scopes);
 }
 
-export function setResourceLoader(value: ResourceLoader, scopes: UsingScope[]) {
+export function setResourceLoader(value: ResourceLoader<any>, scopes: UsingScope[]) {
   setGlobalConfig(ConfigName.resourceLoader, value, scopes);
 }
 
 export function setRender(value: Render, scopes: UsingScope[]) {
   setGlobalConfig(ConfigName.render, value, scopes);
+}
+
+export function setSandbox(value: Render, scopes: UsingScope[]) {
+  setGlobalConfig(ConfigName.sandbox, value, scopes);
 }
 
 export function getGlobalConfig(pathname: string, scopeName: string) {
@@ -60,7 +65,7 @@ export function getGlobalConfig(pathname: string, scopeName: string) {
 
   if (pathname === ConfigName.resourceLoader) {
     // 没有找到资源加载器描述，向上级查找
-    if (!(value as ResourceLoader)?.desc) {
+    if (!(value as ResourceLoader<any>)?.desc) {
       const names = scopeName.split(ScopeNameDivider);
       names.pop();
 
@@ -71,10 +76,10 @@ export function getGlobalConfig(pathname: string, scopeName: string) {
         name = names[1] || '';
       }
 
-      const val = getGlobalConfig(pathname, name) as ResourceLoader;
+      const val = getGlobalConfig(pathname, name) as ResourceLoader<any>;
       value = {
         desc: val?.desc,
-        config: (value as ResourceLoader)?.config,
+        config: (value as ResourceLoader<any>)?.config,
       };
     }
   }

@@ -1,5 +1,5 @@
-import { UsingHooksConfigs, UsingHookOpts, UsingScope, HookDesc, HookOpts } from './type';
-import { getScopeName, ScopeNameDivider } from '../utils/helpers';
+import { UsingHooksConfigs, UsingHookOpts, UsingScope, HookDesc, HookOpts } from '@saasfe/we-app-types';
+import { getScopeName, ScopeNameDivider } from '@saasfe/we-app-utils';
 import { getHookEntity, hasHookName, registerHooks } from './register';
 
 const HooksScopes: UsingScope[] = [];
