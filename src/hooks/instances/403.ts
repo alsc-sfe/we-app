@@ -3,11 +3,13 @@ import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '@saasfe/
 
 export interface Hook403Opts extends HookOpts {
   excludePages?: string[];
-  check403?: (pageAuthCode: string) => Promise<boolean|object>;
+  check403?: (pageAuthCode: string, extraProps?: object) => Promise<boolean|object>;
   [prop: string]: any;
 }
 
 let is403 = false;
+
+const HOOK403_DATANAME = '__hook__403__is403';
 
 const hook403Desc: HookDesc<Hook403Opts> = {
   page: {
@@ -16,8 +18,11 @@ const hook403Desc: HookDesc<Hook403Opts> = {
   },
 
   async beforeRouting(param: HookDescRunnerParam<Hook403Opts>) {
-    const { opts: { excludePages = [] }, hookPages = [], pageScope, hookPageScope } = param;
+    const { opts: { excludePages = [] }, hookPages = [], pageScope, hookPageScope, extraProps } = param;
     const pageName = getScopeName(pageScope);
+    // 初始设置为false
+    is403 = false;
+    pageScope.setData(HOOK403_DATANAME, is403);
     // 从当前路由解析出当前激活的页面
     if (pageName && hookPages.concat(excludePages).indexOf(pageName) === -1) {
       // 获取当前页面对应的权限码
@@ -29,12 +34,12 @@ const hook403Desc: HookDesc<Hook403Opts> = {
         }
 
         if (!check403) {
-          is403 = false;
           return;
         }
 
-        const res = await check403(pageAuth);
+        const res = await check403(pageAuth, extraProps);
         is403 = !!res;
+        pageScope.setData(HOOK403_DATANAME, is403);
 
         if (is403 && hookPageScope) {
           // 设置hook 403页面渲染参数
@@ -44,9 +49,9 @@ const hook403Desc: HookDesc<Hook403Opts> = {
     }
   },
 
-  async beforeMount() {
+  async beforeMount(param: HookDescRunnerParam<Hook403Opts>) {
     // 阻止渲染
-    return !is403;
+    return !param.pageScope.getData(HOOK403_DATANAME);
   },
 };
 
