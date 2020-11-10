@@ -38,7 +38,7 @@ export function parseUri(str: string) {
 
   uri.source = uri.href;
   uri.hostname = uri.host;
-  uri.search = uri.query ? '?' + uri.query : '';
+  uri.search = uri.query ? `?${uri.query}` : '';
 
   return uri as Location;
 }

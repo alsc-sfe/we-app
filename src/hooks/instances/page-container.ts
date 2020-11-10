@@ -30,7 +30,7 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
     let elPageContainer: HTMLElement = selector && elSkeleton.querySelector(selector);
 
     if (!isValidElement(elPageContainer)) {
-      elPageContainer = elSkeleton.querySelector('#' + pageContainerId);
+      elPageContainer = elSkeleton.querySelector(`#${pageContainerId}`);
     }
 
     if (!isValidElement(elPageContainer)) {
