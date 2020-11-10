@@ -3,13 +3,14 @@ import { HookDesc, HookDescRunnerParam, HookOpts, UsingHookOpts } from '@saasfe/
 
 export interface Hook403Opts extends HookOpts {
   excludePages?: string[];
-  check403?: (pageAuthCode: string, extraProps?: object) => Promise<boolean|object>;
+  check403?: (pageAuthCode: string, extraProps?: { location?: Location; [p: string]: any }) => Promise<boolean|object>;
   [prop: string]: any;
 }
 
 let is403 = false;
 
 const HOOK403_DATANAME = '__hook__403__is403';
+let lastHref = '';
 
 const hook403Desc: HookDesc<Hook403Opts> = {
   page: {
@@ -18,11 +19,18 @@ const hook403Desc: HookDesc<Hook403Opts> = {
   },
 
   async beforeRouting(param: HookDescRunnerParam<Hook403Opts>) {
-    const { opts: { excludePages = [] }, hookPages = [], pageScope, hookPageScope, extraProps } = param;
+    const { opts: { excludePages = [] }, hookPages = [], pageScope, hookPageScope, extraProps = {} } = param;
     const pageName = getScopeName(pageScope);
+    const { href } = extraProps.location || {};
     // 初始设置为false
-    is403 = false;
-    pageScope.setData(HOOK403_DATANAME, is403);
+    // 当路由变换时才重置is403，
+    // 因为一个路由会对应多个模块，会出现第一个模块is403=true，结果被后面的模块将is403=false
+    if (lastHref !== href) {
+      is403 = false;
+      pageScope.setData(HOOK403_DATANAME, is403);
+
+      lastHref = href;
+    }
     // 从当前路由解析出当前激活的页面
     if (pageName && hookPages.concat(excludePages).indexOf(pageName) === -1) {
       // 获取当前页面对应的权限码
@@ -50,7 +58,7 @@ const hook403Desc: HookDesc<Hook403Opts> = {
   },
 
   async beforeMount(param: HookDescRunnerParam<Hook403Opts>) {
-    // 阻止渲染
+    // 仅阻止当前is403=true的模块的渲染
     return !param.pageScope.getData(HOOK403_DATANAME);
   },
 };

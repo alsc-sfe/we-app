@@ -30,6 +30,10 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
     let elPageContainer: HTMLElement = selector && elSkeleton.querySelector(selector);
 
     if (!isValidElement(elPageContainer)) {
+      elPageContainer = elSkeleton.querySelector('#' + pageContainerId);
+    }
+
+    if (!isValidElement(elPageContainer)) {
       const elContent = hookScope.getData('contentContainer', true) ||
         getElement(contentContainer, elSkeleton) || elSkeleton;
       if (isValidElement(elContent)) {
@@ -43,89 +47,70 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
   }
 }
 
+function createAndStorePageContainer(param: HookDescRunnerParam<HookPageContainerOpts>) {
+  // 生成页面容器，容器存储到scope中
+  const { opts: { createPageContainer }, pageScope } = param;
+
+  let elPageContainer: HTMLElement = pageScope?.getPageContainer?.();
+  if (!isValidElement(elPageContainer) && createPageContainer) {
+    elPageContainer = createPageContainer(param);
+  }
+
+  if (!isValidElement(elPageContainer)) {
+    elPageContainer = null;
+  }
+
+  pageScope?.setPageContainer?.(elPageContainer);
+
+  return elPageContainer;
+}
+
 const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
   async beforeRouting(param: HookDescRunnerParam<HookPageContainerOpts>) {
     // 生成页面容器，容器存储到scope中
-    const { opts: { createPageContainer }, pageScope } = param;
-
-    if (!createPageContainer) {
-      return;
-    }
-
-    let elPageContainer = pageScope?.getPageContainer?.();
-    if (!isValidElement(elPageContainer)) {
-      elPageContainer = createPageContainer(param);
-      if (isValidElement(elPageContainer)) {
-        pageScope?.setPageContainer?.(elPageContainer);
-      } else {
-        pageScope?.setPageContainer?.(null);
-      }
-    } else {
-      pageScope?.setPageContainer?.(null);
-    }
+    createAndStorePageContainer(param);
   },
 
   async beforeLoad(param: HookDescRunnerParam<HookPageContainerOpts>) {
-    const { opts: { createPageContainer }, pageScope } = param;
-
-    let elPageContainer = pageScope?.getPageContainer?.();
-
-    if (!isValidElement(elPageContainer) && createPageContainer) {
-      elPageContainer = createPageContainer(param);
-    }
+    const elPageContainer = createAndStorePageContainer(param);
 
     if (isValidElement(elPageContainer)) {
-      pageScope?.setPageContainer?.(elPageContainer);
-      (elPageContainer as HTMLElement).style.display = '';
-    } else {
-      pageScope?.setPageContainer?.(null);
+      elPageContainer.style.display = '';
     }
   },
 
   async beforeMount(param: HookDescRunnerParam<HookPageContainerOpts>) {
-    const { pageScope } = param;
+    const elPageContainer = createAndStorePageContainer(param);
 
-    const elPageContainer = pageScope?.getPageContainer?.();
     if (isValidElement(elPageContainer)) {
-      (elPageContainer as HTMLElement).style.display = '';
-    } else {
-      pageScope?.setPageContainer?.(null);
+      elPageContainer.style.display = '';
     }
   },
 
   async onMountPrevented(param: HookDescRunnerParam<HookPageContainerOpts>) {
     // 隐藏页面容器
-    const { pageScope } = param;
+    const elPageContainer = createAndStorePageContainer(param);
 
-    const elPageContainer = pageScope?.getPageContainer?.();
     if (isValidElement(elPageContainer)) {
-      (elPageContainer as HTMLElement).style.display = 'none';
-    } else {
-      pageScope?.setPageContainer?.(null);
+      elPageContainer.style.display = 'none';
     }
   },
 
   async afterUnmount(param: HookDescRunnerParam<HookPageContainerOpts>) {
     // 隐藏页面容器
-    const { pageScope } = param;
+    const elPageContainer = createAndStorePageContainer(param);
 
-    const elPageContainer = pageScope?.getPageContainer?.();
     if (isValidElement(elPageContainer)) {
-      (elPageContainer as HTMLElement).style.display = 'none';
-    } else {
-      pageScope?.setPageContainer?.(null);
+      elPageContainer.style.display = 'none';
     }
   },
 
   async onError(param: HookDescRunnerParam<HookPageContainerOpts>) {
     // 隐藏页面容器
-    const { pageScope } = param;
+    const elPageContainer = createAndStorePageContainer(param);
 
-    const elPageContainer = pageScope?.getPageContainer?.();
     if (isValidElement(elPageContainer)) {
-      (elPageContainer as HTMLElement).style.display = 'none';
-    } else {
-      pageScope?.setPageContainer?.(null);
+      elPageContainer.style.display = 'none';
     }
   },
 };
