@@ -44,7 +44,7 @@ function DefaultCreatePageContainer(param: HookDescRunnerParam<HookPageContainer
 }
 
 const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
-  async beforeLoad(param: HookDescRunnerParam<HookPageContainerOpts>) {
+  async beforeRouting(param: HookDescRunnerParam<HookPageContainerOpts>) {
     // 生成页面容器，容器存储到scope中
     const { opts: { createPageContainer }, pageScope } = param;
 
@@ -52,27 +52,44 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
       return;
     }
 
-    let elPageContainer = pageScope?.getPageContainer();
+    let elPageContainer = pageScope?.getPageContainer?.();
     if (!isValidElement(elPageContainer)) {
       elPageContainer = createPageContainer(param);
       if (isValidElement(elPageContainer)) {
-        pageScope?.setPageContainer(elPageContainer);
+        pageScope?.setPageContainer?.(elPageContainer);
       } else {
-        pageScope?.setPageContainer(null);
+        pageScope?.setPageContainer?.(null);
       }
     } else {
-      pageScope?.setPageContainer(null);
+      pageScope?.setPageContainer?.(null);
+    }
+  },
+
+  async beforeLoad(param: HookDescRunnerParam<HookPageContainerOpts>) {
+    const { opts: { createPageContainer }, pageScope } = param;
+
+    let elPageContainer = pageScope?.getPageContainer?.();
+
+    if (!isValidElement(elPageContainer) && createPageContainer) {
+      elPageContainer = createPageContainer(param);
+    }
+
+    if (isValidElement(elPageContainer)) {
+      pageScope?.setPageContainer?.(elPageContainer);
+      (elPageContainer as HTMLElement).style.display = '';
+    } else {
+      pageScope?.setPageContainer?.(null);
     }
   },
 
   async beforeMount(param: HookDescRunnerParam<HookPageContainerOpts>) {
     const { pageScope } = param;
 
-    const elPageContainer = pageScope?.getPageContainer();
+    const elPageContainer = pageScope?.getPageContainer?.();
     if (isValidElement(elPageContainer)) {
       (elPageContainer as HTMLElement).style.display = '';
     } else {
-      pageScope?.setPageContainer(null);
+      pageScope?.setPageContainer?.(null);
     }
   },
 
@@ -80,11 +97,11 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
     // 隐藏页面容器
     const { pageScope } = param;
 
-    const elPageContainer = pageScope?.getPageContainer();
+    const elPageContainer = pageScope?.getPageContainer?.();
     if (isValidElement(elPageContainer)) {
       (elPageContainer as HTMLElement).style.display = 'none';
     } else {
-      pageScope?.setPageContainer(null);
+      pageScope?.setPageContainer?.(null);
     }
   },
 
@@ -92,11 +109,11 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
     // 隐藏页面容器
     const { pageScope } = param;
 
-    const elPageContainer = pageScope?.getPageContainer();
+    const elPageContainer = pageScope?.getPageContainer?.();
     if (isValidElement(elPageContainer)) {
       (elPageContainer as HTMLElement).style.display = 'none';
     } else {
-      pageScope?.setPageContainer(null);
+      pageScope?.setPageContainer?.(null);
     }
   },
 
@@ -104,11 +121,11 @@ const hookPageContainerDesc: HookDesc<HookPageContainerOpts> = {
     // 隐藏页面容器
     const { pageScope } = param;
 
-    const elPageContainer = pageScope?.getPageContainer();
+    const elPageContainer = pageScope?.getPageContainer?.();
     if (isValidElement(elPageContainer)) {
       (elPageContainer as HTMLElement).style.display = 'none';
     } else {
-      pageScope?.setPageContainer(null);
+      pageScope?.setPageContainer?.(null);
     }
   },
 };
