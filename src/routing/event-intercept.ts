@@ -16,8 +16,6 @@ const capturedEventListeners = {
 
 const originalAddEventListener = window.addEventListener;
 const originalRemoveEventListener = window.removeEventListener;
-const originalPushState = window.history.pushState;
-const originalReplaceState = window.history.replaceState;
 
 export function callCapturedEventListeners(eventArguments) {
   if (eventArguments) {

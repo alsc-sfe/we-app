@@ -5,7 +5,7 @@ export function parseUri(str: string) {
   // http://blog.stevenlevithan.com/archives/parseuri
   const parseOptions = {
     strictMode: true,
-    key: ['source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host', 'port', 'relative', 'pathname', 'directory', 'file', 'query', 'anchor'],
+    key: ['href', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host', 'port', 'relative', 'pathname', 'directory', 'file', 'query', 'anchor'],
     q: {
       name: 'queryKey',
       parser: /(?:^|&)([^&=]*)=?([^&]*)/g,
@@ -35,6 +35,10 @@ export function parseUri(str: string) {
   if (uri.relative.indexOf('#') > -1) {
     uri.hash = uri.relative.replace(uri.pathname, '');
   }
+
+  uri.source = uri.href;
+  uri.hostname = uri.host;
+  uri.search = uri.query ? `?${uri.query}` : '';
 
   return uri as Location;
 }
