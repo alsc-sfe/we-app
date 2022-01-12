@@ -129,6 +129,7 @@ export default class Page extends Base implements PageInstance {
         const productBasename = this.getAppBasename();
         let { pathname } = location;
         if (routerType === RouterType.hash) {
+          pathname = '';
           const matchPath = location.hash.match(/^#([^?]*)/);
           if (matchPath) {
             pathname = matchPath[1];
