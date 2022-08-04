@@ -4,7 +4,7 @@ export function checkWhile(whileCondition: () => boolean, output: { [p: string]:
 
     let result = whileCondition();
     if (result) {
-      resolve();
+      resolve(true);
       return;
     }
 
@@ -12,7 +12,7 @@ export function checkWhile(whileCondition: () => boolean, output: { [p: string]:
       result = whileCondition();
       if (result) {
         clearInterval(t);
-        resolve();
+        resolve(true);
       } else if (new Date().getTime() - start >= timeout) {
         clearInterval(t);
         reject();
